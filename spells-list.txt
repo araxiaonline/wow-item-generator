@@ -1,0 +1,7 @@
+19451 - Frenzy - fast attack / damage (major)
+25516 - Aura of Command - regen, attack speed, dmg (minor)
+14538 - Aural Shock (reduce casting speed by 35%) (major)
+
+Grievous Bite
+67719 Frost Fever = deals frost damage and reduces attack speed
+Aura of Anger - Shadow damage over time

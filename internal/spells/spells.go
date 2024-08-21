@@ -1,4 +1,4 @@
-package models
+package spells
 
 import (
 	"fmt"
@@ -7,7 +7,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/araxiaonline/endgame-item-generator/utils"
 	"github.com/thoas/go-funk"
 )
 
@@ -130,7 +129,7 @@ func (db Database) GetSpell(id int) (Spell, error) {
 	}
 
 	spell := Spell{}
-	sql := "SELECT " + utils.GetSpellFields() + " FROM `spell_dbc` WHERE ID = ? -- " + strconv.Itoa(id)
+	sql := "SELECT " + GetSpellFields() + " FROM `spell_dbc` WHERE ID = ? -- " + strconv.Itoa(id)
 
 	err := db.client.Get(&spell, sql, id)
 	if err != nil {

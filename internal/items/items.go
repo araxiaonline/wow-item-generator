@@ -1,4 +1,4 @@
-package models
+package items
 
 import (
 	"errors"
@@ -7,8 +7,7 @@ import (
 	"math"
 	"math/rand/v2"
 	"reflect"
-
-	"github.com/araxiaonline/endgame-item-generator/utils"
+	"slices"
 )
 
 /**
@@ -171,26 +170,69 @@ var StatModifiers = map[int]float64{
 	48: 0.65, // ITEM_MOD_BLOCK_VALUE
 }
 
+// Get the primary stat for an item (strength, agility, intellect, spirit, stamina)
 func (item Item) GetPrimaryStat() (int, int, error) {
 	var primaryStat int64
 	var primaryVal int64
 
-	values := reflect.ValueOf(item)
 	for i := 1; i < 11; i++ {
-		statType := values.FieldByName(fmt.Sprintf("StatType%v", i)).Elem().Int()
-		// first check if the stat type is not in the primary stats str, agi, intellect, spirit, stamina
+
+		statType, err := item.GetField(fmt.Sprintf("StatType%v", i))
+		if err != nil {
+			log.Printf("Failed to get stat type %v for item: %v", i, item.Name)
+			continue
+		}
 		if statType < 3 || statType > 7 {
 			continue
 		}
 
-		statValue := values.FieldByName(fmt.Sprintf("StatValue%v", i)).Elem().Int()
-		if statValue > primaryVal {
-			primaryVal = statValue
-			primaryStat = statType
+		val, err := item.GetField(fmt.Sprintf("StatValue%v", i))
+
+		if err != nil {
+			log.Printf("Failed to get stat value %v for item: %v", i, item.Name)
+			continue
+		}
+		if val == 0 {
+			continue
+		}
+
+		if int64(val) > primaryVal {
+			primaryVal = int64(val)
+			primaryStat = int64(statType)
 		}
 	}
 
 	return int(primaryStat), int(primaryVal), nil
+}
+
+/**
+ * Get the statIds for anitem as a slice of integers
+ * @return []int
+ */
+func (item Item) GetStatList() ([]int, error) {
+
+	statList := []int{}
+	for i := 1; i < 11; i++ {
+		val, err := item.GetField(fmt.Sprintf("StatValue%v", i))
+
+		if err != nil {
+			log.Printf("Failed to get stat value %v for item: %v", i, item.Name)
+			continue
+		}
+		if val == 0 {
+			continue
+		}
+
+		statId, err := item.GetField(fmt.Sprintf("StatType%v", i))
+		if err != nil {
+			log.Printf("Failed to get stat type %v for item: %s", i, item.Name)
+			continue
+		}
+		statList = append(statList, statId)
+		slices.Sort(statList)
+
+	}
+	return statList, nil
 }
 
 func (i Item) GetDpsModifier() (float64, error) {
