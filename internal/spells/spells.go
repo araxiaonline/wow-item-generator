@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"log"
 	"math"
-	"strconv"
 	"strings"
 
+	"github.com/araxiaonline/endgame-item-generator/internal/config"
 	"github.com/thoas/go-funk"
 )
 
@@ -35,6 +35,7 @@ var SpellAuraEffects = [...]int{
 	189, // Modifies Critical Strike
 }
 
+// Mapping of spell aura effects to stat types they modify
 var AuraEffectsStatMap = map[int]int{
 	8:   46,
 	13:  45,
@@ -120,23 +121,6 @@ type Spell struct {
 	EffectBonusMultiplier3    int    `db:"EffectBonusMultiplier_3"`
 	ItemSpellSlot             int
 	Scaled                    bool
-}
-
-func (db Database) GetSpell(id int) (Spell, error) {
-
-	if id == 0 {
-		return Spell{}, fmt.Errorf("id cannot be 0")
-	}
-
-	spell := Spell{}
-	sql := "SELECT " + GetSpellFields() + " FROM `spell_dbc` WHERE ID = ? -- " + strconv.Itoa(id)
-
-	err := db.client.Get(&spell, sql, id)
-	if err != nil {
-		return Spell{}, fmt.Errorf("failed to get spell: %v", err)
-	}
-
-	return spell, nil
 }
 
 func calcMaxValue(base int, sides int) int {
@@ -288,7 +272,7 @@ func (s Spell) ConvertToStats() ([]ConvItemStat, error) {
 		// Wotlk changed everything to spell power so might as well do the same in
 		// scaling process.
 		seen = append(seen, statId)
-		statMod := float64(StatModifiers[statId])
+		statMod := float64(config.StatModifiers[statId])
 		stats = append(stats, ConvItemStat{
 			StatType:  statId,
 			StatValue: e.CalculatedMax,
@@ -309,7 +293,7 @@ func (s Spell) ConvertToStats() ([]ConvItemStat, error) {
 		stats = append(stats, ConvItemStat{
 			StatType:  statId,
 			StatValue: calced,
-			Budget:    int(math.Abs(math.Ceil(float64(calced) * float64(StatModifiers[statId])))),
+			Budget:    int(math.Abs(math.Ceil(float64(calced) * float64(config.StatModifiers[statId])))),
 		})
 	}
 

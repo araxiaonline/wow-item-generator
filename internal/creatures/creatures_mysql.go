@@ -4,41 +4,54 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/araxiaonline/endgame-item-generator/import/utils"
+	"github.com/araxiaonline/endgame-item-generator/internal/items"
 	"github.com/araxiaonline/endgame-item-generator/internal/pkg/db"
-	_ "github.com/go-sql-driver/mysql"
-	_ "github.com/jmoiron/sqlx"
 )
-
-type Boss struct {
-	Entry              int
-	Name               string
-	ScriptName         string `db:"ScriptName"`
-	ExperienceModifier int    `db:"ExperienceModifier"`
-}
 
 type MySql struct {
 	*db.MySql
 }
 
-// NewMySql initializes the MySql struct with the MySQL connection instance
-func NewMySql() (*MySql, error) {
-	client, err := db.ConnectMySql(nil)
+func (db *MySql) GetBosses(mapId int) ([]Boss, error) {
+
+	if mapId == 0 {
+		return nil, errors.New("mapId cannot be 0")
+	}
+
+	bosses := []Boss{}
+	var sql string
+
+	// 540 is pre-classic dungeons so XP Multiplier is best way to determine bosses / rare mobs
+	if mapId < 540 {
+		sql = `
+			SELECT ct.entry, ct.name, ct.ScriptName, ct.ExperienceModifier from acore_world.creature c
+			JOIN acore_world.creature_template ct ON(c.id1 = ct.entry)  WHERE map = ? and ExperienceModifier >= 2;
+		`
+	} else {
+		sql = `
+			SELECT ct.entry, ct.name, ct.ScriptName, ct.ExperienceModifier from acore_world.creature c
+    		JOIN acore_world.creature_template ct ON(c.id1 = ct.entry)  WHERE map = ? and ct.ScriptName Like 'boss_%'
+		`
+	}
+
+	err := db.Select(&bosses, sql, mapId)
 	if err != nil {
 		return nil, err
 	}
-	return &MySql{MySql: client}, nil
+
+	return bosses, nil
 }
 
-func (db Database) GetBossLoot(bossId int) ([]Item, error) {
+func (db *MySql) GetBossLoot(bossId int) ([]items.Item, error) {
 	if bossId == 0 {
 		return nil, errors.New("bossId cannot be 0")
 	}
 
 	// This will first find items that are not in the reference boss loot table
-	items := []Item{}
+	items := []items.Item{}
+	fields := items.GetItemFields("")
 	sql := `
-	SELECT ` + utils.GetItemFields("") + `
+	SELECT ` + fields + `
 	from acore_world.item_template 
 	where 
 	entry in
@@ -68,12 +81,12 @@ func (db Database) GetBossLoot(bossId int) ([]Item, error) {
 		return items, nil
 	}
 
-	refItems := []Item{}
+	refItems := []items.Item{}
 
 	// For each reference we now need to get the items and add them to the items slice
 	for _, ref := range references {
 		sql = `
-		SELECT ` + utils.GetItemFields("it") + ` 
+		SELECT ` + items.GetItemFields("it") + ` 
 		FROM acore_world.reference_loot_template rlt 
 		  JOIN acore_world.item_template it ON rlt.Item = it.entry 
 		WHERE rlt.Entry = ? and it.Quality > 2 and it.StatsCount > 0

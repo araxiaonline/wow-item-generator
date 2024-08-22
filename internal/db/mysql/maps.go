@@ -3,8 +3,13 @@ package maps
 import (
 	"fmt"
 
-	"github.com/araxiaonline/endgame-item-generator/utils"
+	"github.com/araxiaonline/endgame-item-generator/internal/items"
+	"github.com/araxiaonline/endgame-item-generator/internal/pkg/db"
 )
+
+type MySql struct {
+	*db.MySql
+}
 
 type Dungeon struct {
 	Id          int    `db:"Id"`
@@ -74,7 +79,7 @@ var dungeonLevels = map[int]int{
 	668: 80, // Halls of Reflection
 }
 
-func (db Database) GetDungeons(expansionId int) ([]Dungeon, error) {
+func (db *MySql) GetDungeons(expansionId int) ([]Dungeon, error) {
 	dungeons := []Dungeon{}
 
 	sql := `
@@ -85,9 +90,9 @@ func (db Database) GetDungeons(expansionId int) ([]Dungeon, error) {
 	var err error
 	if expansionId != -1 {
 		sql = sql + "AND ExpansionID = ?"
-		err = db.client.Select(&dungeons, sql, expansionId)
+		err = db.Select(&dungeons, sql, expansionId)
 	} else {
-		err = db.client.Select(&dungeons, sql)
+		err = db.Select(&dungeons, sql)
 	}
 
 	if err != nil {
@@ -103,11 +108,13 @@ func (db Database) GetDungeons(expansionId int) ([]Dungeon, error) {
 	return dungeons, nil
 }
 
-func (db Database) GetAddlDungeonDrops(instanceId int) ([]Item, error) {
+// Gets a list of other rare+ items that drop in a specific instance.
+func (db *MySql) GetAddlDungeonDrops(instanceId int) ([]items.Item, error) {
 
-	var items []Item
+	fields := items.GetItemFields("it")
+	var items []items.Item
 	sql := fmt.Sprintf(`
-	SELECT `+utils.GetItemFields("it")+`
+	SELECT `+fields+`
 from
     acore_world.map_dbc m
     join acore_world.creature c on m.ID = c.map
@@ -118,7 +125,7 @@ from
 WHERE m.ID = %v and Quality >= 3 and it.bonding = 2 and class IN(2,4)
 
 UNION
-SELECT `+utils.GetItemFields("it")+`
+SELECT `+fields+`
 from
     acore_world.map_dbc m
     join acore_world.creature c on m.ID = c.map
@@ -127,7 +134,7 @@ from
     left join item_template it on clt.Item = it.entry
 WHERE m.ID = %v and Quality >= 3 and it.bonding = 2 and it.class IN(2,4)
 UNION
-SELECT `+utils.GetItemFields("it")+`
+SELECT `+fields+`
 from
     acore_world.map_dbc m
     join acore_world.gameobject go on m.ID = go.map
@@ -140,7 +147,7 @@ where m.ID = %v and Quality >=3 and it.bonding IN(1,2) and it.class IN(2,4);
 
 	// log.Printf("sql: %s", sql)
 
-	err := db.client.Select(&items, sql)
+	err := db.Select(&items, sql)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get additional dungeon items: %v ", err)
 	}

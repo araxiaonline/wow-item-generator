@@ -2,7 +2,28 @@ package items
 
 import (
 	"fmt"
+
+	"github.com/araxiaonline/endgame-item-generator/internal/pkg/db"
 )
+
+type MySql struct {
+	*db.MySql
+}
+
+func (db *MySql) GetItem(entry int) (Item, error) {
+	if entry == 0 {
+		return Item{}, fmt.Errorf("entry cannot be 0")
+	}
+
+	item := Item{}
+	sql := "SELECT " + GetItemFields("") + " FROM item_template WHERE entry = ?"
+	err := db.Get(&item, sql, entry)
+	if err != nil {
+		return Item{}, err
+	}
+
+	return item, nil
+}
 
 func GetItemFields(prefix string) string {
 	pre := ""

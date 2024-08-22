@@ -7,8 +7,8 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-type MySql struct {
-	client *sqlx.DB
+type MySqlDb struct {
+	*sqlx.DB
 }
 
 type MySqlConfig struct {
@@ -18,7 +18,9 @@ type MySqlConfig struct {
 	Database string
 }
 
-func ConnectMySql(config *MySqlConfig) (*MySql, error) {
+var MySql MySqlDb
+
+func ConnectMySql(config *MySqlConfig) (*MySqlDb, error) {
 
 	if config == nil {
 		config = &MySqlConfig{
@@ -35,9 +37,10 @@ func ConnectMySql(config *MySqlConfig) (*MySql, error) {
 		return nil, err
 	}
 
-	return &MySql{client: client}, nil
+	Conn = &MySql{client}
+	return Conn, nil
 }
 
 func (db *MySql) Close() {
-	db.client.Close()
+	db.Close()
 }
