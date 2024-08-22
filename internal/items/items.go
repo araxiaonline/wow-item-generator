@@ -10,6 +10,7 @@ import (
 	"slices"
 
 	"github.com/araxiaonline/endgame-item-generator/internal/config"
+	"github.com/araxiaonline/endgame-item-generator/internal/db/mysql"
 	"github.com/araxiaonline/endgame-item-generator/internal/spells"
 )
 
@@ -18,59 +19,10 @@ import (
  * @link https://www.azerothcore.org/wiki/item_template
  */
 type Item struct {
-	Entry          int
-	Name           string
-	DisplayId      int `db:"displayid"`
-	Quality        *int
-	ItemLevel      *int `db:"ItemLevel"`
-	Class          *int
-	Subclass       *int
-	Armor          *int `db:"armor"`
-	Material       *int `db:"material"`
-	InventoryType  *int `db:"inventoryType"`
-	AllowableClass *int `db:"allowableClass"`
-	AllowableRace  *int `db:"allowableRace"`
-	RequiredSkill  *int `db:"requiredSkill"`
-	RequiredLevel  *int `db:"requiredLevel"`
-	Durability     *int `db:"MaxDurability"`
-	MinDmg1        *int `db:"dmg_min1"`
-	MaxDmg1        *int `db:"dmg_max1"`
-	MinDmg2        *int `db:"dmg_min2"`
-	MaxDmg2        *int `db:"dmg_max2"`
-	DmgType1       *int `db:"dmg_type1"`
-	DmgType2       *int `db:"dmg_type2"`
-	Delay          *float64
-	Sheath         *int
-	StatsCount     *int `db:"statsCount"`
-	StatType1      *int `db:"stat_type1"`
-	StatValue1     *int `db:"stat_value1"`
-	StatType2      *int `db:"stat_type2"`
-	StatValue2     *int `db:"stat_value2"`
-	StatType3      *int `db:"stat_type3"`
-	StatValue3     *int `db:"stat_value3"`
-	StatType4      *int `db:"stat_type4"`
-	StatValue4     *int `db:"stat_value4"`
-	StatType5      *int `db:"stat_type5"`
-	StatValue5     *int `db:"stat_value5"`
-	StatType6      *int `db:"stat_type6"`
-	StatValue6     *int `db:"stat_value6"`
-	StatType7      *int `db:"stat_type7"`
-	StatValue7     *int `db:"stat_value7"`
-	StatType8      *int `db:"stat_type8"`
-	StatValue8     *int `db:"stat_value8"`
-	StatType9      *int `db:"stat_type9"`
-	StatValue9     *int `db:"stat_value9"`
-	StatType10     *int `db:"stat_type10"`
-	StatValue10    *int `db:"stat_value10"`
-	SpellId1       *int `db:"spellid_1"`
-	SpellId2       *int `db:"spellid_2"`
-	SpellId3       *int `db:"spellid_3"`
-	SpellTrigger1  *int `db:"spelltrigger_1"`
-	SpellTrigger2  *int `db:"spelltrigger_2"`
-	SpellTrigger3  *int `db:"spelltrigger_3"`
-	StatsMap       map[int]*ItemStat
-	ConvStatCount  int
-	Spells         []spells.Spell
+	mysql.DbItem
+	StatsMap      map[int]*ItemStat
+	ConvStatCount int
+	Spells        []spells.Spell
 }
 
 // Use for storing item stats for all stats that will be scaled.
@@ -309,7 +261,7 @@ func (item *Item) GetSpells() ([]spells.Spell, error) {
 		return item.Spells, nil
 	}
 
-	spells := []spells.Spell{}
+	spellList := []spells.Spell{}
 	values := reflect.ValueOf(item)
 	for i := 1; i < 4; i++ {
 		spellId := values.Elem().FieldByName(fmt.Sprintf("SpellId%v", i)).Elem().Int()
@@ -321,16 +273,25 @@ func (item *Item) GetSpells() ([]spells.Spell, error) {
 			continue
 		}
 
-		spell, err := spells.GetSpell(int(spellId))
+		db, err := mysql.GetDb()
+		if err != nil {
+			return nil, err
+		}
+
+		dbspell, err := db.GetSpell(int(spellId))
 		if err != nil {
 			log.Printf("failed to get the spell: %v error: %v", spellId, err)
 			continue
 		}
+		spell := spells.Spell{
+			DbSpell:       dbspell,
+			ItemSpellSlot: i,
+		}
 
-		spells = append(spells, spell)
+		spellList = append(spellList, spell)
 	}
-	item.Spells = spells
-	return spells, nil
+	item.Spells = spellList
+	return spellList, nil
 }
 
 func (item *Item) GetNonStatSpells() ([]spells.Spell, error) {
@@ -346,10 +307,20 @@ func (item *Item) GetNonStatSpells() ([]spells.Spell, error) {
 		if spellId == 0 {
 			continue
 		}
-		spell, err := DB.GetSpell(spellId)
+
+		db, err := mysql.GetDb()
+		if err != nil {
+			return nil, err
+		}
+
+		dbSpell, err := db.GetSpell(spellId)
 		if err != nil {
 			log.Printf("Failed to get spell %v", spellId)
 			continue
+		}
+
+		spell := spells.Spell{
+			DbSpell: dbSpell,
 		}
 
 		// Need to handle extended spell casts basically when a spell casts another spell and the base points are there
@@ -370,7 +341,7 @@ func (item *Item) GetNonStatSpells() ([]spells.Spell, error) {
 // Ceiling of ((ItemLevel * QualityModifier * ItemTypeModifier)^1.7095 * %ofStats) ^ (1/1.7095)) / StatModifier
 // i.e)   Green Strength Helmet  (((100 * 1.1 * 1.0)^1.705) * 1)^(1/1.7095) / 1.0 = 110 Strength on item
 func (item *Item) ScaleItem(itemLevel int, itemQuality int) (bool, error) {
-	var allSpellStats []ConvItemStat
+	var allSpellStats []spells.ConvItemStat
 	if item.ItemLevel == nil {
 		return false, errors.New("field itemLevel is not set")
 	}
@@ -390,19 +361,19 @@ func (item *Item) ScaleItem(itemLevel int, itemQuality int) (bool, error) {
 	log.Printf("Scaling item %v %v to item level %v and quality %v", item.Name, item.Entry, itemLevel, *item.Quality)
 
 	// Get all the spell Stats on the item we can convert
-	spells, err := item.GetSpells()
+	spellList, err := item.GetSpells()
 	if err != nil {
 		log.Printf("Failed to get spells for item: %v", err)
 		return false, err
 	}
 
-	for i := 0; i < len(spells); i++ {
+	for i := 0; i < len(spellList); i++ {
 
-		log.Printf("Spell %v (%v) Effect %v AuraEffect %v Spell Desc: %v basePoints %v", spells[i].Name, spells[i].ID, spells[i].Effect1, spells[i].EffectAura1, spells[i].Description, spells[i].EffectBasePoints1)
+		log.Printf("Spell %v (%v) Effect %v AuraEffect %v Spell Desc: %v basePoints %v", spellList[i].Name, spellList[i].ID, spellList[i].Effect1, spellList[i].EffectAura1, spellList[i].Description, spellList[i].EffectBasePoints1)
 
-		convStats, err := spells[i].ConvertToStats()
+		convStats, err := spellList[i].ConvertToStats()
 		if err != nil {
-			log.Printf("Failed to convert spell to stats: %v for spell %v", err, spells[i].Name)
+			log.Printf("Failed to convert spell to stats: %v for spell %v", err, spellList[i].Name)
 			continue
 		}
 
@@ -417,7 +388,7 @@ func (item *Item) ScaleItem(itemLevel int, itemQuality int) (bool, error) {
 	for statId, stat := range allStats {
 		origValue := stat.Value
 
-		stat.Value = scaleStat(itemLevel, *item.InventoryType, *item.Quality, stat.Percent, StatModifiers[statId])
+		stat.Value = scaleStat(itemLevel, *item.InventoryType, *item.Quality, stat.Percent, config.StatModifiers[statId])
 
 		log.Printf(">>>>>> Scaled : StatId: %v Type: %s Orig: %v - New Value: %v Percent: %v", statId, stat.Type, origValue, stat.Value, stat.Percent)
 	}
@@ -428,7 +399,7 @@ func (item *Item) ScaleItem(itemLevel int, itemQuality int) (bool, error) {
 	// Scale Armor Stats
 	if *item.Class == 4 && *item.Armor > 0 {
 		preArmor := *item.Armor
-		*item.Armor = int(math.Ceil(float64(itemLevel) * QualityModifiers[*item.Quality] * MaterialModifiers[*item.Subclass]))
+		*item.Armor = int(math.Ceil(float64(itemLevel) * config.QualityModifiers[*item.Quality] * config.MaterialModifiers[*item.Subclass]))
 
 		log.Printf("New Armor: %v scaled up from previous armor %v material is %v", *item.Armor, preArmor, *item.Material)
 	}
@@ -630,9 +601,134 @@ func (item *Item) addStats(stats map[int]*ItemStat) {
 
 // Scale formula ((ItemLevel * QualityModifier * ItemTypeModifier)^1.7095 * %ofStats) ^ (1/1.7095)) / StatModifier
 func scaleStat(itemLevel int, itemType int, itemQuality int, percOfStat float64, statModifier float64) int {
-	scaledUp := math.Pow((float64(itemLevel)*QualityModifiers[itemQuality]*InvTypeModifiers[itemType]), 1.7095) * percOfStat
+	scaledUp := math.Pow((float64(itemLevel)*config.QualityModifiers[itemQuality]*config.InvTypeModifiers[itemType]), 1.7095) * percOfStat
 
 	// leaving modifier off for now but not changing signature in case I need to add it back
 	_ = statModifier
 	return int(math.Ceil(math.Pow(scaledUp, 1/1.7095))) // normalized
+}
+
+func ItemToSql(item Item, reqLevel int, difficulty int) string {
+
+	entryBump := 20000000
+	spellBump := 30000000
+	if difficulty == 4 {
+		entryBump = 21000000
+	}
+	if difficulty == 5 {
+		entryBump = 22000000
+	}
+
+	if *item.Quality == 4 {
+		spellBump = 31000000
+	}
+	if *item.Quality == 5 {
+		spellBump = 32000000
+	}
+
+	spellList := ""
+	if len(item.Spells) > 0 {
+		for i, spell := range item.Spells {
+
+			spellList += spells.SpellToSql(spell, *item.Quality)
+			item.UpdateField(fmt.Sprintf("SpellId%v", i), spellBump+spell.ID)
+		}
+	}
+
+	delete := fmt.Sprintf("DELETE FROM acore_world.item_template WHERE entry = %v;", entryBump+item.Entry)
+
+	clone := fmt.Sprintf(`
+	INSERT INTO acore_world.item_template  (
+		entry, class, subclass, SoundOverrideSubclass, name, displayid, Quality, Flags, FlagsExtra, BuyCount, 
+		BuyPrice, SellPrice, InventoryType, AllowableClass, AllowableRace, ItemLevel, RequiredLevel, 
+		RequiredSkill, RequiredSkillRank, requiredspell, requiredhonorrank, RequiredCityRank, 
+		RequiredReputationFaction, RequiredReputationRank, maxcount, stackable, ContainerSlots, StatsCount, 
+		stat_type1, stat_value1, stat_type2, stat_value2, stat_type3, stat_value3, stat_type4, stat_value4, 
+		stat_type5, stat_value5, stat_type6, stat_value6, stat_type7, stat_value7, stat_type8, stat_value8, 
+		stat_type9, stat_value9, stat_type10, stat_value10, ScalingStatDistribution, ScalingStatValue, 
+		dmg_min1, dmg_max1, dmg_type1, dmg_min2, dmg_max2, dmg_type2, armor, holy_res, fire_res, nature_res, 
+		frost_res, shadow_res, arcane_res, delay, ammo_type, RangedModRange, spellid_1, spelltrigger_1, 
+		spellcharges_1, spellppmRate_1, spellcooldown_1, spellcategory_1, spellcategorycooldown_1, spellid_2, 
+		spelltrigger_2, spellcharges_2, spellppmRate_2, spellcooldown_2, spellcategory_2, spellcategorycooldown_2, 
+		spellid_3, spelltrigger_3, spellcharges_3, spellppmRate_3, spellcooldown_3, spellcategory_3, 
+		spellcategorycooldown_3, spellid_4, spelltrigger_4, spellcharges_4, spellppmRate_4, spellcooldown_4, 
+		spellcategory_4, spellcategorycooldown_4, spellid_5, spelltrigger_5, spellcharges_5, spellppmRate_5, 
+		spellcooldown_5, spellcategory_5, spellcategorycooldown_5, bonding, description, PageText, LanguageID, 
+		PageMaterial, startquest, lockid, Material, sheath, RandomProperty, RandomSuffix, block, itemset, 
+		MaxDurability, area, Map, BagFamily, TotemCategory, socketColor_1, socketContent_1, socketColor_2, 
+		socketContent_2, socketColor_3, socketContent_3, socketBonus, GemProperties, RequiredDisenchantSkill, 
+		ArmorDamageModifier, duration, ItemLimitCategory, HolidayId, ScriptName, DisenchantID, FoodType, 
+		minMoneyLoot, maxMoneyLoot, flagsCustom, VerifiedBuild
+	  )
+	  SELECT 
+		entry + %v, class, subclass, SoundOverrideSubclass, name, displayid, Quality, Flags, FlagsExtra, BuyCount, 
+		BuyPrice, SellPrice, InventoryType, AllowableClass, AllowableRace, ItemLevel, RequiredLevel, 
+		RequiredSkill, RequiredSkillRank, requiredspell, requiredhonorrank, RequiredCityRank, 
+		RequiredReputationFaction, RequiredReputationRank, maxcount, stackable, ContainerSlots, StatsCount, 
+		stat_type1, stat_value1, stat_type2, stat_value2, stat_type3, stat_value3, stat_type4, stat_value4, 
+		stat_type5, stat_value5, stat_type6, stat_value6, stat_type7, stat_value7, stat_type8, stat_value8, 
+		stat_type9, stat_value9, stat_type10, stat_value10, ScalingStatDistribution, ScalingStatValue, 
+		dmg_min1, dmg_max1, dmg_type1, dmg_min2, dmg_max2, dmg_type2, armor, holy_res, fire_res, nature_res, 
+		frost_res, shadow_res, arcane_res, delay, ammo_type, RangedModRange, spellid_1, spelltrigger_1, 
+		spellcharges_1, spellppmRate_1, spellcooldown_1, spellcategory_1, spellcategorycooldown_1, spellid_2, 
+		spelltrigger_2, spellcharges_2, spellppmRate_2, spellcooldown_2, spellcategory_2, spellcategorycooldown_2, 
+		spellid_3, spelltrigger_3, spellcharges_3, spellppmRate_3, spellcooldown_3, spellcategory_3, 
+		spellcategorycooldown_3, spellid_4, spelltrigger_4, spellcharges_4, spellppmRate_4, spellcooldown_4, 
+		spellcategory_4, spellcategorycooldown_4, spellid_5, spelltrigger_5, spellcharges_5, spellppmRate_5, 
+		spellcooldown_5, spellcategory_5, spellcategorycooldown_5, bonding, description, PageText, LanguageID, 
+		PageMaterial, startquest, lockid, Material, sheath, RandomProperty, RandomSuffix, block, itemset, 
+		MaxDurability, area, Map, BagFamily, TotemCategory, socketColor_1, socketContent_1, socketColor_2, 
+		socketContent_2, socketColor_3, socketContent_3, socketBonus, GemProperties, RequiredDisenchantSkill, 
+		ArmorDamageModifier, duration, ItemLimitCategory, HolidayId, ScriptName, DisenchantID, FoodType, 
+		minMoneyLoot, maxMoneyLoot, flagsCustom, VerifiedBuild
+	  FROM acore_world.item_template as src
+	  WHERE src.entry = %v ON DUPLICATE KEY UPDATE entry = src.entry + %v;	  
+	`, entryBump, item.Entry, entryBump)
+
+	update := fmt.Sprintf(`
+	UPDATE acore_world.item_template
+	SET 
+	  Quality = %v,
+	  ItemLevel = %v,
+	  RequiredLevel = %v,
+	  dmg_min1 = %v,
+	  dmg_max1 = %v,
+	  dmg_min2 = %v,
+	  dmg_max2 = %v,
+	  StatsCount = %v,
+	  stat_type1 = %v,
+	  stat_value1 = %v,
+	  stat_type2 = %v,
+	  stat_value2 = %v,
+	  stat_type3 = %v,
+	  stat_value3 = %v,
+	  stat_type4 = %v,
+	  stat_value4 = %v,
+	  stat_type5 = %v,
+	  stat_value5 = %v,
+	  stat_type6 = %v,
+	  stat_value6 = %v,
+	  stat_type7 = %v,
+	  stat_value7 = %v,
+	  stat_type8 = %v,
+	  stat_value8 = %v,
+	  stat_type9 = %v,
+	  stat_value9 = %v,
+	  stat_type10 = %v,
+	  stat_value10 = %v,
+	  spellid_1 = %v,
+	  spellid_2 = %v,
+	  spellid_3 = %v,
+	  RequiredDisenchantSkill = %v,
+	  DisenchantID = %v,
+	  SellPrice = FLOOR(100000 + (RAND() * 400001)),
+	  Armor = %v
+	WHERE entry = %v;
+	`, *item.Quality, *item.ItemLevel, reqLevel, *item.MinDmg1, *item.MaxDmg1, *item.MinDmg2, *item.MaxDmg2, *item.StatsCount,
+		*item.StatType1, *item.StatValue1, *item.StatType2, *item.StatValue2, *item.StatType3, *item.StatValue3, *item.StatType4, *item.StatValue4,
+		*item.StatType5, *item.StatValue5, *item.StatType6, *item.StatValue6, *item.StatType7, *item.StatValue7, *item.StatType8, *item.StatValue8,
+		*item.StatType9, *item.StatValue9, *item.StatType10, *item.StatValue10, *item.SpellId1, *item.SpellId2, *item.SpellId3, 375,
+		68, *item.Armor, entryBump+item.Entry)
+
+	return fmt.Sprintf("%s %s \n %s \n %s", spellList, delete, clone, update)
 }

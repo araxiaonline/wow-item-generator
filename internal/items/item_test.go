@@ -7,10 +7,12 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/araxiaonline/endgame-item-generator/internal/db/mysql"
 	"golang.org/x/exp/rand"
 )
 
 func TestGetPrimaryStat(t *testing.T) {
+
 	originalLog := log.Writer()
 	log.SetOutput(io.Discard)
 	defer log.SetOutput(originalLog)
@@ -25,11 +27,13 @@ func TestGetPrimaryStat(t *testing.T) {
 		{
 			name: "No primary stat found",
 			item: Item{
-				Entry:     1,
-				Name:      "Test Item",
-				StatType1: ptrInt(1), StatValue1: ptrInt(10),
-				StatType2: ptrInt(2), StatValue2: ptrInt(20),
-				StatType3: ptrInt(12), StatValue3: ptrInt(15),
+				DbItem: mysql.DbItem{
+					Entry:     1,
+					Name:      "Test Item",
+					StatType1: ptrInt(1), StatValue1: ptrInt(10),
+					StatType2: ptrInt(2), StatValue2: ptrInt(20),
+					StatType3: ptrInt(12), StatValue3: ptrInt(15),
+				},
 			},
 			wantStat:    0,
 			wantValue:   0,
@@ -38,11 +42,13 @@ func TestGetPrimaryStat(t *testing.T) {
 		{
 			name: "Primary stat found with higher value",
 			item: Item{
-				Entry:     1,
-				Name:      "Test Item",
-				StatType1: ptrInt(3), StatValue1: ptrInt(10), // Agility
-				StatType2: ptrInt(4), StatValue2: ptrInt(20), // Strength
-				StatType3: ptrInt(5), StatValue3: ptrInt(15), // Intellect
+				DbItem: mysql.DbItem{
+					Entry:     1,
+					Name:      "Test Item",
+					StatType1: ptrInt(3), StatValue1: ptrInt(10), // Agility
+					StatType2: ptrInt(4), StatValue2: ptrInt(20), // Strength
+					StatType3: ptrInt(5), StatValue3: ptrInt(15), // Intellect
+				},
 			},
 			wantStat:    4, // Strength
 			wantValue:   20,
@@ -51,11 +57,13 @@ func TestGetPrimaryStat(t *testing.T) {
 		{
 			name: "Primary stat found with lower value",
 			item: Item{
-				Entry:     1,
-				Name:      "Test Item",
-				StatType1: ptrInt(3), StatValue1: ptrInt(30), // Agility
-				StatType2: ptrInt(4), StatValue2: ptrInt(20), // Strength
-				StatType3: ptrInt(5), StatValue3: ptrInt(15), // Intellect
+				DbItem: mysql.DbItem{
+					Entry:     1,
+					Name:      "Test Item",
+					StatType1: ptrInt(3), StatValue1: ptrInt(30), // Agility
+					StatType2: ptrInt(4), StatValue2: ptrInt(20), // Strength
+					StatType3: ptrInt(5), StatValue3: ptrInt(15), // Intellect
+				},
 			},
 			wantStat:    3, // Agility
 			wantValue:   30,
@@ -94,10 +102,12 @@ func TestGetStatList(t *testing.T) {
 		{
 			name: "No stats available",
 			item: Item{
-				Entry:     1,
-				Name:      "Test Item",
-				StatType1: ptrInt(0), StatValue1: ptrInt(0),
-				StatType2: ptrInt(0), StatValue2: ptrInt(0),
+				DbItem: mysql.DbItem{
+					Entry:     1,
+					Name:      "Test Item",
+					StatType1: ptrInt(0), StatValue1: ptrInt(0),
+					StatType2: ptrInt(0), StatValue2: ptrInt(0),
+				},
 			},
 			want:        []int{},
 			expectError: false,
@@ -105,11 +115,13 @@ func TestGetStatList(t *testing.T) {
 		{
 			name: "Multiple stats available",
 			item: Item{
-				Entry:     1,
-				Name:      "Test Item",
-				StatType1: ptrInt(3), StatValue1: ptrInt(10), // Agility
-				StatType2: ptrInt(4), StatValue2: ptrInt(20), // Strength
-				StatType3: ptrInt(5), StatValue3: ptrInt(15), // Intellect
+				DbItem: mysql.DbItem{
+					Entry:     1,
+					Name:      "Test Item",
+					StatType1: ptrInt(3), StatValue1: ptrInt(10), // Agility
+					StatType2: ptrInt(4), StatValue2: ptrInt(20), // Strength
+					StatType3: ptrInt(5), StatValue3: ptrInt(15), // Intellect
+				},
 			},
 			want:        []int{3, 4, 5},
 			expectError: false,
@@ -117,11 +129,13 @@ func TestGetStatList(t *testing.T) {
 		{
 			name: "Stats are ordered correctly",
 			item: Item{
-				Entry:     1,
-				Name:      "Test Item",
-				StatType1: ptrInt(7), StatValue1: ptrInt(10), // Agility
-				StatType2: ptrInt(4), StatValue2: ptrInt(20), // Strength
-				StatType3: ptrInt(31), StatValue3: ptrInt(15), // Intellect
+				DbItem: mysql.DbItem{
+					Entry:     1,
+					Name:      "Test Item",
+					StatType1: ptrInt(7), StatValue1: ptrInt(10), // Agility
+					StatType2: ptrInt(4), StatValue2: ptrInt(20), // Strength
+					StatType3: ptrInt(31), StatValue3: ptrInt(15), // Intellect
+				},
 			},
 			want:        []int{4, 7, 31},
 			expectError: false,
@@ -129,11 +143,13 @@ func TestGetStatList(t *testing.T) {
 		{
 			name: "Some stats are zero",
 			item: Item{
-				Entry:     1,
-				Name:      "Test Item",
-				StatType1: ptrInt(3), StatValue1: ptrInt(0), // Agility
-				StatType2: ptrInt(4), StatValue2: ptrInt(20), // Strength
-				StatType3: ptrInt(5), StatValue3: ptrInt(0), // Intellect
+				DbItem: mysql.DbItem{
+					Entry:     1,
+					Name:      "Test Item",
+					StatType1: ptrInt(3), StatValue1: ptrInt(0), // Agility
+					StatType2: ptrInt(4), StatValue2: ptrInt(20), // Strength
+					StatType3: ptrInt(5), StatValue3: ptrInt(0), // Intellect
+				},
 			},
 			want:        []int{4},
 			expectError: false,
@@ -164,9 +180,11 @@ func TestGetDPS(t *testing.T) {
 		{
 			name: "Valid DPS calculation",
 			item: Item{
-				MinDmg1: ptrInt(50),
-				MaxDmg1: ptrInt(70),
-				Delay:   ptrFloat64(3000),
+				DbItem: mysql.DbItem{
+					MinDmg1: ptrInt(50),
+					MaxDmg1: ptrInt(70),
+					Delay:   ptrFloat64(3000),
+				},
 			},
 			wantDPS:     20.00,
 			expectError: false,
@@ -174,9 +192,11 @@ func TestGetDPS(t *testing.T) {
 		{
 			name: "High damage DPS calculation",
 			item: Item{
-				MinDmg1: ptrInt(100),
-				MaxDmg1: ptrInt(150),
-				Delay:   ptrFloat64(2000),
+				DbItem: mysql.DbItem{
+					MinDmg1: ptrInt(100),
+					MaxDmg1: ptrInt(150),
+					Delay:   ptrFloat64(2000),
+				},
 			},
 			wantDPS:     62.50,
 			expectError: false,
@@ -184,9 +204,11 @@ func TestGetDPS(t *testing.T) {
 		{
 			name: "Low damage DPS calculation",
 			item: Item{
-				MinDmg1: ptrInt(10),
-				MaxDmg1: ptrInt(15),
-				Delay:   ptrFloat64(1500),
+				DbItem: mysql.DbItem{
+					MinDmg1: ptrInt(10),
+					MaxDmg1: ptrInt(15),
+					Delay:   ptrFloat64(1500),
+				},
 			},
 			wantDPS:     8.33,
 			expectError: false,
@@ -194,8 +216,10 @@ func TestGetDPS(t *testing.T) {
 		{
 			name: "Missing MinDmg1",
 			item: Item{
-				MaxDmg1: ptrInt(70),
-				Delay:   ptrFloat64(3000),
+				DbItem: mysql.DbItem{
+					MaxDmg1: ptrInt(70),
+					Delay:   ptrFloat64(3000),
+				},
 			},
 			wantDPS:     0,
 			expectError: true,
@@ -203,8 +227,10 @@ func TestGetDPS(t *testing.T) {
 		{
 			name: "Missing MaxDmg1",
 			item: Item{
-				MinDmg1: ptrInt(50),
-				Delay:   ptrFloat64(3000),
+				DbItem: mysql.DbItem{
+					MinDmg1: ptrInt(50),
+					Delay:   ptrFloat64(3000),
+				},
 			},
 			wantDPS:     0,
 			expectError: true,
@@ -212,8 +238,10 @@ func TestGetDPS(t *testing.T) {
 		{
 			name: "Missing Delay",
 			item: Item{
-				MinDmg1: ptrInt(50),
-				MaxDmg1: ptrInt(70),
+				DbItem: mysql.DbItem{
+					MinDmg1: ptrInt(50),
+					MaxDmg1: ptrInt(70),
+				},
 			},
 			wantDPS:     0,
 			expectError: true,
@@ -246,12 +274,14 @@ func TestScaleDPS(t *testing.T) {
 		{
 			name: "Valid Scale DPS calculation",
 			item: Item{
-				ItemLevel: ptrInt(60),
-				Delay:     ptrFloat64(3000),
-				MinDmg1:   ptrInt(50),
-				MaxDmg1:   ptrInt(70),
-				Subclass:  ptrInt(4), // One-handed weapon
-				Quality:   ptrInt(3), // Rare
+				DbItem: mysql.DbItem{
+					ItemLevel: ptrInt(60),
+					Delay:     ptrFloat64(3000),
+					MinDmg1:   ptrInt(50),
+					MaxDmg1:   ptrInt(70),
+					Subclass:  ptrInt(4), // One-handed weapon
+					Quality:   ptrInt(3), // Rare
+				},
 			},
 			level:       70,
 			wantDPSMin:  53.0, // Expected DPS range due to randomness
@@ -261,12 +291,14 @@ func TestScaleDPS(t *testing.T) {
 		{
 			name: "High level Scale DPS calculation",
 			item: Item{
-				ItemLevel: ptrInt(80),
-				Delay:     ptrFloat64(2000),
-				MinDmg1:   ptrInt(150),
-				MaxDmg1:   ptrInt(200),
-				Subclass:  ptrInt(17), // Two-handed weapon
-				Quality:   ptrInt(4),  // Epic
+				DbItem: mysql.DbItem{
+					ItemLevel: ptrInt(80),
+					Delay:     ptrFloat64(2000),
+					MinDmg1:   ptrInt(150),
+					MaxDmg1:   ptrInt(200),
+					Subclass:  ptrInt(17), // Two-handed weapon
+					Quality:   ptrInt(4),  // Epic
+				},
 			},
 			level:       100,
 			wantDPSMin:  120.0, // Expected DPS range due to randomness
@@ -276,12 +308,14 @@ func TestScaleDPS(t *testing.T) {
 		{
 			name: "Low level Scale DPS calculation",
 			item: Item{
-				ItemLevel: ptrInt(20),
-				Delay:     ptrFloat64(1000),
-				MinDmg1:   ptrInt(30),
-				MaxDmg1:   ptrInt(50),
-				Subclass:  ptrInt(2), // Ranged weapon
-				Quality:   ptrInt(2), // Uncommon
+				DbItem: mysql.DbItem{
+					ItemLevel: ptrInt(20),
+					Delay:     ptrFloat64(1000),
+					MinDmg1:   ptrInt(30),
+					MaxDmg1:   ptrInt(50),
+					Subclass:  ptrInt(2), // Ranged weapon
+					Quality:   ptrInt(2), // Uncommon
+				},
 			},
 			level:       25,
 			wantDPSMin:  21.0, // Expected DPS range due to randomness
@@ -291,11 +325,13 @@ func TestScaleDPS(t *testing.T) {
 		{
 			name: "Missing ItemLevel",
 			item: Item{
-				Delay:    ptrFloat64(3000),
-				MinDmg1:  ptrInt(50),
-				MaxDmg1:  ptrInt(70),
-				Subclass: ptrInt(4), // One-handed weapon
-				Quality:  ptrInt(3), // Rare
+				DbItem: mysql.DbItem{
+					Delay:    ptrFloat64(3000),
+					MinDmg1:  ptrInt(50),
+					MaxDmg1:  ptrInt(70),
+					Subclass: ptrInt(4), // One-handed weapon
+					Quality:  ptrInt(3), // Rare
+				},
 			},
 			level:       70,
 			wantDPSMin:  0,
@@ -305,11 +341,13 @@ func TestScaleDPS(t *testing.T) {
 		{
 			name: "Missing Delay",
 			item: Item{
-				ItemLevel: ptrInt(60),
-				MinDmg1:   ptrInt(50),
-				MaxDmg1:   ptrInt(70),
-				Subclass:  ptrInt(4), // One-handed weapon
-				Quality:   ptrInt(3), // Rare
+				DbItem: mysql.DbItem{
+					ItemLevel: ptrInt(60),
+					MinDmg1:   ptrInt(50),
+					MaxDmg1:   ptrInt(70),
+					Subclass:  ptrInt(4), // One-handed weapon
+					Quality:   ptrInt(3), // Rare
+				},
 			},
 			level:       70,
 			wantDPSMin:  0,
@@ -319,14 +357,16 @@ func TestScaleDPS(t *testing.T) {
 		{
 			name: "Secondary damage scaling",
 			item: Item{
-				ItemLevel: ptrInt(60),
-				Delay:     ptrFloat64(3000),
-				MinDmg1:   ptrInt(50),
-				MaxDmg1:   ptrInt(70),
-				MinDmg2:   ptrInt(25),
-				MaxDmg2:   ptrInt(35),
-				Subclass:  ptrInt(4), // One-handed weapon
-				Quality:   ptrInt(3), // Rare
+				DbItem: mysql.DbItem{
+					ItemLevel: ptrInt(60),
+					Delay:     ptrFloat64(3000),
+					MinDmg1:   ptrInt(50),
+					MaxDmg1:   ptrInt(70),
+					MinDmg2:   ptrInt(25),
+					MaxDmg2:   ptrInt(35),
+					Subclass:  ptrInt(4), // One-handed weapon
+					Quality:   ptrInt(3), // Rare
+				},
 			},
 			level:       70,
 			wantDPSMin:  53.0, // Expected DPS range due to randomness
@@ -362,8 +402,10 @@ func TestGetDpsModifier(t *testing.T) {
 		{
 			name: "Valid one-handed weapon modifier",
 			item: Item{
-				Subclass: ptrInt(4), // One-handed weapon
-				Quality:  ptrInt(3), // Rare
+				DbItem: mysql.DbItem{
+					Subclass: ptrInt(4), // One-handed weapon
+					Quality:  ptrInt(3), // Rare
+				},
 			},
 			wantModifier: 0.64 * 1.38,
 			expectError:  false,
@@ -371,8 +413,10 @@ func TestGetDpsModifier(t *testing.T) {
 		{
 			name: "Valid two-handed weapon modifier",
 			item: Item{
-				Subclass: ptrInt(17), // Two-handed weapon
-				Quality:  ptrInt(4),  // Epic
+				DbItem: mysql.DbItem{
+					Subclass: ptrInt(17), // Two-handed weapon
+					Quality:  ptrInt(4),  // Epic
+				},
 			},
 			wantModifier: 0.80 * 1.5,
 			expectError:  false,
@@ -380,8 +424,10 @@ func TestGetDpsModifier(t *testing.T) {
 		{
 			name: "Valid ranged weapon modifier",
 			item: Item{
-				Subclass: ptrInt(2), // Ranged weapon
-				Quality:  ptrInt(2), // Uncommon
+				DbItem: mysql.DbItem{
+					Subclass: ptrInt(2), // Ranged weapon
+					Quality:  ptrInt(2), // Uncommon
+				},
 			},
 			wantModifier: 0.70 * 1.25,
 			expectError:  false,
@@ -389,8 +435,10 @@ func TestGetDpsModifier(t *testing.T) {
 		{
 			name: "Valid wand modifier",
 			item: Item{
-				Subclass: ptrInt(19), // Wand
-				Quality:  ptrInt(4),  // Epic
+				DbItem: mysql.DbItem{
+					Subclass: ptrInt(19), // Wand
+					Quality:  ptrInt(4),  // Epic
+				},
 			},
 			wantModifier: 0.70 * 1.5,
 			expectError:  false,
@@ -398,8 +446,10 @@ func TestGetDpsModifier(t *testing.T) {
 		{
 			name: "Invalid subclass",
 			item: Item{
-				Subclass: ptrInt(99), // Invalid subclass
-				Quality:  ptrInt(3),  // Rare
+				DbItem: mysql.DbItem{
+					Subclass: ptrInt(99), // Invalid subclass
+					Quality:  ptrInt(3),  // Rare
+				},
 			},
 			wantModifier: 0,
 			expectError:  true,
@@ -407,7 +457,9 @@ func TestGetDpsModifier(t *testing.T) {
 		{
 			name: "Missing subclass",
 			item: Item{
-				Quality: ptrInt(3), // Rare
+				DbItem: mysql.DbItem{
+					Quality: ptrInt(3), // Rare
+				},
 			},
 			wantModifier: 0,
 			expectError:  true,
@@ -415,7 +467,9 @@ func TestGetDpsModifier(t *testing.T) {
 		{
 			name: "Missing quality",
 			item: Item{
-				Subclass: ptrInt(4), // One-handed weapon
+				DbItem: mysql.DbItem{
+					Subclass: ptrInt(4), // One-handed weapon
+				},
 			},
 			wantModifier: 0,
 			expectError:  true,
