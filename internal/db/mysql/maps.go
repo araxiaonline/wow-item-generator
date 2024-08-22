@@ -1,15 +1,10 @@
-package maps
+package mysql
 
 import (
 	"fmt"
 
 	"github.com/araxiaonline/endgame-item-generator/internal/items"
-	"github.com/araxiaonline/endgame-item-generator/internal/pkg/db"
 )
-
-type MySql struct {
-	*db.MySql
-}
 
 type Dungeon struct {
 	Id          int    `db:"Id"`
@@ -79,7 +74,7 @@ var dungeonLevels = map[int]int{
 	668: 80, // Halls of Reflection
 }
 
-func (db *MySql) GetDungeons(expansionId int) ([]Dungeon, error) {
+func (db *MySqlDb) GetDungeons(expansionId int) ([]Dungeon, error) {
 	dungeons := []Dungeon{}
 
 	sql := `
@@ -109,7 +104,7 @@ func (db *MySql) GetDungeons(expansionId int) ([]Dungeon, error) {
 }
 
 // Gets a list of other rare+ items that drop in a specific instance.
-func (db *MySql) GetAddlDungeonDrops(instanceId int) ([]items.Item, error) {
+func (db *MySqlDb) GetAddlDungeonDrops(instanceId int) ([]items.Item, error) {
 
 	fields := items.GetItemFields("it")
 	var items []items.Item

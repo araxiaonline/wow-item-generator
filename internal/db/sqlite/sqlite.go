@@ -1,4 +1,4 @@
-package db
+package sqlite
 
 import (
 	"database/sql"
@@ -10,7 +10,7 @@ type SqlLite struct {
 	client *sql.DB
 }
 
-func ConnectSqlLite(path string) (*SqlLite, error) {
+func Connect(path string) (*SqlLite, error) {
 	client, err := sql.Open("sqlite3", path)
 	if err != nil {
 		return nil, err

@@ -1,4 +1,4 @@
-package db
+package mysql
 
 import (
 	"os"
@@ -18,9 +18,9 @@ type MySqlConfig struct {
 	Database string
 }
 
-var MySql MySqlDb
+var MySql *MySqlDb
 
-func ConnectMySql(config *MySqlConfig) (*MySqlDb, error) {
+func Connect(config *MySqlConfig) (*MySqlDb, error) {
 
 	if config == nil {
 		config = &MySqlConfig{
@@ -37,10 +37,10 @@ func ConnectMySql(config *MySqlConfig) (*MySqlDb, error) {
 		return nil, err
 	}
 
-	Conn = &MySql{client}
-	return Conn, nil
+	MySql = &MySqlDb{client}
+	return MySql, nil
 }
 
-func (db *MySql) Close() {
+func (db *MySqlDb) Close() {
 	db.Close()
 }

@@ -9,6 +9,7 @@ import (
 	"reflect"
 	"slices"
 
+	"github.com/araxiaonline/endgame-item-generator/internal/config"
 	"github.com/araxiaonline/endgame-item-generator/internal/spells"
 )
 
@@ -259,7 +260,7 @@ func (item *Item) ScaleDPS(level int) (float64, error) {
 }
 
 // Create a Map of stat percentages based on the current stat and how budgets are caluated
-func (item Item) GetStatPercents(spellStats []ConvItemStat) map[int]*ItemStat {
+func (item Item) GetStatPercents(spellStats []spells.ConvItemStat) map[int]*ItemStat {
 
 	statMap := make(map[int]*ItemStat)
 	statBudget := 0.0
@@ -272,7 +273,7 @@ func (item Item) GetStatPercents(spellStats []ConvItemStat) map[int]*ItemStat {
 			continue
 		}
 
-		adjValue := float64(statValue) / StatModifiers[int(statType)]
+		adjValue := float64(statValue) / config.StatModifiers[int(statType)]
 		statBudget += adjValue
 		statMap[int(statType)] = &ItemStat{
 			Value:    int(statValue),
@@ -302,13 +303,13 @@ func (item Item) GetStatPercents(spellStats []ConvItemStat) map[int]*ItemStat {
 }
 
 // get an array of all the spells set on the item
-func (item *Item) GetSpells() ([]Spell, error) {
+func (item *Item) GetSpells() ([]spells.Spell, error) {
 	// dont reload for the same item .
 	if len(item.Spells) > 0 {
 		return item.Spells, nil
 	}
 
-	spells := []Spell{}
+	spells := []spells.Spell{}
 	values := reflect.ValueOf(item)
 	for i := 1; i < 4; i++ {
 		spellId := values.Elem().FieldByName(fmt.Sprintf("SpellId%v", i)).Elem().Int()
@@ -320,7 +321,7 @@ func (item *Item) GetSpells() ([]Spell, error) {
 			continue
 		}
 
-		spell, err := DB.GetSpell(int(spellId))
+		spell, err := spells.GetSpell(int(spellId))
 		if err != nil {
 			log.Printf("failed to get the spell: %v error: %v", spellId, err)
 			continue
@@ -332,8 +333,8 @@ func (item *Item) GetSpells() ([]Spell, error) {
 	return spells, nil
 }
 
-func (item *Item) GetNonStatSpells() ([]Spell, error) {
-	nonStatSpells := []Spell{}
+func (item *Item) GetNonStatSpells() ([]spells.Spell, error) {
+	nonStatSpells := []spells.Spell{}
 	for i := 1; i < 4; i++ {
 		spellId, err := item.GetField(fmt.Sprintf("SpellId%v", i))
 

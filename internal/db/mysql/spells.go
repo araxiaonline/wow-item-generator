@@ -1,28 +1,24 @@
-package spells
+package mysql
 
 import (
 	"fmt"
 	"strconv"
 
-	"github.com/araxiaonline/endgame-item-generator/internal/pkg/db"
+	"github.com/araxiaonline/endgame-item-generator/internal/spells"
 )
 
-type MySql struct {
-	*db.MySql
-}
-
-func (db *MySql) GetSpell(id int) (Spell, error) {
+func (db *MySqlDb) GetSpell(id int) (spells.Spell, error) {
 
 	if id == 0 {
-		return Spell{}, fmt.Errorf("id cannot be 0")
+		return spells.Spell{}, fmt.Errorf("id cannot be 0")
 	}
 
-	spell := Spell{}
+	spell := spells.Spell{}
 	sql := "SELECT " + GetSpellFields() + " FROM `spell_dbc` WHERE ID = ? -- " + strconv.Itoa(id)
 
 	err := db.Get(&spell, sql, id)
 	if err != nil {
-		return Spell{}, fmt.Errorf("failed to get spell: %v", err)
+		return spells.Spell{}, fmt.Errorf("failed to get spell: %v", err)
 	}
 
 	return spell, nil
@@ -57,7 +53,7 @@ func GetSpellFields() string {
 	`
 }
 
-func SpellToSql(spell Spell, quality int) string {
+func SpellToSql(spell spells.Spell, quality int) string {
 
 	entryBump := 30000000
 	if quality == 4 {
