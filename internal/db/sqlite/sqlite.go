@@ -1,23 +1,33 @@
 package sqlite
 
 import (
-	"database/sql"
+	"github.com/jmoiron/sqlx"
 
 	_ "github.com/mattn/go-sqlite3"
 )
 
 type SqlLite struct {
-	client *sql.DB
+	*sqlx.DB
 }
 
+var SqlLiteDb *SqlLite
+
 func Connect(path string) (*SqlLite, error) {
-	client, err := sql.Open("sqlite3", path)
+	client, err := sqlx.Open("sqlite3", path)
 	if err != nil {
 		return nil, err
 	}
-	return &SqlLite{client: client}, nil
+
+	SqlLiteDb = &SqlLite{client}
+	return SqlLiteDb, nil
+}
+
+func GetDb() (*SqlLite, error) {
+	return SqlLiteDb, nil
 }
 
 func (db *SqlLite) Close() {
-	db.client.Close()
+	if db.DB != nil {
+		db.DB.Close()
+	}
 }

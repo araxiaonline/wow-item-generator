@@ -1,6 +1,7 @@
 package mysql
 
 import (
+	"errors"
 	"os"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -41,6 +42,16 @@ func Connect(config *MySqlConfig) (*MySqlDb, error) {
 	return MySql, nil
 }
 
+func GetDb() (*MySqlDb, error) {
+	if MySql == nil {
+		return nil, errors.New("mysql not connected")
+	}
+
+	return MySql, nil
+}
+
 func (db *MySqlDb) Close() {
-	db.Close()
+	if db.DB != nil {
+		db.DB.Close()
+	}
 }

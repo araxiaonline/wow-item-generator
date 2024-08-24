@@ -3,18 +3,22 @@ package mysql
 import (
 	"errors"
 	"fmt"
-
-	"github.com/araxiaonline/endgame-item-generator/internal/creatures"
-	"github.com/araxiaonline/endgame-item-generator/internal/items"
 )
 
-func (db *MySqlDb) GetBosses(mapId int) ([]creatures.Boss, error) {
+type Boss struct {
+	Entry              int
+	Name               string
+	ScriptName         string `db:"ScriptName"`
+	ExperienceModifier int    `db:"ExperienceModifier"`
+}
+
+func (db *MySqlDb) GetBosses(mapId int) ([]Boss, error) {
 
 	if mapId == 0 {
 		return nil, errors.New("mapId cannot be 0")
 	}
 
-	bosses := []creatures.Boss{}
+	bosses := []Boss{}
 	var sql string
 
 	// 540 is pre-classic dungeons so XP Multiplier is best way to determine bosses / rare mobs
@@ -38,13 +42,13 @@ func (db *MySqlDb) GetBosses(mapId int) ([]creatures.Boss, error) {
 	return bosses, nil
 }
 
-func (db *MySqlDb) GetBossLoot(bossId int) ([]items.Item, error) {
+func (db *MySqlDb) GetBossLoot(bossId int) ([]DbItem, error) {
 	if bossId == 0 {
 		return nil, errors.New("bossId cannot be 0")
 	}
 
 	// This will first find items that are not in the reference boss loot table
-	items := []items.Item{}
+	items := []DbItem{}
 	fields := GetItemFields("")
 	sql := `
 	SELECT ` + fields + `
@@ -77,7 +81,7 @@ func (db *MySqlDb) GetBossLoot(bossId int) ([]items.Item, error) {
 		return items, nil
 	}
 
-	refItems := []items.Item{}
+	refItems := []DbItem{}
 
 	// For each reference we now need to get the items and add them to the items slice
 	for _, ref := range references {

@@ -33,6 +33,13 @@ type ItemStat struct {
 	AdjValue float64
 }
 
+// Create a new item from the database item
+func ItemFromDbItem(dbItem mysql.DbItem) Item {
+	return Item{
+		DbItem: dbItem,
+	}
+}
+
 // Get the primary stat for an item (strength, agility, intellect, spirit, stamina)
 func (item Item) GetPrimaryStat() (int, int, error) {
 	var primaryStat int64
@@ -75,6 +82,31 @@ func (item Item) GetPrimaryStat() (int, int, error) {
 func (item Item) GetStatList() ([]int, error) {
 
 	statList := []int{}
+
+	// Also need to get spells that on the item that convert to stats
+	spells, err := item.GetSpells()
+	if err != nil {
+		log.Printf("Failed to get spells for item: %v", err)
+		return nil, err
+	}
+
+	for _, spell := range spells {
+		convStats, err := spell.ConvertToStats()
+		if err != nil {
+			log.Printf("Failed to convert spell to stats: %v for spell %v", err, spell.Name)
+			continue
+		}
+
+		if len(convStats) == 0 {
+			continue
+		}
+
+		for _, convStat := range convStats {
+			statList = append(statList, convStat.StatType)
+		}
+
+	}
+
 	for i := 1; i < 11; i++ {
 		val, err := item.GetField(fmt.Sprintf("StatValue%v", i))
 
@@ -190,8 +222,8 @@ func (item *Item) ScaleDPS(level int) (float64, error) {
 	if item.MinDmg2 != nil && item.MaxDmg2 != nil {
 		ratioMin := float64(*item.MinDmg2) / float64(*item.MinDmg1)
 		ratioMax := float64(*item.MaxDmg2) / float64(*item.MaxDmg1)
-		minimum2 := int(ratioMin * float64(minimum))
-		maximum2 := int(ratioMax * float64(maximum))
+		minimum2 := ratioMin * float64(minimum)
+		maximum2 := ratioMax * float64(maximum)
 
 		item.MinDmg2 = &minimum2
 		item.MaxDmg2 = &maximum2
@@ -199,14 +231,13 @@ func (item *Item) ScaleDPS(level int) (float64, error) {
 		// In order to balance the original scale of the secondary damage from primary
 		minimum = minimum - float64(minimum2)*0.75
 		maximum = maximum - float64(maximum2)*0.75
-
 	}
 
 	// item.MinDmg1 = &minimum
-	var min int = int(minimum)
-	var max int = int(maximum)
-	item.MinDmg1 = &min
-	item.MaxDmg1 = &max
+	// var min int = int(minimum)
+	// var max int = int(maximum)
+	item.MinDmg1 = &minimum
+	item.MaxDmg1 = &maximum
 
 	return dps, nil
 }
@@ -225,7 +256,7 @@ func (item Item) GetStatPercents(spellStats []spells.ConvItemStat) map[int]*Item
 			continue
 		}
 
-		adjValue := float64(statValue) / config.StatModifiers[int(statType)]
+		adjValue := float64(statValue) * config.StatModifiers[int(statType)]
 		statBudget += adjValue
 		statMap[int(statType)] = &ItemStat{
 			Value:    int(statValue),
@@ -337,6 +368,42 @@ func (item *Item) GetNonStatSpells() ([]spells.Spell, error) {
 	return nonStatSpells, nil
 }
 
+// Applies status of one item to another overwriting the current stats
+func (item *Item) ApplyStats(otherItem Item) (success bool, err error) {
+
+	for i := 1; i < 11; i++ {
+		statType, err := otherItem.GetField(fmt.Sprintf("StatType%v", i))
+		if err != nil {
+			return false, err
+		}
+
+		statValue, err := otherItem.GetField(fmt.Sprintf("StatValue%v", i))
+		if err != nil {
+			return false, err
+		}
+
+		item.UpdateField(fmt.Sprintf("StatType%v", i), statType)
+		item.UpdateField(fmt.Sprintf("StatValue%v", i), statValue)
+	}
+
+	if otherItem.SocketColor1 != nil {
+		item.SocketColor1 = otherItem.SocketColor1
+		item.SocketContent1 = otherItem.SocketContent1
+	}
+
+	if otherItem.SocketColor2 != nil {
+		item.SocketColor2 = otherItem.SocketColor2
+		item.SocketContent2 = otherItem.SocketContent2
+	}
+
+	if otherItem.SocketColor3 != nil {
+		item.SocketColor3 = otherItem.SocketColor3
+		item.SocketContent3 = otherItem.SocketContent3
+	}
+
+	return true, nil
+}
+
 // Stat Formula scaler
 // Ceiling of ((ItemLevel * QualityModifier * ItemTypeModifier)^1.7095 * %ofStats) ^ (1/1.7095)) / StatModifier
 // i.e)   Green Strength Helmet  (((100 * 1.1 * 1.0)^1.705) * 1)^(1/1.7095) / 1.0 = 110 Strength on item
@@ -440,7 +507,7 @@ func (item *Item) ScaleItem(itemLevel int, itemQuality int) (bool, error) {
 	item.Spells = []spells.Spell{}
 	// Spells that can not be scaled into stats must get new spells scaled and created
 	for _, spell := range otherSpells {
-		log.Printf(" --^^^^^^--------SPELL --- Spell %v (%v) Effect %v  AuraEffect %v Spell Desc: %v basePoints %v", spell.Name, spell.ID, spell.Effect1, spell.EffectAura1, spell.Description, spell.EffectBasePoints1)
+		// log.Printf(" --^^^^^^--------SPELL --- Spell %v (%v) Effect %v  AuraEffect %v Spell Desc: %v basePoints %v", spell.Name, spell.ID, spell.Effect1, spell.EffectAura1, spell.Description, spell.EffectBasePoints1)
 		newId, err := spell.ScaleSpell(fromItemLevel, itemLevel, *item.Quality)
 		if err != nil {
 			log.Printf("Failed to scale spell: %v, Spell %v", err, spell.ID)
@@ -455,7 +522,7 @@ func (item *Item) ScaleItem(itemLevel int, itemQuality int) (bool, error) {
 		item.UpdateField(fmt.Sprintf("SpellId%v", spell.ItemSpellSlot), newId)
 		item.Spells = append(item.Spells, spell)
 
-		log.Printf(" --SCALED---SPELL --- Spell %v (%v) Effect %v AuraEffect %v Spell Desc: %v basePoints %v", spell.Name, spell.ID, spell.Effect1, spell.EffectAura1, spell.Description, spell.EffectBasePoints1)
+		// log.Printf(" --SCALED---SPELL --- Spell %v (%v) Effect %v AuraEffect %v Spell Desc: %v basePoints %v", spell.Name, spell.ID, spell.Effect1, spell.EffectAura1, spell.Description, spell.EffectBasePoints1)
 	}
 
 	return true, nil
@@ -601,7 +668,7 @@ func (item *Item) addStats(stats map[int]*ItemStat) {
 
 // Scale formula ((ItemLevel * QualityModifier * ItemTypeModifier)^1.7095 * %ofStats) ^ (1/1.7095)) / StatModifier
 func scaleStat(itemLevel int, itemType int, itemQuality int, percOfStat float64, statModifier float64) int {
-	scaledUp := math.Pow((float64(itemLevel)*config.QualityModifiers[itemQuality]*config.InvTypeModifiers[itemType]), 1.7095) * percOfStat
+	scaledUp := (math.Pow((float64(itemLevel)*config.QualityModifiers[itemQuality]*config.InvTypeModifiers[itemType]), 1.7095) * percOfStat)
 
 	// leaving modifier off for now but not changing signature in case I need to add it back
 	_ = statModifier
@@ -719,6 +786,14 @@ func ItemToSql(item Item, reqLevel int, difficulty int) string {
 	  spellid_1 = %v,
 	  spellid_2 = %v,
 	  spellid_3 = %v,
+	  socketColor_1 = %v,
+	  socketContent_1 = %v,
+	  socketColor_2 = %v,
+	  socketContent_2 = %v,
+	  socketColor_3 = %v,
+	  socketContent_3 = %v,
+	  socketBonus = %v,
+	  GemProperties = %v,
 	  RequiredDisenchantSkill = %v,
 	  DisenchantID = %v,
 	  SellPrice = FLOOR(100000 + (RAND() * 400001)),
@@ -727,8 +802,9 @@ func ItemToSql(item Item, reqLevel int, difficulty int) string {
 	`, *item.Quality, *item.ItemLevel, reqLevel, *item.MinDmg1, *item.MaxDmg1, *item.MinDmg2, *item.MaxDmg2, *item.StatsCount,
 		*item.StatType1, *item.StatValue1, *item.StatType2, *item.StatValue2, *item.StatType3, *item.StatValue3, *item.StatType4, *item.StatValue4,
 		*item.StatType5, *item.StatValue5, *item.StatType6, *item.StatValue6, *item.StatType7, *item.StatValue7, *item.StatType8, *item.StatValue8,
-		*item.StatType9, *item.StatValue9, *item.StatType10, *item.StatValue10, *item.SpellId1, *item.SpellId2, *item.SpellId3, 375,
-		68, *item.Armor, entryBump+item.Entry)
+		*item.StatType9, *item.StatValue9, *item.StatType10, *item.StatValue10, *item.SpellId1, *item.SpellId2, *item.SpellId3, *item.SocketColor1, *item.SocketContent1,
+		*item.SocketColor2, *item.SocketContent2, *item.SocketColor3, *item.SocketContent3, *item.SocketBonus, *item.GemProperties,
+		375, 68, *item.Armor, entryBump+item.Entry)
 
 	return fmt.Sprintf("%s %s \n %s \n %s", spellList, delete, clone, update)
 }

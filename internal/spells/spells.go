@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/araxiaonline/endgame-item-generator/internal/config"
+	"github.com/araxiaonline/endgame-item-generator/internal/db/mysql"
 	"github.com/thoas/go-funk"
 )
 
@@ -27,6 +28,7 @@ var SpellAuraEffects = [...]int{
 	13,  // Modifies Spell Damage Done
 	15,  // Modifies Damage Shield
 	22,  // Modifies Resistance
+	29,  // Modifies Strength
 	34,  // Modifies HEalth
 	85,  // Modifies Mana Regen
 	99,  // Modifies Attack Power
@@ -39,6 +41,7 @@ var SpellAuraEffects = [...]int{
 var AuraEffectsStatMap = map[int]int{
 	8:   46,
 	13:  45,
+	29:  4,
 	85:  43,
 	99:  38,
 	124: 38,
@@ -93,34 +96,10 @@ type SpellEffect struct {
 	CalculatedMax int
 }
 
-// DB Mapping from spell_dbc
 type Spell struct {
-	ID                        int    `db:"ID"`
-	Name                      string `db:"Name_Lang_enUS"`
-	Description               string `db:"Description_Lang_enUS"`
-	AuraDescription           string `db:"AuraDescription_Lang_enUS"`
-	ProcChance                int    `db:"ProcChance"`
-	SpellLevel                int    `db:"SpellLevel"`
-	Effect1                   int    `db:"Effect_1"`
-	Effect2                   int    `db:"Effect_2"`
-	Effect3                   int    `db:"Effect_3"`
-	EffectDieSides1           int    `db:"EffectDieSides_1"`
-	EffectDieSides2           int    `db:"EffectDieSides_2"`
-	EffectDieSides3           int    `db:"EffectDieSides_3"`
-	EffectRealPointsPerLevel1 int    `db:"EffectRealPointsPerLevel_1"`
-	EffectRealPointsPerLevel2 int    `db:"EffectRealPointsPerLevel_2"`
-	EffectRealPointsPerLevel3 int    `db:"EffectRealPointsPerLevel_3"`
-	EffectBasePoints1         int    `db:"EffectBasePoints_1"`
-	EffectBasePoints2         int    `db:"EffectBasePoints_2"`
-	EffectBasePoints3         int    `db:"EffectBasePoints_3"`
-	EffectAura1               int    `db:"EffectAura_1"`
-	EffectAura2               int    `db:"EffectAura_2"`
-	EffectAura3               int    `db:"EffectAura_3"`
-	EffectBonusMultiplier1    int    `db:"EffectBonusMultiplier_1"`
-	EffectBonusMultiplier2    int    `db:"EffectBonusMultiplier_2"`
-	EffectBonusMultiplier3    int    `db:"EffectBonusMultiplier_3"`
-	ItemSpellSlot             int
-	Scaled                    bool
+	mysql.DbSpell
+	Scaled        bool
+	ItemSpellSlot int
 }
 
 func calcMaxValue(base int, sides int) int {
@@ -225,14 +204,13 @@ func (s Spell) HasAuraEffect() bool {
 }
 
 func AuraEffectCanBeConv(effect int) bool {
-	statMods := [...]int{8, 13, 22, 34, 85, 99, 124, 135, 189}
-	return funk.Contains(statMods, effect)
+	return funk.Contains(SpellAuraEffects, effect)
 }
 
 // Lookup details about the effect and return the stat type -1 indicates not found
 func convertAuraEffect(effect int) int {
 	if !funk.Contains(AuraEffectsStatMap, effect) {
-		log.Printf("effect %v not found in SpellEffectStatMap skipping", effect)
+		// log.Printf("effect %v not found in SpellEffectStatMap skipping", effect)
 		return -1
 	}
 
@@ -251,8 +229,8 @@ func (s Spell) ConvertToStats() ([]ConvItemStat, error) {
 
 	if s.ID == 9397 {
 		log.Printf("Spell: %v AuraEffect1: %v AuraEffect2: %v AuraEffect3: %v", s.Name, s.EffectAura1, s.EffectAura2, s.EffectAura3)
-
 	}
+
 	var seen []int
 	for _, e := range effects {
 		if !AuraEffectCanBeConv(e.Effect) {
@@ -282,20 +260,26 @@ func (s Spell) ConvertToStats() ([]ConvItemStat, error) {
 
 	// Handle special stat case where 189 is catch all for crit, dodge, parry, hit, haste, expertise
 	if s.Effect1 != 0 && s.Effect1 == 6 && (s.EffectAura1 == 189 || s.EffectAura1 == 123) {
-		log.Printf("Special case for spell aura effect: %v", s.Description)
+		// log.Printf("Special case for spell aura effect: %v", s.Description)
 		statId := parseStatDesc(s.Description)
-		if statId == 0 {
-			log.Printf("Could not determine stat for spell aura effect description: %v", s.Name)
-		}
+		// if statId == 0 {
+		// 	// log.Printf("Could not determine stat for spell aura effect description: %v", s.Name)
+		// }
 
 		calced := calcMaxValue(s.EffectBasePoints1, s.EffectDieSides1)
-		log.Printf("StatId: %v Calced: %v", statId, calced)
+		// log.Printf("StatId: %v Calced: %v", statId, calced)
 		stats = append(stats, ConvItemStat{
 			StatType:  statId,
 			StatValue: calced,
 			Budget:    int(math.Abs(math.Ceil(float64(calced) * float64(config.StatModifiers[statId])))),
 		})
 	}
+
+	// if len(stats) == 0 {
+	// 	// log.Printf("Failed to Convert Spell to Stats: %v AuraEffect1: %v AuraEffect2: %v AuraEffect3: %v", s.Name, s.EffectAura1, s.EffectAura2, s.EffectAura3)
+	// } else {
+	// 	// log.Printf("Converted Spell to Stats: %v AuraEffect1: %v AuraEffect2: %v AuraEffect3: %v", s.Name, s.EffectAura1, s.EffectAura2, s.EffectAura3)
+	// }
 
 	return stats, nil
 }
@@ -446,4 +430,97 @@ func (s *Spell) ScaleSpell(fromItemLevel int, itemLevel int, itemQuality int) (i
 	}
 	s.Scaled = true
 	return idBump + s.ID, nil
+}
+
+func SpellToSql(spell Spell, quality int) string {
+
+	entryBump := 30000000
+	if quality == 4 {
+		entryBump = 31000000
+	}
+	if quality == 5 {
+		entryBump = 32000000
+	}
+
+	insert := fmt.Sprintf(`
+	INSERT IGNORE INTO acore_world.spell_dbc (
+		ID, Category, DispelType, Mechanic, Attributes, AttributesEx, AttributesEx2, AttributesEx3, AttributesEx4,
+		AttributesEx5, AttributesEx6, AttributesEx7, ShapeshiftMask, unk_320_2, ShapeshiftExclude, unk_320_3, Targets,
+		TargetCreatureType, RequiresSpellFocus, FacingCasterFlags, CasterAuraState, TargetAuraState, ExcludeCasterAuraState,
+		ExcludeTargetAuraState, CasterAuraSpell, TargetAuraSpell, ExcludeCasterAuraSpell, ExcludeTargetAuraSpell, CastingTimeIndex,
+		RecoveryTime, CategoryRecoveryTime, InterruptFlags, AuraInterruptFlags, ChannelInterruptFlags, ProcTypeMask, ProcChance,
+		ProcCharges, MaxLevel, BaseLevel, SpellLevel, DurationIndex, PowerType, ManaCost, ManaCostPerLevel, ManaPerSecond,
+		ManaPerSecondPerLevel, RangeIndex, Speed, ModalNextSpell, CumulativeAura, Totem_1, Totem_2, Reagent_1, Reagent_2, Reagent_3,
+		Reagent_4, Reagent_5, Reagent_6, Reagent_7, Reagent_8, ReagentCount_1, ReagentCount_2, ReagentCount_3, ReagentCount_4,
+		ReagentCount_5, ReagentCount_6, ReagentCount_7, ReagentCount_8, EquippedItemClass, EquippedItemSubclass, EquippedItemInvTypes,
+		Effect_1, Effect_2, Effect_3, EffectDieSides_1, EffectDieSides_2, EffectDieSides_3, EffectRealPointsPerLevel_1,
+		EffectRealPointsPerLevel_2, EffectRealPointsPerLevel_3, EffectBasePoints_1, EffectBasePoints_2, EffectBasePoints_3,
+		EffectMechanic_1, EffectMechanic_2, EffectMechanic_3, ImplicitTargetA_1, ImplicitTargetA_2, ImplicitTargetA_3, ImplicitTargetB_1,
+		ImplicitTargetB_2, ImplicitTargetB_3, EffectRadiusIndex_1, EffectRadiusIndex_2, EffectRadiusIndex_3, EffectAura_1,
+		EffectAura_2, EffectAura_3, EffectAuraPeriod_1, EffectAuraPeriod_2, EffectAuraPeriod_3, EffectMultipleValue_1, EffectMultipleValue_2,
+		EffectMultipleValue_3, EffectChainTargets_1, EffectChainTargets_2, EffectChainTargets_3, EffectItemType_1, EffectItemType_2,
+		EffectItemType_3, EffectMiscValue_1, EffectMiscValue_2, EffectMiscValue_3, EffectMiscValueB_1, EffectMiscValueB_2, EffectMiscValueB_3,
+		EffectTriggerSpell_1, EffectTriggerSpell_2, EffectTriggerSpell_3, EffectPointsPerCombo_1, EffectPointsPerCombo_2, EffectPointsPerCombo_3,
+		EffectSpellClassMaskA_1, EffectSpellClassMaskA_2, EffectSpellClassMaskA_3, EffectSpellClassMaskB_1, EffectSpellClassMaskB_2,
+		EffectSpellClassMaskB_3, EffectSpellClassMaskC_1, EffectSpellClassMaskC_2, EffectSpellClassMaskC_3, SpellVisualID_1, SpellVisualID_2,
+		SpellIconID, ActiveIconID, SpellPriority, Name_Lang_enUS, Name_Lang_enGB, Name_Lang_koKR, Name_Lang_frFR, Name_Lang_deDE,
+		Name_Lang_enCN, Name_Lang_zhCN, Name_Lang_enTW, Name_Lang_zhTW, Name_Lang_esES, Name_Lang_esMX, Name_Lang_ruRU, Name_Lang_ptPT,
+		Name_Lang_ptBR, Name_Lang_itIT, Name_Lang_Unk, Name_Lang_Mask, NameSubtext_Lang_enUS, NameSubtext_Lang_enGB, NameSubtext_Lang_koKR,
+		NameSubtext_Lang_frFR, NameSubtext_Lang_deDE, NameSubtext_Lang_enCN, NameSubtext_Lang_zhCN, NameSubtext_Lang_enTW, NameSubtext_Lang_zhTW,
+		NameSubtext_Lang_esES, NameSubtext_Lang_esMX, NameSubtext_Lang_ruRU, NameSubtext_Lang_ptPT, NameSubtext_Lang_ptBR, NameSubtext_Lang_itIT,
+		NameSubtext_Lang_Unk, NameSubtext_Lang_Mask, Description_Lang_enUS, Description_Lang_enGB, Description_Lang_koKR, Description_Lang_frFR,
+		Description_Lang_deDE, Description_Lang_enCN, Description_Lang_zhCN, Description_Lang_enTW, Description_Lang_zhTW, Description_Lang_esES,
+		Description_Lang_esMX, Description_Lang_ruRU, Description_Lang_ptPT, Description_Lang_ptBR, Description_Lang_itIT, Description_Lang_Unk,
+		Description_Lang_Mask, AuraDescription_Lang_enUS, AuraDescription_Lang_enGB, AuraDescription_Lang_koKR, AuraDescription_Lang_frFR,
+		AuraDescription_Lang_deDE, AuraDescription_Lang_enCN, AuraDescription_Lang_zhCN, AuraDescription_Lang_enTW, AuraDescription_Lang_zhTW,
+		AuraDescription_Lang_esES, AuraDescription_Lang_esMX, AuraDescription_Lang_ruRU, AuraDescription_Lang_ptPT, AuraDescription_Lang_ptBR,
+		AuraDescription_Lang_itIT, AuraDescription_Lang_Unk, AuraDescription_Lang_Mask, ManaCostPct, StartRecoveryCategory, StartRecoveryTime,
+		MaxTargetLevel, SpellClassSet, SpellClassMask_1, SpellClassMask_2, SpellClassMask_3, MaxTargets, DefenseType, PreventionType, StanceBarOrder,
+		EffectChainAmplitude_1, EffectChainAmplitude_2, EffectChainAmplitude_3, MinFactionID, MinReputation, RequiredAuraVision, RequiredTotemCategoryID_1,
+		RequiredTotemCategoryID_2, RequiredAreasID, SchoolMask, RuneCostID, SpellMissileID, PowerDisplayID, EffectBonusMultiplier_1, EffectBonusMultiplier_2,
+		EffectBonusMultiplier_3, SpellDescriptionVariableID, SpellDifficultyID
+	) SELECT 
+	ID + %v, Category, DispelType, Mechanic, Attributes, AttributesEx, AttributesEx2, AttributesEx3, AttributesEx4,
+	AttributesEx5, AttributesEx6, AttributesEx7, ShapeshiftMask, unk_320_2, ShapeshiftExclude, unk_320_3, Targets,
+	TargetCreatureType, RequiresSpellFocus, FacingCasterFlags, CasterAuraState, TargetAuraState, ExcludeCasterAuraState,
+	ExcludeTargetAuraState, CasterAuraSpell, TargetAuraSpell, ExcludeCasterAuraSpell, ExcludeTargetAuraSpell, CastingTimeIndex,
+	RecoveryTime, CategoryRecoveryTime, InterruptFlags, AuraInterruptFlags, ChannelInterruptFlags, ProcTypeMask, ProcChance,
+	ProcCharges, MaxLevel, BaseLevel, SpellLevel, DurationIndex, PowerType, ManaCost, ManaCostPerLevel, ManaPerSecond,
+	ManaPerSecondPerLevel, RangeIndex, Speed, ModalNextSpell, CumulativeAura, Totem_1, Totem_2, Reagent_1, Reagent_2, Reagent_3,
+	Reagent_4, Reagent_5, Reagent_6, Reagent_7, Reagent_8, ReagentCount_1, ReagentCount_2, ReagentCount_3, ReagentCount_4,
+	ReagentCount_5, ReagentCount_6, ReagentCount_7, ReagentCount_8, EquippedItemClass, EquippedItemSubclass, EquippedItemInvTypes,
+	Effect_1, Effect_2, Effect_3, EffectDieSides_1, EffectDieSides_2, EffectDieSides_3, EffectRealPointsPerLevel_1,
+	EffectRealPointsPerLevel_2, EffectRealPointsPerLevel_3, EffectBasePoints_1, EffectBasePoints_2, EffectBasePoints_3,
+	EffectMechanic_1, EffectMechanic_2, EffectMechanic_3, ImplicitTargetA_1, ImplicitTargetA_2, ImplicitTargetA_3, ImplicitTargetB_1,
+	ImplicitTargetB_2, ImplicitTargetB_3, EffectRadiusIndex_1, EffectRadiusIndex_2, EffectRadiusIndex_3, EffectAura_1,
+	EffectAura_2, EffectAura_3, EffectAuraPeriod_1, EffectAuraPeriod_2, EffectAuraPeriod_3, EffectMultipleValue_1, EffectMultipleValue_2,
+	EffectMultipleValue_3, EffectChainTargets_1, EffectChainTargets_2, EffectChainTargets_3, EffectItemType_1, EffectItemType_2,
+	EffectItemType_3, EffectMiscValue_1, EffectMiscValue_2, EffectMiscValue_3, EffectMiscValueB_1, EffectMiscValueB_2, EffectMiscValueB_3,
+	EffectTriggerSpell_1, EffectTriggerSpell_2, EffectTriggerSpell_3, EffectPointsPerCombo_1, EffectPointsPerCombo_2, EffectPointsPerCombo_3,
+	EffectSpellClassMaskA_1, EffectSpellClassMaskA_2, EffectSpellClassMaskA_3, EffectSpellClassMaskB_1, EffectSpellClassMaskB_2,
+	EffectSpellClassMaskB_3, EffectSpellClassMaskC_1, EffectSpellClassMaskC_2, EffectSpellClassMaskC_3, SpellVisualID_1, SpellVisualID_2,
+	SpellIconID, ActiveIconID, SpellPriority, Name_Lang_enUS, Name_Lang_enGB, Name_Lang_koKR, Name_Lang_frFR, Name_Lang_deDE,
+	Name_Lang_enCN, Name_Lang_zhCN, Name_Lang_enTW, Name_Lang_zhTW, Name_Lang_esES, Name_Lang_esMX, Name_Lang_ruRU, Name_Lang_ptPT,
+	Name_Lang_ptBR, Name_Lang_itIT, Name_Lang_Unk, Name_Lang_Mask, NameSubtext_Lang_enUS, NameSubtext_Lang_enGB, NameSubtext_Lang_koKR,
+	NameSubtext_Lang_frFR, NameSubtext_Lang_deDE, NameSubtext_Lang_enCN, NameSubtext_Lang_zhCN, NameSubtext_Lang_enTW, NameSubtext_Lang_zhTW,
+	NameSubtext_Lang_esES, NameSubtext_Lang_esMX, NameSubtext_Lang_ruRU, NameSubtext_Lang_ptPT, NameSubtext_Lang_ptBR, NameSubtext_Lang_itIT,
+	NameSubtext_Lang_Unk, NameSubtext_Lang_Mask, Description_Lang_enUS, Description_Lang_enGB, Description_Lang_koKR, Description_Lang_frFR,
+	Description_Lang_deDE, Description_Lang_enCN, Description_Lang_zhCN, Description_Lang_enTW, Description_Lang_zhTW, Description_Lang_esES,
+	Description_Lang_esMX, Description_Lang_ruRU, Description_Lang_ptPT, Description_Lang_ptBR, Description_Lang_itIT, Description_Lang_Unk,
+	Description_Lang_Mask, AuraDescription_Lang_enUS, AuraDescription_Lang_enGB, AuraDescription_Lang_koKR, AuraDescription_Lang_frFR,
+	AuraDescription_Lang_deDE, AuraDescription_Lang_enCN, AuraDescription_Lang_zhCN, AuraDescription_Lang_enTW, AuraDescription_Lang_zhTW,
+	AuraDescription_Lang_esES, AuraDescription_Lang_esMX, AuraDescription_Lang_ruRU, AuraDescription_Lang_ptPT, AuraDescription_Lang_ptBR,
+	AuraDescription_Lang_itIT, AuraDescription_Lang_Unk, AuraDescription_Lang_Mask, ManaCostPct, StartRecoveryCategory, StartRecoveryTime,
+	MaxTargetLevel, SpellClassSet, SpellClassMask_1, SpellClassMask_2, SpellClassMask_3, MaxTargets, DefenseType, PreventionType, StanceBarOrder,
+	EffectChainAmplitude_1, EffectChainAmplitude_2, EffectChainAmplitude_3, MinFactionID, MinReputation, RequiredAuraVision, RequiredTotemCategoryID_1,
+	RequiredTotemCategoryID_2, RequiredAreasID, SchoolMask, RuneCostID, SpellMissileID, PowerDisplayID, EffectBonusMultiplier_1, EffectBonusMultiplier_2,
+	EffectBonusMultiplier_3, SpellDescriptionVariableID, SpellDifficultyID from acore_world.spell_dbc as src
+	WHERE src.ID = %v ON DUPLICATE KEY UPDATE ID = src.ID + %v;`, entryBump, spell.ID, entryBump)
+
+	update := fmt.Sprintf(`
+	UPDATE acore_world.spell_dbc
+	SET EffectBasePoints_1 = %v, EffectBasePoints_2 = %v
+	WHERE ID = %v;`, spell.EffectBasePoints1, spell.EffectBasePoints2, entryBump+spell.ID)
+
+	return fmt.Sprintf("\n %s \n %s \n", insert, update)
 }

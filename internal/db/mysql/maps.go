@@ -2,8 +2,6 @@ package mysql
 
 import (
 	"fmt"
-
-	"github.com/araxiaonline/endgame-item-generator/internal/items"
 )
 
 type Dungeon struct {
@@ -104,10 +102,10 @@ func (db *MySqlDb) GetDungeons(expansionId int) ([]Dungeon, error) {
 }
 
 // Gets a list of other rare+ items that drop in a specific instance.
-func (db *MySqlDb) GetAddlDungeonDrops(instanceId int) ([]items.Item, error) {
+func (db *MySqlDb) GetAddlDungeonDrops(instanceId int) ([]DbItem, error) {
 
-	fields := items.GetItemFields("it")
-	var items []items.Item
+	fields := GetItemFields("it")
+	var items []DbItem
 	sql := fmt.Sprintf(`
 	SELECT `+fields+`
 from

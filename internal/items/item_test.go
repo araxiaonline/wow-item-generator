@@ -181,8 +181,8 @@ func TestGetDPS(t *testing.T) {
 			name: "Valid DPS calculation",
 			item: Item{
 				DbItem: mysql.DbItem{
-					MinDmg1: ptrInt(50),
-					MaxDmg1: ptrInt(70),
+					MinDmg1: ptrFloat64(50),
+					MaxDmg1: ptrFloat64(70),
 					Delay:   ptrFloat64(3000),
 				},
 			},
@@ -193,8 +193,8 @@ func TestGetDPS(t *testing.T) {
 			name: "High damage DPS calculation",
 			item: Item{
 				DbItem: mysql.DbItem{
-					MinDmg1: ptrInt(100),
-					MaxDmg1: ptrInt(150),
+					MinDmg1: ptrFloat64(100),
+					MaxDmg1: ptrFloat64(150),
 					Delay:   ptrFloat64(2000),
 				},
 			},
@@ -205,8 +205,8 @@ func TestGetDPS(t *testing.T) {
 			name: "Low damage DPS calculation",
 			item: Item{
 				DbItem: mysql.DbItem{
-					MinDmg1: ptrInt(10),
-					MaxDmg1: ptrInt(15),
+					MinDmg1: ptrFloat64(10),
+					MaxDmg1: ptrFloat64(15),
 					Delay:   ptrFloat64(1500),
 				},
 			},
@@ -217,7 +217,7 @@ func TestGetDPS(t *testing.T) {
 			name: "Missing MinDmg1",
 			item: Item{
 				DbItem: mysql.DbItem{
-					MaxDmg1: ptrInt(70),
+					MaxDmg1: ptrFloat64(70),
 					Delay:   ptrFloat64(3000),
 				},
 			},
@@ -228,7 +228,7 @@ func TestGetDPS(t *testing.T) {
 			name: "Missing MaxDmg1",
 			item: Item{
 				DbItem: mysql.DbItem{
-					MinDmg1: ptrInt(50),
+					MinDmg1: ptrFloat64(50),
 					Delay:   ptrFloat64(3000),
 				},
 			},
@@ -239,8 +239,8 @@ func TestGetDPS(t *testing.T) {
 			name: "Missing Delay",
 			item: Item{
 				DbItem: mysql.DbItem{
-					MinDmg1: ptrInt(50),
-					MaxDmg1: ptrInt(70),
+					MinDmg1: ptrFloat64(50),
+					MaxDmg1: ptrFloat64(70),
 				},
 			},
 			wantDPS:     0,
@@ -277,8 +277,8 @@ func TestScaleDPS(t *testing.T) {
 				DbItem: mysql.DbItem{
 					ItemLevel: ptrInt(60),
 					Delay:     ptrFloat64(3000),
-					MinDmg1:   ptrInt(50),
-					MaxDmg1:   ptrInt(70),
+					MinDmg1:   ptrFloat64(50),
+					MaxDmg1:   ptrFloat64(70),
 					Subclass:  ptrInt(4), // One-handed weapon
 					Quality:   ptrInt(3), // Rare
 				},
@@ -294,8 +294,8 @@ func TestScaleDPS(t *testing.T) {
 				DbItem: mysql.DbItem{
 					ItemLevel: ptrInt(80),
 					Delay:     ptrFloat64(2000),
-					MinDmg1:   ptrInt(150),
-					MaxDmg1:   ptrInt(200),
+					MinDmg1:   ptrFloat64(150),
+					MaxDmg1:   ptrFloat64(200),
 					Subclass:  ptrInt(17), // Two-handed weapon
 					Quality:   ptrInt(4),  // Epic
 				},
@@ -311,8 +311,8 @@ func TestScaleDPS(t *testing.T) {
 				DbItem: mysql.DbItem{
 					ItemLevel: ptrInt(20),
 					Delay:     ptrFloat64(1000),
-					MinDmg1:   ptrInt(30),
-					MaxDmg1:   ptrInt(50),
+					MinDmg1:   ptrFloat64(30),
+					MaxDmg1:   ptrFloat64(50),
 					Subclass:  ptrInt(2), // Ranged weapon
 					Quality:   ptrInt(2), // Uncommon
 				},
@@ -327,8 +327,8 @@ func TestScaleDPS(t *testing.T) {
 			item: Item{
 				DbItem: mysql.DbItem{
 					Delay:    ptrFloat64(3000),
-					MinDmg1:  ptrInt(50),
-					MaxDmg1:  ptrInt(70),
+					MinDmg1:  ptrFloat64(50),
+					MaxDmg1:  ptrFloat64(70),
 					Subclass: ptrInt(4), // One-handed weapon
 					Quality:  ptrInt(3), // Rare
 				},
@@ -343,8 +343,8 @@ func TestScaleDPS(t *testing.T) {
 			item: Item{
 				DbItem: mysql.DbItem{
 					ItemLevel: ptrInt(60),
-					MinDmg1:   ptrInt(50),
-					MaxDmg1:   ptrInt(70),
+					MinDmg1:   ptrFloat64(50),
+					MaxDmg1:   ptrFloat64(70),
 					Subclass:  ptrInt(4), // One-handed weapon
 					Quality:   ptrInt(3), // Rare
 				},
@@ -360,10 +360,10 @@ func TestScaleDPS(t *testing.T) {
 				DbItem: mysql.DbItem{
 					ItemLevel: ptrInt(60),
 					Delay:     ptrFloat64(3000),
-					MinDmg1:   ptrInt(50),
-					MaxDmg1:   ptrInt(70),
-					MinDmg2:   ptrInt(25),
-					MaxDmg2:   ptrInt(35),
+					MinDmg1:   ptrFloat64(50),
+					MaxDmg1:   ptrFloat64(70),
+					MinDmg2:   ptrFloat64(25),
+					MaxDmg2:   ptrFloat64(35),
 					Subclass:  ptrInt(4), // One-handed weapon
 					Quality:   ptrInt(3), // Rare
 				},
