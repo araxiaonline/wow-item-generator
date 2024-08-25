@@ -89,7 +89,7 @@ func (db *MySqlDb) GetBossLoot(bossId int) ([]DbItem, error) {
 		SELECT ` + GetItemFields("it") + ` 
 		FROM acore_world.reference_loot_template rlt 
 		  JOIN acore_world.item_template it ON rlt.Item = it.entry 
-		WHERE rlt.Entry = ? and it.Quality > 2 and it.StatsCount > 0
+		WHERE rlt.Entry = ? and it.Quality > 2 
 		`
 		err = db.Select(&refItems, sql, ref)
 		if err != nil {

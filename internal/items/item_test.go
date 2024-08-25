@@ -380,7 +380,7 @@ func TestScaleDPS(t *testing.T) {
 			// Seed the random number generator for consistent test results
 			rand.Seed(1)
 
-			gotDPS, err := tt.item.ScaleDPS(tt.level)
+			gotDPS, err := tt.item.ScaleDPS(tt.level, 100)
 			if (err != nil) != tt.expectError {
 				t.Errorf("ScaleDPS() error = %v, expectError %v", err, tt.expectError)
 				return

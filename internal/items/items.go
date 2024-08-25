@@ -200,12 +200,13 @@ func (item Item) GetDPS() (float64, error) {
 		return 0, fmt.Errorf("delay is not set")
 	}
 
-	dps := math.Round((float64(*item.MinDmg1+*item.MaxDmg1)/2.0)/float64(*item.Delay/1000)*100) / 100
+	dps := math.Round(((float64(*item.MinDmg1)+float64(*item.MaxDmg1))/2.0)/(float64(*item.Delay)/1000.0)*100) / 100
+
 	return dps, nil
 }
 
 // Scales and items dps damage numbers based on a desired item level.
-func (item *Item) ScaleDPS(level int) (float64, error) {
+func (item *Item) ScaleDPS(oldLevel, level int) (float64, error) {
 	if item.ItemLevel == nil {
 		return 0, fmt.Errorf("ItemLevel is not set")
 	}
@@ -220,12 +221,17 @@ func (item *Item) ScaleDPS(level int) (float64, error) {
 		return 0.0, err
 	}
 
-	dps := modifier * float64(level)
+	scalingFactor := math.Pow(float64(level)/float64(oldLevel), 1.1)
+
+	dps := modifier * float64(level) * scalingFactor
 	adjDps := (dps * (*item.Delay / 1000) / 100)
 
 	//(((Y8*Y4)/100))*((100 - Y5)) Forumula from Weapon Item Genertor
-	minimum := adjDps * float64(100-(rand.IntN(17)+20))
+	minimum := adjDps * float64(100-(rand.IntN(25)+22))
 	maximum := adjDps * float64(100+(rand.IntN(25)+28))
+
+	minimum = math.Ceil(minimum)
+	maximum = math.Ceil(maximum)
 
 	// If the weapon has secondary damage, scale that as well based on the ratio of the primary damage
 	if *item.MinDmg2 != 0 && *item.MaxDmg2 != 0 {
@@ -505,7 +511,7 @@ func (item *Item) ScaleItem(itemLevel int, itemQuality int) (bool, error) {
 			log.Printf("Failed to get DPS: %v", err)
 		}
 
-		dps, err := item.ScaleDPS(itemLevel)
+		dps, err := item.ScaleDPS(fromItemLevel, itemLevel)
 		if err != nil {
 			log.Printf("Failed to scale DPS: %v", err)
 			return false, err
@@ -737,12 +743,18 @@ func scaleStatv3(scaleParams StatScaleParams) int {
 
 func ItemToSql(item Item, reqLevel int, difficulty int) string {
 
+	var name string
+
 	entryBump := 20000000
 	spellBump := 30000000
+	name = "Mythic " + item.Name
+
 	if difficulty == 4 {
 		entryBump = 21000000
+		name = "Legendary " + item.Name
 	}
 	if difficulty == 5 {
+		name = "Godlike " + item.Name
 		entryBump = 22000000
 	}
 
@@ -816,6 +828,7 @@ func ItemToSql(item Item, reqLevel int, difficulty int) string {
 	UPDATE acore_world.item_template
 	SET 
 	  Quality = %v,
+	  name = '%s',
 	  ItemLevel = %v,
 	  RequiredLevel = %v,
 	  dmg_min1 = %v,
@@ -859,7 +872,7 @@ func ItemToSql(item Item, reqLevel int, difficulty int) string {
 	  SellPrice = FLOOR(100000 + (RAND() * 400001)),
 	  Armor = %v
 	WHERE entry = %v;
-	`, *item.Quality, *item.ItemLevel, reqLevel, *item.MinDmg1, *item.MaxDmg1, *item.MinDmg2, *item.MaxDmg2, *item.StatsCount,
+	`, *item.Quality, name, *item.ItemLevel, reqLevel, *item.MinDmg1, *item.MaxDmg1, *item.MinDmg2, *item.MaxDmg2, *item.StatsCount,
 		*item.StatType1, *item.StatValue1, *item.StatType2, *item.StatValue2, *item.StatType3, *item.StatValue3, *item.StatType4, *item.StatValue4,
 		*item.StatType5, *item.StatValue5, *item.StatType6, *item.StatValue6, *item.StatType7, *item.StatValue7, *item.StatType8, *item.StatValue8,
 		*item.StatType9, *item.StatValue9, *item.StatType10, *item.StatValue10, *item.SpellId1, *item.SpellId2, *item.SpellId3, *item.SocketColor1, *item.SocketContent1,

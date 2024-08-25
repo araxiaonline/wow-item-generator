@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"io"
 	"log"
 	"os"
@@ -100,16 +101,18 @@ func main() {
 		}
 
 		// Print all the status for the item that was copied
-		log.Printf("Item Name: %v Stat1: %v Stat2: %v Stat3: %v Stat4: %v Stat5: %v Stat6: %v Stat7: %v Stat8: %v \n",
-			item.Entry, *item.StatValue1, *item.StatValue2, *item.StatValue3, *item.StatValue4, *item.StatValue5, *item.StatValue6, *item.StatValue7, *item.StatValue8)
+		// log.Printf("Item Name: %v Stat1: %v Stat2: %v Stat3: %v Stat4: %v Stat5: %v Stat6: %v Stat7: %v Stat8: %v \n",
+		// 	item.Entry, *item.StatValue1, *item.StatValue2, *item.StatValue3, *item.StatValue4, *item.StatValue5, *item.StatValue6, *item.StatValue7, *item.StatValue8)
 
 		item.ApplyStats(items.ItemFromDbItem(highLevelItem))
 
 		item.ScaleItem(*itemLevel, 3)
-		log.Printf("Item Name: %v Stat1: %v Stat2: %v Stat3: %v Stat4: %v Stat5: %v Stat6: %v Stat7: %v Stat8: %v \n",
-			item.Name, *item.StatValue1, *item.StatValue2, *item.StatValue3, *item.StatValue4, *item.StatValue5, *item.StatValue6, *item.StatValue7, *item.StatValue8)
+		// log.Printf("Item Name: %v Stat1: %v Stat2: %v Stat3: %v Stat4: %v Stat5: %v Stat6: %v Stat7: %v Stat8: %v \n",
+		// 	item.Name, *item.StatValue1, *item.StatValue2, *item.StatValue3, *item.StatValue4, *item.StatValue5, *item.StatValue6, *item.StatValue7, *item.StatValue8)
 
-		if itr > 100 {
+		fmt.Print(items.ItemToSql(item, 80, 3))
+
+		if itr > 600 {
 			break
 		}
 	}
