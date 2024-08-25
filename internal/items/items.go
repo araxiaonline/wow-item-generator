@@ -33,6 +33,15 @@ type ItemStat struct {
 	AdjValue float64
 }
 
+type StatScaleParams struct {
+	ItemLevel    int
+	NewItemLevel int
+	Quality      int
+	ItemType     int
+	StatTypeId   int
+	StatValue    int
+}
+
 // Create a new item from the database item
 func ItemFromDbItem(dbItem mysql.DbItem) Item {
 	return Item{
@@ -215,8 +224,8 @@ func (item *Item) ScaleDPS(level int) (float64, error) {
 	adjDps := (dps * (*item.Delay / 1000) / 100)
 
 	//(((Y8*Y4)/100))*((100 - Y5)) Forumula from Weapon Item Genertor
-	minimum := adjDps * float64(100-(rand.IntN(15)+22))
-	maximum := adjDps * float64(100+(rand.IntN(15)+22))
+	minimum := adjDps * float64(100-(rand.IntN(17)+20))
+	maximum := adjDps * float64(100+(rand.IntN(25)+28))
 
 	// If the weapon has secondary damage, scale that as well based on the ratio of the primary damage
 	if item.MinDmg2 != nil && item.MaxDmg2 != nil {
@@ -229,8 +238,8 @@ func (item *Item) ScaleDPS(level int) (float64, error) {
 		item.MaxDmg2 = &maximum2
 
 		// In order to balance the original scale of the secondary damage from primary
-		minimum = minimum - float64(minimum2)*0.75
-		maximum = maximum - float64(maximum2)*0.75
+		minimum = minimum - float64(minimum2)*0.85
+		maximum = maximum - float64(maximum2)*0.85
 	}
 
 	// item.MinDmg1 = &minimum
@@ -256,7 +265,7 @@ func (item Item) GetStatPercents(spellStats []spells.ConvItemStat) map[int]*Item
 			continue
 		}
 
-		adjValue := float64(statValue) * config.StatModifiers[int(statType)]
+		adjValue := float64(statValue) / config.StatModifiers[int(statType)]
 		statBudget += adjValue
 		statMap[int(statType)] = &ItemStat{
 			Value:    int(statValue),
@@ -401,6 +410,8 @@ func (item *Item) ApplyStats(otherItem Item) (success bool, err error) {
 		item.SocketContent3 = otherItem.SocketContent3
 	}
 
+	item.ItemLevel = otherItem.ItemLevel
+
 	return true, nil
 }
 
@@ -455,7 +466,17 @@ func (item *Item) ScaleItem(itemLevel int, itemQuality int) (bool, error) {
 	for statId, stat := range allStats {
 		origValue := stat.Value
 
-		stat.Value = scaleStat(itemLevel, *item.InventoryType, *item.Quality, stat.Percent, config.StatModifiers[statId])
+		scaleParams := StatScaleParams{
+			ItemLevel:    *item.ItemLevel,
+			NewItemLevel: fromItemLevel,
+			Quality:      *item.Quality,
+			ItemType:     *item.InventoryType,
+			StatTypeId:   statId,
+			StatValue:    stat.Value,
+		}
+
+		stat.Value = scaleStatv2(scaleParams)
+		// stat.Value = scaleStatv2(itemLevel, *item.InventoryType, *item.Quality, stat.Percent, config.StatModifiers[statId])
 
 		log.Printf(">>>>>> Scaled : StatId: %v Type: %s Orig: %v - New Value: %v Percent: %v", statId, stat.Type, origValue, stat.Value, stat.Percent)
 	}
@@ -634,11 +655,11 @@ func (item *Item) addStats(stats map[int]*ItemStat) {
 
 		// MP5 adjustment
 		if statId == 43 {
-			stat.Value = int(math.Round(float64(stat.Value) * 0.5))
+			stat.Value = int(math.Round(float64(stat.Value) * 0.85))
 		}
 
 		if statId == 12 {
-			stat.Value = int(math.Round(float64(stat.Value) * 0.5))
+			stat.Value = int(math.Round(float64(stat.Value) * 0.85))
 		}
 
 		if statId == 12 {
@@ -646,11 +667,11 @@ func (item *Item) addStats(stats map[int]*ItemStat) {
 		}
 
 		if statId == 13 {
-			stat.Value = int(math.Round(float64(stat.Value) * 0.65))
+			stat.Value = int(math.Round(float64(stat.Value) * 0.75))
 		}
 
 		if statId == 31 {
-			stat.Value = int(math.Round(float64(stat.Value) * 0.55))
+			stat.Value = int(math.Round(float64(stat.Value) * 0.65))
 		}
 
 		// Update the item with new stats from scaling
@@ -673,6 +694,14 @@ func scaleStat(itemLevel int, itemType int, itemQuality int, percOfStat float64,
 	// leaving modifier off for now but not changing signature in case I need to add it back
 	_ = statModifier
 	return int(math.Ceil(math.Pow(scaledUp, 1/1.7095))) // normalized
+}
+
+func scaleStatv2(scaleParams StatScaleParams) int {
+	modifier := config.QualityModifiers[scaleParams.Quality] * config.ScalingFactor[scaleParams.StatTypeId] * config.InvTypeModifiers[scaleParams.ItemType]
+	scaledValue := float64(scaleParams.StatValue) * float64(scaleParams.NewItemLevel/scaleParams.ItemLevel) * modifier
+
+	log.Printf("------- scaledValue: %v modifier: %v", scaledValue, modifier)
+	return int(math.Ceil(scaledValue))
 }
 
 func ItemToSql(item Item, reqLevel int, difficulty int) string {
