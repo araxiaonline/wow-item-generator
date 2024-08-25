@@ -697,7 +697,7 @@ func scaleStat(itemLevel int, itemType int, itemQuality int, percOfStat float64,
 }
 
 func scaleStatv2(scaleParams StatScaleParams) int {
-	modifier := config.QualityModifiers[scaleParams.Quality] * config.ScalingFactor[scaleParams.StatTypeId] * config.InvTypeModifiers[scaleParams.ItemType]
+	modifier := config.QualityModifiers[scaleParams.Quality] * config.ScalingFactor[scaleParams.StatTypeId]
 	scaledValue := float64(scaleParams.StatValue) * float64(scaleParams.NewItemLevel/scaleParams.ItemLevel) * modifier
 
 	log.Printf("------- scaledValue: %v modifier: %v", scaledValue, modifier)
