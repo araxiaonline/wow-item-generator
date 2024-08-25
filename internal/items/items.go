@@ -228,7 +228,7 @@ func (item *Item) ScaleDPS(level int) (float64, error) {
 	maximum := adjDps * float64(100+(rand.IntN(25)+28))
 
 	// If the weapon has secondary damage, scale that as well based on the ratio of the primary damage
-	if item.MinDmg2 != nil && item.MaxDmg2 != nil {
+	if *item.MinDmg2 != 0 && *item.MaxDmg2 != 0 {
 		ratioMin := float64(*item.MinDmg2) / float64(*item.MinDmg1)
 		ratioMax := float64(*item.MaxDmg2) / float64(*item.MaxDmg1)
 		minimum2 := ratioMin * float64(minimum)
@@ -247,6 +247,8 @@ func (item *Item) ScaleDPS(level int) (float64, error) {
 	// var max int = int(maximum)
 	item.MinDmg1 = &minimum
 	item.MaxDmg1 = &maximum
+
+	dps, _ = item.GetDPS()
 
 	return dps, nil
 }
@@ -504,7 +506,7 @@ func (item *Item) ScaleItem(itemLevel int, itemQuality int) (bool, error) {
 			log.Printf("Failed to scale DPS: %v", err)
 			return false, err
 		}
-		log.Printf("DPS: %.1f scaled up from previous dps %v", dps, predps)
+		log.Printf("DPS: %.1f scaled up from previous dps %v: Min %v - Max %v", dps, predps, *item.MinDmg1, *item.MaxDmg1)
 	}
 
 	item.cleanSpells()
