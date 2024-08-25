@@ -105,7 +105,7 @@ func main() {
 
 		item.ApplyStats(items.ItemFromDbItem(highLevelItem))
 
-		item.ScaleItem(*itemLevel, 4)
+		item.ScaleItem(*itemLevel, 3)
 		log.Printf("Item Name: %v Stat1: %v Stat2: %v Stat3: %v Stat4: %v Stat5: %v Stat6: %v Stat7: %v Stat8: %v \n",
 			item.Name, *item.StatValue1, *item.StatValue2, *item.StatValue3, *item.StatValue4, *item.StatValue5, *item.StatValue6, *item.StatValue7, *item.StatValue8)
 

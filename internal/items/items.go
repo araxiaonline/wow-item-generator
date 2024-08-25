@@ -467,15 +467,15 @@ func (item *Item) ScaleItem(itemLevel int, itemQuality int) (bool, error) {
 		origValue := stat.Value
 
 		scaleParams := StatScaleParams{
-			ItemLevel:    *item.ItemLevel,
-			NewItemLevel: fromItemLevel,
+			ItemLevel:    fromItemLevel,
+			NewItemLevel: *item.ItemLevel,
 			Quality:      *item.Quality,
 			ItemType:     *item.InventoryType,
 			StatTypeId:   statId,
 			StatValue:    stat.Value,
 		}
 
-		stat.Value = scaleStatv2(scaleParams)
+		stat.Value = scaleStatv3(scaleParams)
 		// stat.Value = scaleStatv2(itemLevel, *item.InventoryType, *item.Quality, stat.Percent, config.StatModifiers[statId])
 
 		log.Printf(">>>>>> Scaled : StatId: %v Type: %s Orig: %v - New Value: %v Percent: %v", statId, stat.Type, origValue, stat.Value, stat.Percent)
@@ -698,9 +698,34 @@ func scaleStat(itemLevel int, itemType int, itemQuality int, percOfStat float64,
 
 func scaleStatv2(scaleParams StatScaleParams) int {
 	modifier := config.QualityModifiers[scaleParams.Quality] * config.ScalingFactor[scaleParams.StatTypeId]
-	scaledValue := float64(scaleParams.StatValue) * float64(scaleParams.NewItemLevel/scaleParams.ItemLevel) * modifier
+	modifier *= float64(scaleParams.NewItemLevel) / float64(scaleParams.ItemLevel)
+	scaledValue := float64(scaleParams.StatValue) * modifier // * config.InvTypeModifiers[scaleParams.ItemType]
 
 	log.Printf("------- scaledValue: %v modifier: %v", scaledValue, modifier)
+	return int(math.Ceil(scaledValue))
+}
+
+func scaleStatv3(scaleParams StatScaleParams) int {
+	// Calculate the quality and inventory type modifiers
+	qualityModifier := config.QualityModifiers[scaleParams.Quality]
+	// invTypeModifier := config.InvTypeModifiers[scaleParams.ItemType]
+
+	// Calculate the base scaling factor
+	baseScalingFactor := config.ScalingFactor[scaleParams.StatTypeId]
+
+	// Calculate the level ratio (new item level / original item level)
+	levelRatio := float64(scaleParams.NewItemLevel) / float64(scaleParams.ItemLevel)
+
+	// Apply the comprehensive scaling formula
+	scaledValue := float64(scaleParams.StatValue) *
+		math.Pow(levelRatio, baseScalingFactor) *
+		qualityModifier
+
+	// // Log the details for debugging
+	// log.Printf("------- scaledValue: %v, levelRatio: %v, qualityModifier: %v, baseScalingFactor: %v",
+	// 	scaledValue, levelRatio, qualityModifier, baseScalingFactor)
+
+	// Return the scaled value, rounded up
 	return int(math.Ceil(scaledValue))
 }
 
