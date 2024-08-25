@@ -414,6 +414,10 @@ func (item *Item) ApplyStats(otherItem Item) (success bool, err error) {
 
 	item.ItemLevel = otherItem.ItemLevel
 
+	if otherItem.Armor != nil {
+		item.Armor = otherItem.Armor
+	}
+
 	return true, nil
 }
 
