@@ -19,6 +19,15 @@ type HighLevelItem struct {
 	StatsList string `db:"stats_list"`
 }
 
+type DungeonItem struct {
+	Entry        int `db:"entry"`
+	MapId        int `db:"mapId"`
+	CreatureId   int `db:"creatureId"`
+	Quality      int `db:"Quality"`
+	Expansion    int `db:"expansion"`
+	DungeonLevel int `db:"dungeonLevel"`
+}
+
 func (db *SqlLite) GetItem(entry int) (HighLevelItem, error) {
 	if entry == 0 {
 		return HighLevelItem{}, fmt.Errorf("entry cannot be 0")
@@ -77,6 +86,18 @@ func (db *SqlLite) GetRandItem(class, subclass int, statsList []int, end bool) (
 	}
 
 	return rndItem, nil
+}
+
+func (db *SqlLite) GetItemFromDungeon(itemEntry int) (DungeonItem, error) {
+	item := DungeonItem{}
+	sql := "SELECT * FROM dungeon_items WHERE entry = ?"
+
+	err := db.Get(&item, sql, itemEntry)
+	if err != nil {
+		return item, err
+	}
+
+	return item, nil
 }
 
 func intSliceToString(slice []int) string {

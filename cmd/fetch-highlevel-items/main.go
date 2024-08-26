@@ -52,7 +52,7 @@ func ConvertIntSliceToString(slice []int) string {
 
 func main() {
 	godotenv.Load("../../.env")
-	liteDb, err := sql.Open("sqlite3", "./items.db")
+	liteDb, err := sql.Open("sqlite3", "../../data/items.db")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -79,11 +79,12 @@ func main() {
 	sql := `
 		SELECT ` + mysql.GetItemFields("") + `
 		from acore_world.item_template
-		where ItemLevel >= 200 and Quality >= 3 and ItemLevel < 290
+		where ItemLevel >= 220 and Quality >= 3 and ItemLevel < 290
 		AND name NOT LIKE 'NPC Equip%' and name NOT LIKE 'OLD%'
 		AND name NOT LIKE '%(test)%' AND name NOT LIKE '%Deprecated%'
 		AND name NOT LIKE  '%Monster - %'
 		AND ((class = 2 and subclass IN(0,1,2,3,4,5,6,7,8,10,11,12,13,15,16,17,18,19)) or ((class = 4 AND subclass IN (0,1,2,3,4,6))))
+		AND stat_type1 != 32 AND stat_type2 != 32 AND stat_type3 != 32 AND stat_type4 != 32 AND stat_type5 != 32 AND stat_type6 != 32 AND stat_type7 != 32 AND stat_type8 != 32 AND stat_type9 != 32 AND stat_type10 != 32
 	`
 	err = mysqlDb.Select(&dbItems, sql)
 	if err != nil {

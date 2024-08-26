@@ -82,7 +82,8 @@ func (db *MySqlDb) GetItem(entry int) (DbItem, error) {
 
 func (db *MySqlDb) GetRarePlusItems(limit, offset int) ([]DbItem, error) {
 	items := []DbItem{}
-	sql := "SELECT " + GetItemFields("") + " FROM item_template WHERE Quality >= 3 and Quality <= 5 and (class = 2 or class = 4)"
+	sql := "SELECT " + GetItemFields("") + " FROM item_template WHERE Quality >= 3 and Quality <= 5 and (class = 2 or class = 4) "
+	sql += "and subclass != 20 AND entry < 20000000 ORDER BY entry ASC"
 
 	if limit != 0 && offset != 0 {
 		sql += fmt.Sprintf("LIMIT %v OFFSET %v", limit, offset)

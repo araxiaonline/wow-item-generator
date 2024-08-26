@@ -9,20 +9,19 @@ import (
 	"strings"
 
 	"github.com/araxiaonline/endgame-item-generator/internal/db/mysql"
+	"github.com/araxiaonline/endgame-item-generator/internal/db/sqlite"
 	"github.com/joho/godotenv"
 	_ "github.com/mattn/go-sqlite3"
 )
 
-type DungeonItem struct {
-	Entry        int `db:"entry"`
-	MapId        int `db:"mapId"`
-	CreatureId   int `db:"creatureId"`
-	Quality      int `db:"Quality"`
-	Expansion    int `db:"expansion"`
-	DungeonLevel int `db:"dungeonLevel"`
-}
-
 func createTable(db *sql.DB) {
+
+	droptable := `DROP TABLE IF EXISTS dungeon_items`
+	_, err := db.Exec(droptable)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	createTable := `CREATE TABLE IF NOT EXISTS dungeon_items (
 		entry int unsigned NOT NULL DEFAULT '0',
 		mapId tinyint unsigned NOT NULL DEFAULT '0',
@@ -33,7 +32,7 @@ func createTable(db *sql.DB) {
 		PRIMARY KEY (entry)
 	  )`
 
-	_, err := db.Exec(createTable)
+	_, err = db.Exec(createTable)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -96,7 +95,7 @@ func main() {
 
 			for _, dungItem := range dbItems {
 
-				insertItem := DungeonItem{
+				insertItem := sqlite.DungeonItem{
 					Entry:        dungItem.Entry,
 					MapId:        dungeon.Id,
 					Quality:      *dungItem.Quality,
@@ -117,7 +116,7 @@ func main() {
 		}
 
 		for _, dungItem := range dbItems {
-			insertItem := DungeonItem{
+			insertItem := sqlite.DungeonItem{
 				Entry:        dungItem.Entry,
 				MapId:        dungeon.Id,
 				Quality:      *dungItem.Quality,

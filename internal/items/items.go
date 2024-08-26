@@ -8,6 +8,7 @@ import (
 	"math/rand/v2"
 	"reflect"
 	"slices"
+	"strings"
 
 	"github.com/araxiaonline/endgame-item-generator/internal/config"
 	"github.com/araxiaonline/endgame-item-generator/internal/db/mysql"
@@ -151,12 +152,12 @@ func (i Item) GetDpsModifier() (float64, error) {
 	typeModifier := 0.0
 	// Is a One-Handed Weapon
 	if *i.Subclass == 0 || *i.Subclass == 4 || *i.Subclass == 13 || *i.Subclass == 15 || *i.Subclass == 7 {
-		typeModifier = 0.64
+		typeModifier = 0.58
 	}
 
 	// Is a Two-Handed Weapon
 	if *i.Subclass == 1 || *i.Subclass == 5 || *i.Subclass == 6 || *i.Subclass == 8 || *i.Subclass == 10 || *i.Subclass == 17 {
-		typeModifier = 0.80
+		typeModifier = 0.85
 	}
 
 	// Ranged Weapons
@@ -172,15 +173,7 @@ func (i Item) GetDpsModifier() (float64, error) {
 	qualityModifier := 1.0
 
 	// Add the quality modifier for the DPS calculation
-	if *i.Quality == 2 {
-		qualityModifier = 1.25
-	}
-	if *i.Quality == 3 {
-		qualityModifier = 1.38
-	}
-	if *i.Quality == 4 {
-		qualityModifier = 1.5
-	}
+	qualityModifier = config.QualityModifiers[*i.Quality]
 
 	if typeModifier == 0 {
 		return 0, fmt.Errorf("Item subclass is not a weapon %v", *i.Subclass)
@@ -221,17 +214,14 @@ func (item *Item) ScaleDPS(oldLevel, level int) (float64, error) {
 		return 0.0, err
 	}
 
-	scalingFactor := math.Pow(float64(level)/float64(oldLevel), 1.1)
+	scalingFactor := math.Pow(float64(level)/float64(oldLevel), 1.012)
 
 	dps := modifier * float64(level) * scalingFactor
 	adjDps := (dps * (*item.Delay / 1000) / 100)
 
 	//(((Y8*Y4)/100))*((100 - Y5)) Forumula from Weapon Item Genertor
-	minimum := adjDps * float64(100-(rand.IntN(25)+22))
-	maximum := adjDps * float64(100+(rand.IntN(25)+28))
-
-	minimum = math.Ceil(minimum)
-	maximum = math.Ceil(maximum)
+	minimum := adjDps * float64(100-(rand.IntN(15)+22))
+	maximum := adjDps * float64(100+(rand.IntN(15)+28))
 
 	// If the weapon has secondary damage, scale that as well based on the ratio of the primary damage
 	if *item.MinDmg2 != 0 && *item.MaxDmg2 != 0 {
@@ -240,6 +230,9 @@ func (item *Item) ScaleDPS(oldLevel, level int) (float64, error) {
 		minimum2 := ratioMin * float64(minimum)
 		maximum2 := ratioMax * float64(maximum)
 
+		minimum2 = math.Ceil(minimum2)
+		maximum2 = math.Ceil(maximum2)
+
 		item.MinDmg2 = &minimum2
 		item.MaxDmg2 = &maximum2
 
@@ -247,6 +240,9 @@ func (item *Item) ScaleDPS(oldLevel, level int) (float64, error) {
 		minimum = minimum - float64(minimum2)*0.85
 		maximum = maximum - float64(maximum2)*0.85
 	}
+
+	minimum = math.Ceil(minimum)
+	maximum = math.Ceil(maximum)
 
 	// item.MinDmg1 = &minimum
 	// var min int = int(minimum)
@@ -444,7 +440,7 @@ func (item *Item) ScaleItem(itemLevel int, itemQuality int) (bool, error) {
 	*item.ItemLevel = itemLevel
 
 	// if an item quality is being forced than use it intead
-	if itemQuality != 0 {
+	if *item.Quality < itemQuality {
 		*item.Quality = itemQuality
 	}
 
@@ -469,6 +465,7 @@ func (item *Item) ScaleItem(itemLevel int, itemQuality int) (bool, error) {
 
 		if len(convStats) != 0 {
 			item.UpdateField(fmt.Sprintf("SpellId%v", i+1), 0)
+			item.UpdateField(fmt.Sprintf("SpellTrigger%v", i+1), 0)
 		}
 
 		allSpellStats = append(allSpellStats, convStats...)
@@ -859,6 +856,9 @@ func ItemToSql(item Item, reqLevel int, difficulty int) string {
 	  spellid_1 = %v,
 	  spellid_2 = %v,
 	  spellid_3 = %v,
+	  spelltrigger_1 = %v,
+	  spelltrigger_2 = %v,
+	  spelltrigger_3 = %v,
 	  socketColor_1 = %v,
 	  socketContent_1 = %v,
 	  socketColor_2 = %v,
@@ -872,11 +872,12 @@ func ItemToSql(item Item, reqLevel int, difficulty int) string {
 	  SellPrice = FLOOR(100000 + (RAND() * 400001)),
 	  Armor = %v
 	WHERE entry = %v;
-	`, *item.Quality, name, *item.ItemLevel, reqLevel, *item.MinDmg1, *item.MaxDmg1, *item.MinDmg2, *item.MaxDmg2, *item.StatsCount,
+	`, *item.Quality, strings.ReplaceAll(name, "'", "''"), *item.ItemLevel, reqLevel, *item.MinDmg1, *item.MaxDmg1, *item.MinDmg2, *item.MaxDmg2, *item.StatsCount,
 		*item.StatType1, *item.StatValue1, *item.StatType2, *item.StatValue2, *item.StatType3, *item.StatValue3, *item.StatType4, *item.StatValue4,
 		*item.StatType5, *item.StatValue5, *item.StatType6, *item.StatValue6, *item.StatType7, *item.StatValue7, *item.StatType8, *item.StatValue8,
-		*item.StatType9, *item.StatValue9, *item.StatType10, *item.StatValue10, *item.SpellId1, *item.SpellId2, *item.SpellId3, *item.SocketColor1, *item.SocketContent1,
-		*item.SocketColor2, *item.SocketContent2, *item.SocketColor3, *item.SocketContent3, *item.SocketBonus, *item.GemProperties,
+		*item.StatType9, *item.StatValue9, *item.StatType10, *item.StatValue10, *item.SpellId1, *item.SpellId2, *item.SpellId3, *item.SpellTrigger1, *item.SpellTrigger2,
+		*item.SpellTrigger3, *item.SocketColor1, *item.SocketContent1, *item.SocketColor2, *item.SocketContent2,
+		*item.SocketColor3, *item.SocketContent3, *item.SocketBonus, *item.GemProperties,
 		375, 68, *item.Armor, entryBump+item.Entry)
 
 	return fmt.Sprintf("%s %s \n %s \n %s", spellList, delete, clone, update)
