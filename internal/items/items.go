@@ -487,6 +487,10 @@ func (item *Item) ScaleItem(itemLevel int, itemQuality int) (bool, error) {
 		stat.Value = scaleStatv3(scaleParams)
 		// stat.Value = scaleStatv2(itemLevel, *item.InventoryType, *item.Quality, stat.Percent, config.StatModifiers[statId])
 
+		if statId == 45 && stat.Value < 100 {
+			stat.Value = int(math.Round(float64(stat.Value) * 2.3785))
+		}
+
 		log.Printf(">>>>>> Scaled : StatId: %v Type: %s Orig: %v - New Value: %v Percent: %v", statId, stat.Type, origValue, stat.Value, stat.Percent)
 	}
 
@@ -740,20 +744,10 @@ func scaleStatv3(scaleParams StatScaleParams) int {
 
 func ItemToSql(item Item, reqLevel int, difficulty int) string {
 
-	var name string
+	var name string = item.Name
 
 	entryBump := 20000000
 	spellBump := 30000000
-	name = "Mythic " + item.Name
-
-	if difficulty == 4 {
-		entryBump = 21000000
-		name = "Legendary " + item.Name
-	}
-	if difficulty == 5 {
-		name = "Godlike " + item.Name
-		entryBump = 22000000
-	}
 
 	if *item.Quality == 4 {
 		spellBump = 31000000

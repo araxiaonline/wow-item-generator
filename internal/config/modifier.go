@@ -34,7 +34,7 @@ var QualityModifiers = map[int]float64{
 	2: 1.0, // UnCommon
 	3: 1.2, // Rare
 	4: 1.4, // Epic
-	5: 5.0, // Legendary
+	5: 1.8, // Legendary
 }
 
 var MaterialModifiers = map[int]float64{

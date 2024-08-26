@@ -164,7 +164,10 @@ func main() {
 			// check if it is the final boss
 			if mysql.IsFinalBoss(lookupItem.CreatureId) {
 				finalBonus = 5
-				quality = 5
+
+				if *difficulty >= 4 {
+					quality = 5
+				}
 			}
 			// if the item is from a boss fight
 			if lookupItem.DungeonLevel < 60 {
