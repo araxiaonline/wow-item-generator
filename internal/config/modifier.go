@@ -11,7 +11,7 @@ var InvTypeModifiers = map[int]float64{
 	9:  0.437, // Wrists
 	10: 0.625, // Hands
 	11: 1.0,   // Finger
-	13: 0.42,  // One-Hand (not to confuse with Off-Hand = 22)
+	13: 0.62,  // One-Hand (not to confuse with Off-Hand = 22)
 	14: 0.66,  // Shield (class = armor, not weapon even if in weapon slot)
 	15: 0.32,  // Ranged (Bows) (see also Ranged right = 26)
 	16: 0.66,  // Back
@@ -19,7 +19,7 @@ var InvTypeModifiers = map[int]float64{
 	18: 1.0,   // Bag (assuming same as Chest for simplicity)
 	19: 1.0,   // Tabard (assuming same as Chest for simplicity)
 	20: 1.0,   // Robe (see also Chest = 5)
-	21: 0.85,  // Main hand
+	21: 0.80,  // Main hand
 	22: 0.42,  // Off Hand weapons (see also One-Hand = 13)
 	23: 0.56,  // Held in Off-Hand (class = armor, not weapon even if in weapon slot)
 	24: 1.0,   // Ammo (assuming same as Chest for simplicity)
@@ -95,36 +95,36 @@ var StatModifiers = map[int]float64{
 var ScalingFactor = map[int]float64{
 	0:  1.1,  // ITEM_MOD_MANA
 	1:  1.5,  // ITEM_MOD_HEALTH
-	3:  1.2,  // ITEM_MOD_AGILITY
-	4:  1.2,  // ITEM_MOD_STRENGTH
-	5:  1.2,  // ITEM_MOD_INTELLECT
-	6:  1.3,  // ITEM_MOD_SPIRIT
-	7:  1.85, // ITEM_MOD_STAMINA
-	12: 1.1,  // ITEM_MOD_DEFENSE_SKILL_RATING
-	13: 1.1,  // ITEM_MOD_DODGE_RATING
-	14: 1.1,  // ITEM_MOD_PARRY_RATING
+	3:  1.30, // ITEM_MOD_AGILITY
+	4:  1.30, // ITEM_MOD_STRENGTH
+	5:  1.30, // ITEM_MOD_INTELLECT
+	6:  1.30, // ITEM_MOD_SPIRIT
+	7:  1.75, // ITEM_MOD_STAMINA
+	12: 1.2,  // ITEM_MOD_DEFENSE_SKILL_RATING
+	13: 1.15, // ITEM_MOD_DODGE_RATING
+	14: 1.15, // ITEM_MOD_PARRY_RATING
 	15: 1.1,  // ITEM_MOD_BLOCK_RATING
 	16: 1.1,  // ITEM_MOD_HIT_MELEE_RATING
 	17: 1.1,  // ITEM_MOD_HIT_RANGED_RATING
 	18: 1.1,  // ITEM_MOD_HIT_SPELL_RATING
 	19: 1.2,  // ITEM_MOD_CRIT_MELEE_RATING
 	20: 1.2,  // ITEM_MOD_CRIT_RANGED_RATING
-	21: 1.2,  // ITEM_MOD_CRIT_SPELL_RATING
+	21: 1.3,  // ITEM_MOD_CRIT_SPELL_RATING
 	22: 1.3,  // ITEM_MOD_HIT_TAKEN_MELEE_RATING
 	23: 1.3,  // ITEM_MOD_HIT_TAKEN_RANGED_RATING
 	24: 1.3,  // ITEM_MOD_HIT_TAKEN_SPELL_RATING
 	25: 1.3,  // ITEM_MOD_CRIT_TAKEN_MELEE_RATING
 	26: 1.3,  // ITEM_MOD_CRIT_TAKEN_RANGED_RATING
 	27: 1.3,  // ITEM_MOD_CRIT_TAKEN_SPELL_RATING
-	28: 1.15, // ITEM_MOD_HASTE_MELEE_RATING
-	29: 1.15, // ITEM_MOD_HASTE_RANGED_RATING
-	30: 1.15, // ITEM_MOD_HASTE_SPELL_RATING
-	31: 1.1,  // ITEM_MOD_HIT_RATING
-	32: 1.25, // ITEM_MOD_CRIT_RATING
+	28: 1.25, // ITEM_MOD_HASTE_MELEE_RATING
+	29: 1.25, // ITEM_MOD_HASTE_RANGED_RATING
+	30: 1.25, // ITEM_MOD_HASTE_SPELL_RATING
+	31: 1.15, // ITEM_MOD_HIT_RATING
+	32: 1.30, // ITEM_MOD_CRIT_RATING
 	33: 1.3,  // ITEM_MOD_HIT_TAKEN_RATING
 	34: 1.3,  // ITEM_MOD_CRIT_TAKEN_RATING
 	35: 1.0,  // ITEM_MOD_RESILIENCE_RATING
-	36: 1.15, // ITEM_MOD_HASTE_RATING
+	36: 1.25, // ITEM_MOD_HASTE_RATING
 	37: 0.8,  // ITEM_MOD_EXPERTISE_RATING
 	38: 1.45, // ITEM_MOD_ATTACK_POWER
 	39: 1.45, // ITEM_MOD_RANGED_ATTACK_POWER
@@ -133,7 +133,7 @@ var ScalingFactor = map[int]float64{
 	42: 1.4,  // ITEM_MOD_SPELL_DAMAGE_DONE
 	43: 1.3,  // ITEM_MOD_MANA_REGENERATION
 	44: 1.1,  // ITEM_MOD_ARMOR_PENETRATION_RATING
-	45: 1.5,  // ITEM_MOD_SPELL_POWER
+	45: 1.6,  // ITEM_MOD_SPELL_POWER
 	46: 1.3,  // ITEM_MOD_HEALTH_REGEN
 	47: 1.0,  // ITEM_MOD_SPELL_PENETRATION
 	48: 1.0,  // ITEM_MOD_BLOCK_VALUE

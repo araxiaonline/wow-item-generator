@@ -8,6 +8,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/araxiaonline/endgame-item-generator/internal/config"
 	"github.com/araxiaonline/endgame-item-generator/internal/db/mysql"
 	"github.com/araxiaonline/endgame-item-generator/internal/db/sqlite"
 	"github.com/araxiaonline/endgame-item-generator/internal/items"
@@ -23,7 +24,6 @@ func main() {
 	// database.models.Connect()
 
 	debug := flag.Bool("debug", false, "Enable verbose logging inside generator")
-	itemLevel := flag.Int("ilvl", 300, "Specify the item level to start scaling from, expansion and difficulty modifiers scale up.")
 	difficulty := flag.Int("difficulty", 3, "set the difficulty of the dungeon, defaults to 3 (mythic) 4 (legendary) 5 (ascendant)")
 	// levelUp := flag.Bool("levelUp", false, "Boss items require higher +1 level to equip, defaults to false")
 	baselevel := flag.Int("baselevel", 80, "set the base level for items to be used, defaults to 80 this is required for levelUp flag")
@@ -34,14 +34,19 @@ func main() {
 		os.Exit(1)
 	}
 
-	if itemLevel == nil || *itemLevel < 280 {
-		log.Fatal("item level must be greater than 280")
-		os.Exit(1)
-	}
-
 	if baselevel == nil || *baselevel < 0 {
 		log.Fatal("base level must be greater than 80")
 		os.Exit(1)
+	}
+
+	var itemLevel *int = new(int)
+	switch *difficulty {
+	case 3:
+		*itemLevel = config.MythicItemLevelStart
+	case 4:
+		*itemLevel = config.LegendaryItemLevelStart
+	case 5:
+		*itemLevel = config.AscendantItemLevelStart
 	}
 
 	if *debug {
@@ -68,13 +73,35 @@ func main() {
 		log.Fatal(err)
 	}
 
+	// Get all rare items int the acore_world.item_template that are rare or higher quality
 	rareItems, err := mysqlDb.GetRarePlusItems(0, 0)
 	if err != nil {
 		log.Fatal(err)
 	}
 
+	// do scaling and write sql for all items that are processed from the rareItems list
 	for itr, dbItem := range rareItems {
+
+		// convert from a dbModel item to Item entity
 		item := items.ItemFromDbItem(dbItem)
+
+		// the lookup Item is a check to see if the item comes from a dungeon on higher difficulties (4,5) we only process dungeon items
+		lookupItem, err := sqliteDb.GetItemFromDungeon(item.Entry)
+		if err != nil {
+			if !strings.Contains(err.Error(), "no rows in result set") {
+				log.Printf("failed to lookup item %v from dungeon: %v", item.Entry, err)
+			}
+		}
+		log.Printf("Lookup %v", lookupItem)
+		// skip items not from a dungeon on higher difficulties
+		if *difficulty > 3 {
+			if lookupItem.Entry == 0 {
+				log.Printf("Item %v Entry: %v is not from a dungeon\n", item.Name, item.Entry)
+				continue
+			} else {
+				log.Printf("Item %v Entry: %v is from a dungeon\n", item.Name, item.Entry)
+			}
+		}
 
 		// if it is a rare item then we need to scale it up to epic
 		if *item.Quality < 5 {
@@ -83,45 +110,47 @@ func main() {
 
 		statsList, err := item.GetStatList()
 		if err != nil {
-			log.Fatal(err)
-			continue
-		}
-
-		log.Printf("Item: %v Entry: %v StatsList: %v\n", item.Name, item.Entry, statsList)
-		rndItem, err := sqliteDb.GetRandItem(*item.Class, *item.Subclass, statsList, false)
-		if err != nil {
 			log.Print(err)
 			continue
 		}
 
-		if rndItem == (sqlite.HighLevelItem{}) {
-			log.Fatalf("Failed to get random item for %v Entry: %v\n", item.Name, item.Entry)
-		}
+		log.Printf("Item: %v Entry: %v StatsList: %v\n", item.Name, item.Entry, statsList)
 
-		log.Printf("Random Item: %v Entry: %v\n", rndItem.Name, rndItem.Entry)
+		var highLevelItem mysql.DbItem
+		if *difficulty == 3 {
+			rndItem, err := sqliteDb.GetRandItem(*item.Class, *item.Subclass, statsList, false)
+			if err != nil {
+				log.Print(err)
+				continue
+			}
 
-		highLevelItem, err := mysqlDb.GetItem(rndItem.Entry)
-		if err != nil {
-			log.Fatal(err)
-			continue
-		}
+			if rndItem == (sqlite.HighLevelItem{}) {
+				log.Fatalf("Failed to get random item for %v Entry: %v\n", item.Name, item.Entry)
+			}
 
-		// Take the high level item that has been selected for stats and remap to current item
+			log.Printf("Random Item: %v Entry: %v\n", rndItem.Name, rndItem.Entry)
 
-		// Now apply logic build out the different difficulties and item levels based on source of item
-		lookupItem, err := sqliteDb.GetItemFromDungeon(item.Entry)
-		if err != nil {
-			if !strings.Contains(err.Error(), "no rows in result set") {
-				log.Fatalf("failed to lookup item %v from dungeon: %v", item.Entry, err)
+			// Take the high level item that has been selected for stats and remap to current item
+			highLevelItem, err = mysqlDb.GetItem(rndItem.Entry)
+			if err != nil {
+				log.Fatal(err)
+				continue
+			}
+		} else {
+
+			highLevelItem, err = mysqlDb.GetByNameAndDifficulty(item.Name, *difficulty-1)
+			if err != nil {
+				log.Println(err)
+				continue
 			}
 		}
 
-		// Start at the item level and scale up based details about the source of the item
+		// difficulty is used to tweak things in the scaling proces specifically modifiers so stats are not inflated twice by quality multiples
+		item.SetDifficulty(*difficulty)
 
-		// if the item is from a dungeon and not a boss and is a craftable / world item so set to base level
+		// if the item is not from a dungeon and we made it here, then just scale to mythic which can be used for weekly loot chests or new recipes.
 		if lookupItem.Entry == 0 {
-
-			Scale(highLevelItem, &item, *itemLevel, 3)
+			Scale(highLevelItem, &item, *itemLevel, *item.Quality)
 			fmt.Print(items.ItemToSql(item, *baselevel, *difficulty))
 			continue
 		}
@@ -129,80 +158,92 @@ func main() {
 		// if the item is from a dungeon and not a boss item
 		if lookupItem.CreatureId == 0 {
 
-			if lookupItem.DungeonLevel < 60 {
-				Scale(highLevelItem, &item, *itemLevel+5, 3)
+			if lookupItem.DungeonLevel < 60 && lookupItem.Expansion == 0 {
+				Scale(highLevelItem, &item, *itemLevel+5, *item.Quality)
 				fmt.Print(items.ItemToSql(item, *baselevel, *difficulty))
 			}
 
 			if lookupItem.DungeonLevel == 60 && lookupItem.Expansion == 0 {
-				Scale(highLevelItem, &item, *itemLevel+10, 3)
-				fmt.Print(items.ItemToSql(item, *baselevel+2, *difficulty))
+				Scale(highLevelItem, &item, *itemLevel+10, *item.Quality)
+				fmt.Print(items.ItemToSql(item, *baselevel, *difficulty))
 			}
 
 			if lookupItem.DungeonLevel < 70 && lookupItem.Expansion == 1 {
-				Scale(highLevelItem, &item, *itemLevel+7, 3)
+				Scale(highLevelItem, &item, *itemLevel+7, *item.Quality)
 				fmt.Print(items.ItemToSql(item, *baselevel, *difficulty))
 			}
 
 			if lookupItem.DungeonLevel == 70 && lookupItem.Expansion == 1 {
-				Scale(highLevelItem, &item, *itemLevel+10, 3)
-				fmt.Print(items.ItemToSql(item, *baselevel+2, *difficulty))
+				Scale(highLevelItem, &item, *itemLevel+10, *item.Quality)
+				fmt.Print(items.ItemToSql(item, *baselevel, *difficulty))
 			}
 
 			if lookupItem.DungeonLevel < 80 && lookupItem.Expansion == 2 {
-				Scale(highLevelItem, &item, *itemLevel+7, 3)
+				Scale(highLevelItem, &item, *itemLevel+7, *item.Quality)
+				fmt.Print(items.ItemToSql(item, *baselevel, *difficulty))
 			}
 
 			if lookupItem.DungeonLevel == 80 && lookupItem.Expansion == 2 {
-				Scale(highLevelItem, &item, *itemLevel+10, 3)
+				Scale(highLevelItem, &item, *itemLevel+10, *item.Quality)
 				fmt.Print(items.ItemToSql(item, *baselevel+2, *difficulty))
 			}
 		} else {
 
 			var finalBonus int = 0
 			var quality int = 4
-			// check if it is the final boss
+
+			// adjust qualities and levels required based on power and difficulty
 			if mysql.IsFinalBoss(lookupItem.CreatureId) {
+				fmt.Printf("-- Final Boss Item: %v Entry: %v difficulty %v\n", item.Name, item.Entry, *difficulty)
 				finalBonus = 5
 
 				if *difficulty >= 4 {
 					quality = 5
 				}
 			}
+
+			var reqLevel int
+			if *difficulty == 4 || *difficulty == 5 {
+				reqLevel = *baselevel + 5
+			} else {
+				reqLevel = *baselevel + 2
+			}
+
 			// if the item is from a boss fight
-			if lookupItem.DungeonLevel < 60 {
+			if lookupItem.DungeonLevel < 60 && lookupItem.Expansion == 0 {
 				Scale(highLevelItem, &item, *itemLevel+9+finalBonus, quality)
-				fmt.Print(items.ItemToSql(item, *baselevel, *difficulty))
+				fmt.Print(items.ItemToSql(item, reqLevel-1, *difficulty))
 			}
 
 			if lookupItem.DungeonLevel == 60 && lookupItem.Expansion == 0 {
-				Scale(highLevelItem, &item, *itemLevel+17+finalBonus, quality)
-				fmt.Print(items.ItemToSql(item, *baselevel+2, *difficulty))
+				Scale(highLevelItem, &item, *itemLevel+23+finalBonus, quality)
+				fmt.Print(items.ItemToSql(item, reqLevel, *difficulty))
 			}
 
 			if lookupItem.DungeonLevel < 70 && lookupItem.Expansion == 1 {
 				Scale(highLevelItem, &item, *itemLevel+10+finalBonus, quality)
-				fmt.Print(items.ItemToSql(item, *baselevel, *difficulty))
+				fmt.Print(items.ItemToSql(item, reqLevel-1, *difficulty))
 			}
 
 			if lookupItem.DungeonLevel == 70 && lookupItem.Expansion == 1 {
-				Scale(highLevelItem, &item, *itemLevel+19+finalBonus, quality)
-				fmt.Print(items.ItemToSql(item, *baselevel+2, *difficulty))
+				Scale(highLevelItem, &item, *itemLevel+23+finalBonus, quality)
+				fmt.Print(items.ItemToSql(item, reqLevel, *difficulty))
 			}
 
 			if lookupItem.DungeonLevel < 80 && lookupItem.Expansion == 2 {
 				Scale(highLevelItem, &item, *itemLevel+12+finalBonus, quality)
+				fmt.Print(items.ItemToSql(item, reqLevel-1, *difficulty))
 			}
 
 			if lookupItem.DungeonLevel == 80 && lookupItem.Expansion == 2 {
-				Scale(highLevelItem, &item, *itemLevel+22+finalBonus, quality)
-				fmt.Print(items.ItemToSql(item, *baselevel+3, *difficulty))
+				Scale(highLevelItem, &item, *itemLevel+25+finalBonus, quality)
+				fmt.Print(items.ItemToSql(item, reqLevel, *difficulty))
 			}
 		}
 
 		fmt.Printf("\n -- Item Updated: %v Entry: %v\n", item.Name, item.Entry)
 		if itr >= 300 {
-			// os.exit(0)
+			// os.Exit(0)
 		}
 	}
 }

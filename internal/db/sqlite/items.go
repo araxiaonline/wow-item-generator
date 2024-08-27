@@ -52,12 +52,12 @@ func (db *SqlLite) GetRandItem(class, subclass int, statsList []int, end bool) (
 
 	// if we have a stats_list try to match by that first, if not then just select a random item from the class and subclass
 	if len(statsList) == 0 {
-		sql = "SELECT * FROM items WHERE class = ? and subclass = ? ORDER BY RANDOM() LIMIT 1"
+		sql = "SELECT * FROM items WHERE class = ? and subclass = ? and itemLevel >= 240  ORDER BY RANDOM() LIMIT 1"
 		err = db.Get(&rndItem, sql, class, subclass)
 	} else {
 		// convert the array of ints to a commas string for lookup
 		statsTxt = intSliceToString(statsList)
-		sql = "SELECT * FROM items WHERE class = ? and subclass = ? and stats_list like ? ORDER BY RANDOM() LIMIT 1"
+		sql = "SELECT * FROM items WHERE class = ? and subclass = ? and stats_list and itemLevel >= 240 like ? ORDER BY RANDOM() LIMIT 1"
 		err = db.Get(&rndItem, sql, class, subclass, statsTxt+"%")
 	}
 

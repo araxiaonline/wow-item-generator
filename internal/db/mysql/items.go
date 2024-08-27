@@ -1,7 +1,11 @@
 package mysql
 
 import (
+	"errors"
 	"fmt"
+	"log"
+
+	"github.com/araxiaonline/endgame-item-generator/internal/config"
 )
 
 type DbItem struct {
@@ -80,6 +84,42 @@ func (db *MySqlDb) GetItem(entry int) (DbItem, error) {
 	return item, nil
 }
 
+// Look up a mythic item by name
+func (db *MySqlDb) GetByNameAndDifficulty(name string, difficulty int) (DbItem, error) {
+	item := DbItem{}
+	var min, max int = 0, 0
+	if difficulty == 0 {
+		return DbItem{}, errors.New("difficulty cannot be 0")
+	}
+
+	if difficulty == 3 {
+		min = config.MythicItemLevelStart
+		max = config.MythicItemLevelEnd
+	}
+
+	if difficulty == 4 {
+		min = config.LegendaryItemLevelStart
+		max = config.LegendaryItemLevelEnd
+	}
+
+	if difficulty == 5 {
+		min = config.AscendantItemLevelStart
+		max = config.AscendantItemLevelEnd
+	}
+
+	// though levels are flexible I am going to assume here that mythics are between 300 to 340 these can be overriden in config
+	sql := "SELECT " + GetItemFields("") + " FROM item_template WHERE name like ? and ItemLevel >= ? and ItemLevel < ? LIMIT 1"
+	name = "%" + name
+	err := db.Get(&item, sql, name, min, max)
+	if err != nil {
+		log.Printf("failed to get item: %v sql: %v", err, fmt.Sprintf("SELECT * FROM item_template WHERE name like %v and ItemLevel >= %v and ItemLevel < %v LIMIT 1", name, min, max))
+		return DbItem{}, err
+	}
+
+	return item, nil
+}
+
+// returns all items from item_template where the quality is between rare and legendary items
 func (db *MySqlDb) GetRarePlusItems(limit, offset int) ([]DbItem, error) {
 	items := []DbItem{}
 	sql := "SELECT " + GetItemFields("") + " FROM item_template WHERE Quality >= 3 and Quality <= 5 and (class = 2 or class = 4) "

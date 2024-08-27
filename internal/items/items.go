@@ -9,6 +9,7 @@ import (
 	"reflect"
 	"slices"
 	"strings"
+	"time"
 
 	"github.com/araxiaonline/endgame-item-generator/internal/config"
 	"github.com/araxiaonline/endgame-item-generator/internal/db/mysql"
@@ -24,6 +25,7 @@ type Item struct {
 	StatsMap      map[int]*ItemStat
 	ConvStatCount int
 	Spells        []spells.Spell
+	Difficulty    int
 }
 
 // Use for storing item stats for all stats that will be scaled.
@@ -48,6 +50,14 @@ func ItemFromDbItem(dbItem mysql.DbItem) Item {
 	return Item{
 		DbItem: dbItem,
 	}
+}
+
+func (item Item) GetDifficulty() int {
+	return item.Difficulty
+}
+
+func (item *Item) SetDifficulty(difficulty int) {
+	item.Difficulty = difficulty
 }
 
 // Get the primary stat for an item (strength, agility, intellect, spirit, stamina)
@@ -472,6 +482,7 @@ func (item *Item) ScaleItem(itemLevel int, itemQuality int) (bool, error) {
 	}
 
 	allStats := item.GetStatPercents(allSpellStats)
+
 	for statId, stat := range allStats {
 		origValue := stat.Value
 
@@ -484,12 +495,14 @@ func (item *Item) ScaleItem(itemLevel int, itemQuality int) (bool, error) {
 			StatValue:    stat.Value,
 		}
 
-		stat.Value = scaleStatv3(scaleParams)
+		stat.Value = scaleStatv3(scaleParams, item.GetDifficulty())
 		// stat.Value = scaleStatv2(itemLevel, *item.InventoryType, *item.Quality, stat.Percent, config.StatModifiers[statId])
 
-		if statId == 45 && stat.Value < 100 {
+		if statId == STAT.SpellPower && stat.Value < 100 {
 			stat.Value = int(math.Round(float64(stat.Value) * 2.3785))
 		}
+
+		correctSpellAttackPower(item, allStats)
 
 		log.Printf(">>>>>> Scaled : StatId: %v Type: %s Orig: %v - New Value: %v Percent: %v", statId, stat.Type, origValue, stat.Value, stat.Percent)
 	}
@@ -718,7 +731,7 @@ func scaleStatv2(scaleParams StatScaleParams) int {
 	return int(math.Ceil(scaledValue))
 }
 
-func scaleStatv3(scaleParams StatScaleParams) int {
+func scaleStatv3(scaleParams StatScaleParams, difficulty int) int {
 	// Calculate the quality and inventory type modifiers
 	qualityModifier := config.QualityModifiers[scaleParams.Quality]
 	// invTypeModifier := config.InvTypeModifiers[scaleParams.ItemType]
@@ -727,12 +740,20 @@ func scaleStatv3(scaleParams StatScaleParams) int {
 	baseScalingFactor := config.ScalingFactor[scaleParams.StatTypeId]
 
 	// Calculate the level ratio (new item level / original item level)
-	levelRatio := float64(scaleParams.NewItemLevel) / float64(scaleParams.ItemLevel)
+	levelRatio := float64(scaleParams.NewItemLevel) * 1.0795 / float64(scaleParams.ItemLevel)
 
 	// Apply the comprehensive scaling formula
 	scaledValue := float64(scaleParams.StatValue) *
-		math.Pow(levelRatio, baseScalingFactor) *
-		qualityModifier
+		math.Pow(levelRatio, baseScalingFactor)
+
+	if difficulty == 3 {
+		scaledValue = scaledValue * qualityModifier
+	} else {
+		// Apply the legendary modifier only
+		if scaleParams.Quality == 5 {
+			scaledValue = scaledValue * 1.25
+		}
+	}
 
 	// // Log the details for debugging
 	// log.Printf("------- scaledValue: %v, levelRatio: %v, qualityModifier: %v, baseScalingFactor: %v",
@@ -742,7 +763,43 @@ func scaleStatv3(scaleParams StatScaleParams) int {
 	return int(math.Ceil(scaledValue))
 }
 
+// This will copy higher value of spell power and attack powers into one unit.  This is to fix items that have both
+func correctSpellAttackPower(item *Item, allStats map[int]*ItemStat) {
+	// do some manual corrections for stats oddly getting attack power and spell power
+	itemStats, err := item.GetStatList()
+	if err != nil {
+		log.Printf("Failed to get stat list: %v not attempting to fix stats", err)
+	}
+	if slices.Contains(itemStats, STAT.AttackPower) && slices.Contains(itemStats, STAT.SpellPower) {
+
+		// if the Attack power is greater than spell power then add it spell power and remove spell power
+		if allStats[STAT.AttackPower] != nil && allStats[STAT.SpellPower] != nil {
+			if allStats[STAT.AttackPower].Value > allStats[STAT.SpellPower].Value {
+				allStats[STAT.AttackPower].Value += allStats[STAT.SpellPower].Value
+				delete(allStats, STAT.SpellPower)
+			} else {
+				allStats[STAT.SpellPower].Value += allStats[STAT.AttackPower].Value
+				delete(allStats, STAT.AttackPower)
+			}
+		}
+	}
+	if slices.Contains(itemStats, STAT.RangedAttackPower) && slices.Contains(itemStats, STAT.SpellPower) {
+
+		if allStats[STAT.RangedAttackPower] != nil && allStats[STAT.SpellPower] != nil {
+			if allStats[STAT.RangedAttackPower].Value > allStats[STAT.SpellPower].Value {
+				allStats[STAT.RangedAttackPower].Value += allStats[STAT.SpellPower].Value
+				delete(allStats, STAT.SpellPower)
+			} else {
+				allStats[STAT.SpellPower].Value += allStats[STAT.RangedAttackPower].Value
+				delete(allStats, STAT.RangedAttackPower)
+			}
+		}
+	}
+}
+
 func ItemToSql(item Item, reqLevel int, difficulty int) string {
+
+	fmt.Printf("-- Required level: %v\n", reqLevel)
 
 	var name string = item.Name
 
@@ -755,6 +812,15 @@ func ItemToSql(item Item, reqLevel int, difficulty int) string {
 	if *item.Quality == 5 {
 		spellBump = 32000000
 	}
+
+	if difficulty == 4 {
+		entryBump = 21000000
+	}
+	if difficulty == 5 {
+		entryBump = 22000000
+	}
+
+	name = getRandomWord(difficulty) + " " + name
 
 	spellList := ""
 	if len(item.Spells) > 0 {
@@ -875,4 +941,26 @@ func ItemToSql(item Item, reqLevel int, difficulty int) string {
 		375, 68, *item.Armor, entryBump+item.Entry)
 
 	return fmt.Sprintf("%s %s \n %s \n %s", spellList, delete, clone, update)
+}
+
+func getRandomWord(difficulty int) string {
+	mythic := []string{"Mythic", "Powerful", "Stalwart", "Venerated", "Mighty", "Unyielding"}
+	legendary := []string{"Legendary", "Fabled", "Exalted", "Magnificent", "Pristine", "Supreme", "Glorious"}
+	ascendant := []string{"Ascendant", "Godlike", "Celestial", "Transcendant", "Divine", "Omnipotent", "Demonforged", "Immortal", "Omniscient", "Ethereal"}
+
+	r := rand.New(rand.NewPCG(uint64(time.Now().UnixNano()), 2))
+
+	switch difficulty {
+	case 3: // Mythic
+		randomIndex := r.IntN(len(mythic))
+		return mythic[randomIndex]
+	case 4: // Legendary
+		randomIndex := r.IntN(len(legendary))
+		return legendary[randomIndex]
+	case 5: // Ascendant
+		randomIndex := r.IntN(len(ascendant))
+		return ascendant[randomIndex]
+	default:
+		return ""
+	}
 }
