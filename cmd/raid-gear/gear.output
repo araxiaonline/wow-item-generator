@@ -1,0 +1,981 @@
+<<<< Items to Process: 88 >>>>>
+Item: Felheart Gloves Entry: 16805 lookup up Class: 4 Subclass: 1
+<<<< High Level Items that match class Type: Healer 18 >>>>>
+New Item: Felheart Gloves Entry: 16805 
+ItemStat1: Type: 5 (INTELLECT) Value: 321
+ItemStat2: Type: 6 (SPIRIT) Value: 174
+ItemStat3: Type: 7 (STAMINA) Value: 422
+ItemStat4: Type: 32 (CRIT_RATING) Value: 172
+ItemStat5: Type: 45 (SPELL_POWER) Value: 155
+ItemStat6: Type: 0 (MANA) Value: 0
+ItemStat7: Type: 0 (MANA) Value: 0
+ItemStat8: Type: 0 (MANA) Value: 0
+Item: Gauntlets of Might Entry: 16863 lookup up Class: 4 Subclass: 4
+<<<< High Level Items that match class Type: Tank 5 >>>>>
+New Item: Gauntlets of Might Entry: 16863 
+ItemStat1: Type: 7 (STAMINA) Value: 407
+ItemStat2: Type: 4 (STRENGTH) Value: 481
+ItemStat3: Type: 31 (HIT_RATING) Value: 62
+ItemStat4: Type: 12 (DEFENSE_SKILL_RATING) Value: 63
+ItemStat5: Type: 0 (MANA) Value: 0
+ItemStat6: Type: 0 (MANA) Value: 0
+ItemStat7: Type: 0 (MANA) Value: 0
+ItemStat8: Type: 0 (MANA) Value: 0
+Item: Crimson Shocker Entry: 17077 lookup up Class: 2 Subclass: 19
+<<<< High Level Items that match class Type: Mage 1 >>>>>
+New Item: Crimson Shocker Entry: 17077 
+ItemStat1: Type: 5 (INTELLECT) Value: 228
+ItemStat2: Type: 0 (MANA) Value: 0
+ItemStat3: Type: 0 (MANA) Value: 0
+ItemStat4: Type: 0 (MANA) Value: 0
+ItemStat5: Type: 0 (MANA) Value: 0
+ItemStat6: Type: 0 (MANA) Value: 0
+ItemStat7: Type: 0 (MANA) Value: 0
+ItemStat8: Type: 0 (MANA) Value: 0
+[32mFire Resistance Applied: Crimson Shocker gets 10 fire resistance (modifier: 0.32)[0m
+Item: Flamewaker Legplates Entry: 18861 lookup up Class: 4 Subclass: 4
+<<<< High Level Items that match class Type: Strength Melee 6 >>>>>
+New Item: Flamewaker Legplates Entry: 18861 
+ItemStat1: Type: 7 (STAMINA) Value: 584
+ItemStat2: Type: 4 (STRENGTH) Value: 431
+ItemStat3: Type: 13 (DODGE_RATING) Value: 95
+ItemStat4: Type: 0 (MANA) Value: 0
+ItemStat5: Type: 0 (MANA) Value: 0
+ItemStat6: Type: 0 (MANA) Value: 0
+ItemStat7: Type: 0 (MANA) Value: 0
+ItemStat8: Type: 0 (MANA) Value: 0
+[32mFire Resistance Applied: Flamewaker Legplates gets 22 fire resistance (modifier: 0.88)[0m
+Item: Helm of the Lifegiver Entry: 18870 lookup up Class: 4 Subclass: 3
+<<<< High Level Items that match class Type: Healer 7 >>>>>
+New Item: Helm of the Lifegiver Entry: 18870 
+ItemStat1: Type: 5 (INTELLECT) Value: 713
+ItemStat2: Type: 7 (STAMINA) Value: 365
+ItemStat3: Type: 6 (SPIRIT) Value: 204
+ItemStat4: Type: 45 (SPELL_POWER) Value: 415
+ItemStat5: Type: 0 (MANA) Value: 0
+ItemStat6: Type: 0 (MANA) Value: 0
+ItemStat7: Type: 0 (MANA) Value: 0
+ItemStat8: Type: 0 (MANA) Value: 0
+Item: Manastorm Leggings Entry: 18872 lookup up Class: 4 Subclass: 1
+<<<< High Level Items that match class Type: Healer 18 >>>>>
+New Item: Manastorm Leggings Entry: 18872 
+ItemStat1: Type: 43 (MANA_REGENERATION) Value: 200
+ItemStat2: Type: 7 (STAMINA) Value: 481
+ItemStat3: Type: 5 (INTELLECT) Value: 328
+ItemStat4: Type: 0 (MANA) Value: 0
+ItemStat5: Type: 0 (MANA) Value: 0
+ItemStat6: Type: 0 (MANA) Value: 0
+ItemStat7: Type: 0 (MANA) Value: 0
+ItemStat8: Type: 0 (MANA) Value: 0
+Item: Salamander Scale Pants Entry: 18875 lookup up Class: 4 Subclass: 2
+<<<< High Level Items that match class Type: Healer 8 >>>>>
+New Item: Salamander Scale Pants Entry: 18875 
+ItemStat1: Type: 5 (INTELLECT) Value: 321
+ItemStat2: Type: 7 (STAMINA) Value: 349
+ItemStat3: Type: 45 (SPELL_POWER) Value: 486
+ItemStat4: Type: 43 (MANA_REGENERATION) Value: 120
+ItemStat5: Type: 0 (MANA) Value: 0
+ItemStat6: Type: 0 (MANA) Value: 0
+ItemStat7: Type: 0 (MANA) Value: 0
+ItemStat8: Type: 0 (MANA) Value: 0
+Item: Sorcerous Dagger Entry: 18878 lookup up Class: 2 Subclass: 15
+<<<< High Level Items that match class Type: Mage 1 >>>>>
+New Item: Sorcerous Dagger Entry: 18878 
+ItemStat1: Type: 5 (INTELLECT) Value: 382
+ItemStat2: Type: 7 (STAMINA) Value: 193
+ItemStat3: Type: 45 (SPELL_POWER) Value: 352
+ItemStat4: Type: 0 (MANA) Value: 0
+ItemStat5: Type: 0 (MANA) Value: 0
+ItemStat6: Type: 0 (MANA) Value: 0
+ItemStat7: Type: 0 (MANA) Value: 0
+ItemStat8: Type: 0 (MANA) Value: 0
+Item: Heavy Dark Iron Ring Entry: 18879 lookup up Class: 4 Subclass: 0
+<<<< High Level Items that match class Type: Tank 3 >>>>>
+New Item: Heavy Dark Iron Ring Entry: 18879 
+ItemStat1: Type: 7 (STAMINA) Value: 480
+ItemStat2: Type: 12 (DEFENSE_SKILL_RATING) Value: 63
+ItemStat3: Type: 0 (MANA) Value: 0
+ItemStat4: Type: 0 (MANA) Value: 0
+ItemStat5: Type: 0 (MANA) Value: 0
+ItemStat6: Type: 0 (MANA) Value: 0
+ItemStat7: Type: 0 (MANA) Value: 0
+ItemStat8: Type: 0 (MANA) Value: 0
+Item: Robe of Volatile Power Entry: 19145 lookup up Class: 4 Subclass: 1
+<<<< High Level Items that match class Type: Healer 18 >>>>>
+New Item: Robe of Volatile Power Entry: 19145 
+ItemStat1: Type: 5 (INTELLECT) Value: 321
+ItemStat2: Type: 7 (STAMINA) Value: 233
+ItemStat3: Type: 6 (SPIRIT) Value: 214
+ItemStat4: Type: 32 (CRIT_RATING) Value: 566
+ItemStat5: Type: 45 (SPELL_POWER) Value: 395
+ItemStat6: Type: 0 (MANA) Value: 0
+ItemStat7: Type: 0 (MANA) Value: 0
+ItemStat8: Type: 0 (MANA) Value: 0
+Item: Wristguards of Stability Entry: 19146 lookup up Class: 4 Subclass: 2
+<<<< High Level Items that match class Type: Strength Melee 0 >>>>>
+[31mItem: Wristguards of Stability Entry: 19146 has no high level items HAS TO BE SCALED MANUALLY[0m
+ItemStat1: Type: 4 (STRENGTH) Value: 532
+ItemStat2: Type: 7 (STAMINA) Value: 193
+ItemStat3: Type: 0 (MANA) Value: 0
+ItemStat4: Type: 0 (MANA) Value: 0
+ItemStat5: Type: 0 (MANA) Value: 0
+ItemStat6: Type: 0 (MANA) Value: 0
+ItemStat7: Type: 0 (MANA) Value: 0
+ItemStat8: Type: 0 (MANA) Value: 0
+Item: Ring of Spell Power Entry: 19147 lookup up Class: 4 Subclass: 0
+<<<< High Level Items that match class Type: Mage 7 >>>>>
+New Item: Ring of Spell Power Entry: 19147 
+ItemStat1: Type: 45 (SPELL_POWER) Value: 567
+ItemStat2: Type: 0 (MANA) Value: 0
+ItemStat3: Type: 0 (MANA) Value: 0
+ItemStat4: Type: 0 (MANA) Value: 0
+ItemStat5: Type: 0 (MANA) Value: 0
+ItemStat6: Type: 0 (MANA) Value: 0
+ItemStat7: Type: 0 (MANA) Value: 0
+ItemStat8: Type: 0 (MANA) Value: 0
+Item: Arcanist Boots Entry: 16800 lookup up Class: 4 Subclass: 1
+<<<< High Level Items that match class Type: Healer 18 >>>>>
+New Item: Arcanist Boots Entry: 16800 
+ItemStat1: Type: 7 (STAMINA) Value: 305
+ItemStat2: Type: 5 (INTELLECT) Value: 308
+ItemStat3: Type: 6 (SPIRIT) Value: 241
+ItemStat4: Type: 32 (CRIT_RATING) Value: 172
+ItemStat5: Type: 45 (SPELL_POWER) Value: 189
+ItemStat6: Type: 0 (MANA) Value: 0
+ItemStat7: Type: 0 (MANA) Value: 0
+ItemStat8: Type: 0 (MANA) Value: 0
+Item: Cenarion Boots Entry: 16829 lookup up Class: 4 Subclass: 2
+<<<< High Level Items that match class Type: Healer 8 >>>>>
+New Item: Cenarion Boots Entry: 16829 
+ItemStat1: Type: 6 (SPIRIT) Value: 321
+ItemStat2: Type: 7 (STAMINA) Value: 378
+ItemStat3: Type: 43 (MANA_REGENERATION) Value: 43
+ItemStat4: Type: 45 (SPELL_POWER) Value: 155
+ItemStat5: Type: 5 (INTELLECT) Value: 281
+ItemStat6: Type: 0 (MANA) Value: 0
+ItemStat7: Type: 0 (MANA) Value: 0
+ItemStat8: Type: 0 (MANA) Value: 0
+Item: Earthfury Boots Entry: 16837 lookup up Class: 4 Subclass: 3
+<<<< High Level Items that match class Type: Healer 7 >>>>>
+New Item: Earthfury Boots Entry: 16837 
+ItemStat1: Type: 5 (INTELLECT) Value: 214
+ItemStat2: Type: 6 (SPIRIT) Value: 481
+ItemStat3: Type: 7 (STAMINA) Value: 349
+ItemStat4: Type: 45 (SPELL_POWER) Value: 155
+ItemStat5: Type: 0 (MANA) Value: 0
+ItemStat6: Type: 0 (MANA) Value: 0
+ItemStat7: Type: 0 (MANA) Value: 0
+ItemStat8: Type: 0 (MANA) Value: 0
+Item: Lawbringer Boots Entry: 16859 lookup up Class: 4 Subclass: 4
+<<<< High Level Items that match class Type: Healer 7 >>>>>
+New Item: Lawbringer Boots Entry: 16859 
+ItemStat1: Type: 45 (SPELL_POWER) Value: 155
+ItemStat2: Type: 5 (INTELLECT) Value: 281
+ItemStat3: Type: 6 (SPIRIT) Value: 214
+ItemStat4: Type: 7 (STAMINA) Value: 480
+ItemStat5: Type: 4 (STRENGTH) Value: 147
+ItemStat6: Type: 43 (MANA_REGENERATION) Value: 31
+ItemStat7: Type: 0 (MANA) Value: 0
+ItemStat8: Type: 0 (MANA) Value: 0
+Item: Choker of Enlightenment Entry: 17109 lookup up Class: 4 Subclass: 0
+<<<< High Level Items that match class Type: Healer 5 >>>>>
+New Item: Choker of Enlightenment Entry: 17109 
+ItemStat1: Type: 5 (INTELLECT) Value: 219
+ItemStat2: Type: 6 (SPIRIT) Value: 219
+ItemStat3: Type: 7 (STAMINA) Value: 208
+ItemStat4: Type: 45 (SPELL_POWER) Value: 317
+ItemStat5: Type: 0 (MANA) Value: 0
+ItemStat6: Type: 0 (MANA) Value: 0
+ItemStat7: Type: 0 (MANA) Value: 0
+ItemStat8: Type: 0 (MANA) Value: 0
+Item: Felheart Slippers Entry: 16803 lookup up Class: 4 Subclass: 1
+<<<< High Level Items that match class Type: Mage 1 >>>>>
+New Item: Felheart Slippers Entry: 16803 
+ItemStat1: Type: 7 (STAMINA) Value: 538
+ItemStat2: Type: 45 (SPELL_POWER) Value: 309
+ItemStat3: Type: 5 (INTELLECT) Value: 241
+ItemStat4: Type: 0 (MANA) Value: 0
+ItemStat5: Type: 0 (MANA) Value: 0
+ItemStat6: Type: 0 (MANA) Value: 0
+ItemStat7: Type: 0 (MANA) Value: 0
+ItemStat8: Type: 0 (MANA) Value: 0
+Item: Boots of Prophecy Entry: 16811 lookup up Class: 4 Subclass: 1
+<<<< High Level Items that match class Type: Healer 18 >>>>>
+New Item: Boots of Prophecy Entry: 16811 
+ItemStat1: Type: 5 (INTELLECT) Value: 388
+ItemStat2: Type: 6 (SPIRIT) Value: 321
+ItemStat3: Type: 7 (STAMINA) Value: 407
+ItemStat4: Type: 45 (SPELL_POWER) Value: 155
+ItemStat5: Type: 0 (MANA) Value: 0
+ItemStat6: Type: 0 (MANA) Value: 0
+ItemStat7: Type: 0 (MANA) Value: 0
+ItemStat8: Type: 0 (MANA) Value: 0
+Item: Nightslayer Boots Entry: 16824 lookup up Class: 4 Subclass: 2
+<<<< High Level Items that match class Type: Agility Melee 9 >>>>>
+New Item: Nightslayer Boots Entry: 16824 
+ItemStat1: Type: 3 (AGILITY) Value: 561
+ItemStat2: Type: 7 (STAMINA) Value: 422
+ItemStat3: Type: 0 (MANA) Value: 0
+ItemStat4: Type: 0 (MANA) Value: 0
+ItemStat5: Type: 0 (MANA) Value: 0
+ItemStat6: Type: 0 (MANA) Value: 0
+ItemStat7: Type: 0 (MANA) Value: 0
+ItemStat8: Type: 0 (MANA) Value: 0
+Item: Arcanist Gloves Entry: 16801 lookup up Class: 4 Subclass: 1
+<<<< High Level Items that match class Type: Healer 18 >>>>>
+New Item: Arcanist Gloves Entry: 16801 
+ItemStat1: Type: 5 (INTELLECT) Value: 321
+ItemStat2: Type: 6 (SPIRIT) Value: 214
+ItemStat3: Type: 7 (STAMINA) Value: 334
+ItemStat4: Type: 43 (MANA_REGENERATION) Value: 53
+ItemStat5: Type: 45 (SPELL_POWER) Value: 241
+ItemStat6: Type: 0 (MANA) Value: 0
+ItemStat7: Type: 0 (MANA) Value: 0
+ItemStat8: Type: 0 (MANA) Value: 0
+Item: Cenarion Gloves Entry: 16831 lookup up Class: 4 Subclass: 2
+<<<< High Level Items that match class Type: Healer 8 >>>>>
+New Item: Cenarion Gloves Entry: 16831 
+ItemStat1: Type: 5 (INTELLECT) Value: 388
+ItemStat2: Type: 6 (SPIRIT) Value: 321
+ItemStat3: Type: 7 (STAMINA) Value: 407
+ItemStat4: Type: 45 (SPELL_POWER) Value: 155
+ItemStat5: Type: 0 (MANA) Value: 0
+ItemStat6: Type: 0 (MANA) Value: 0
+ItemStat7: Type: 0 (MANA) Value: 0
+ItemStat8: Type: 0 (MANA) Value: 0
+Item: Giantstalker's Gloves Entry: 16852 lookup up Class: 4 Subclass: 3
+<<<< High Level Items that match class Type: Agility Melee 0 >>>>>
+[31mItem: Giantstalker's Gloves Entry: 16852 has no high level items HAS TO BE SCALED MANUALLY[0m
+ItemStat1: Type: 3 (AGILITY) Value: 254
+ItemStat2: Type: 7 (STAMINA) Value: 276
+ItemStat3: Type: 31 (HIT_RATING) Value: 125
+ItemStat4: Type: 38 (ATTACK_POWER) Value: 412
+ItemStat5: Type: 0 (MANA) Value: 0
+ItemStat6: Type: 0 (MANA) Value: 0
+ItemStat7: Type: 0 (MANA) Value: 0
+ItemStat8: Type: 0 (MANA) Value: 0
+Item: Cenarion Helm Entry: 16834 lookup up Class: 4 Subclass: 2
+<<<< High Level Items that match class Type: Healer 8 >>>>>
+New Item: Cenarion Helm Entry: 16834 
+ItemStat1: Type: 5 (INTELLECT) Value: 615
+ItemStat2: Type: 6 (SPIRIT) Value: 281
+ItemStat3: Type: 7 (STAMINA) Value: 610
+ItemStat4: Type: 45 (SPELL_POWER) Value: 206
+ItemStat5: Type: 0 (MANA) Value: 0
+ItemStat6: Type: 0 (MANA) Value: 0
+ItemStat7: Type: 0 (MANA) Value: 0
+ItemStat8: Type: 0 (MANA) Value: 0
+Item: Earthfury Helmet Entry: 16842 lookup up Class: 4 Subclass: 3
+<<<< High Level Items that match class Type: Healer 7 >>>>>
+New Item: Earthfury Helmet Entry: 16842 
+ItemStat1: Type: 5 (INTELLECT) Value: 495
+ItemStat2: Type: 6 (SPIRIT) Value: 281
+ItemStat3: Type: 7 (STAMINA) Value: 567
+ItemStat4: Type: 43 (MANA_REGENERATION) Value: 84
+ItemStat5: Type: 45 (SPELL_POWER) Value: 206
+ItemStat6: Type: 0 (MANA) Value: 0
+ItemStat7: Type: 0 (MANA) Value: 0
+ItemStat8: Type: 0 (MANA) Value: 0
+Item: Giantstalker's Helmet Entry: 16846 lookup up Class: 4 Subclass: 3
+<<<< High Level Items that match class Type: Healer 7 >>>>>
+New Item: Giantstalker's Helmet Entry: 16846 
+ItemStat1: Type: 3 (AGILITY) Value: 348
+ItemStat2: Type: 5 (INTELLECT) Value: 321
+ItemStat3: Type: 6 (SPIRIT) Value: 174
+ItemStat4: Type: 7 (STAMINA) Value: 538
+ItemStat5: Type: 32 (CRIT_RATING) Value: 172
+ItemStat6: Type: 38 (ATTACK_POWER) Value: 515
+ItemStat7: Type: 0 (MANA) Value: 0
+ItemStat8: Type: 0 (MANA) Value: 0
+Item: Lawbringer Helm Entry: 16854 lookup up Class: 4 Subclass: 4
+<<<< High Level Items that match class Type: Healer 7 >>>>>
+New Item: Lawbringer Helm Entry: 16854 
+ItemStat1: Type: 45 (SPELL_POWER) Value: 206
+ItemStat2: Type: 5 (INTELLECT) Value: 521
+ItemStat3: Type: 6 (SPIRIT) Value: 214
+ItemStat4: Type: 7 (STAMINA) Value: 480
+ItemStat5: Type: 4 (STRENGTH) Value: 187
+ItemStat6: Type: 43 (MANA_REGENERATION) Value: 53
+ItemStat7: Type: 0 (MANA) Value: 0
+ItemStat8: Type: 0 (MANA) Value: 0
+Item: Helm of Might Entry: 16866 lookup up Class: 4 Subclass: 4
+<<<< High Level Items that match class Type: Tank 5 >>>>>
+New Item: Helm of Might Entry: 16866 
+ItemStat1: Type: 7 (STAMINA) Value: 828
+ItemStat2: Type: 4 (STRENGTH) Value: 321
+ItemStat3: Type: 13 (DODGE_RATING) Value: 86
+ItemStat4: Type: 12 (DEFENSE_SKILL_RATING) Value: 79
+ItemStat5: Type: 0 (MANA) Value: 0
+ItemStat6: Type: 0 (MANA) Value: 0
+ItemStat7: Type: 0 (MANA) Value: 0
+ItemStat8: Type: 0 (MANA) Value: 0
+Item: Drillborer Disk Entry: 17066 lookup up Class: 4 Subclass: 6
+<<<< High Level Items that match class Type: Tank 1 >>>>>
+New Item: Drillborer Disk Entry: 17066 
+ItemStat1: Type: 7 (STAMINA) Value: 228
+ItemStat2: Type: 15 (BLOCK_RATING) Value: 103
+ItemStat3: Type: 0 (MANA) Value: 0
+ItemStat4: Type: 0 (MANA) Value: 0
+ItemStat5: Type: 0 (MANA) Value: 0
+ItemStat6: Type: 0 (MANA) Value: 0
+ItemStat7: Type: 0 (MANA) Value: 0
+ItemStat8: Type: 0 (MANA) Value: 0
+Item: Arcanist Crown Entry: 16795 lookup up Class: 4 Subclass: 1
+<<<< High Level Items that match class Type: Healer 18 >>>>>
+New Item: Arcanist Crown Entry: 16795 
+ItemStat1: Type: 6 (SPIRIT) Value: 214
+ItemStat2: Type: 45 (SPELL_POWER) Value: 344
+ItemStat3: Type: 31 (HIT_RATING) Value: 50
+ItemStat4: Type: 7 (STAMINA) Value: 378
+ItemStat5: Type: 5 (INTELLECT) Value: 588
+ItemStat6: Type: 0 (MANA) Value: 0
+ItemStat7: Type: 0 (MANA) Value: 0
+ItemStat8: Type: 0 (MANA) Value: 0
+Item: Felheart Horns Entry: 16808 lookup up Class: 4 Subclass: 1
+<<<< High Level Items that match class Type: Healer 18 >>>>>
+New Item: Felheart Horns Entry: 16808 
+ItemStat1: Type: 5 (INTELLECT) Value: 441
+ItemStat2: Type: 6 (SPIRIT) Value: 214
+ItemStat3: Type: 7 (STAMINA) Value: 639
+ItemStat4: Type: 45 (SPELL_POWER) Value: 344
+ItemStat5: Type: 0 (MANA) Value: 0
+ItemStat6: Type: 0 (MANA) Value: 0
+ItemStat7: Type: 0 (MANA) Value: 0
+ItemStat8: Type: 0 (MANA) Value: 0
+[33mMana Regen Capped: Felheart Horns mana regen reduced to 60[0m
+Item: Circlet of Prophecy Entry: 16813 lookup up Class: 4 Subclass: 1
+<<<< High Level Items that match class Type: Healer 18 >>>>>
+New Item: Circlet of Prophecy Entry: 16813 
+ItemStat1: Type: 5 (INTELLECT) Value: 588
+ItemStat2: Type: 6 (SPIRIT) Value: 441
+ItemStat3: Type: 7 (STAMINA) Value: 407
+ItemStat4: Type: 45 (SPELL_POWER) Value: 206
+ItemStat5: Type: 0 (MANA) Value: 0
+ItemStat6: Type: 0 (MANA) Value: 0
+ItemStat7: Type: 0 (MANA) Value: 0
+ItemStat8: Type: 0 (MANA) Value: 0
+Item: Nightslayer Cover Entry: 16821 lookup up Class: 4 Subclass: 2
+<<<< High Level Items that match class Type: Strength Melee 0 >>>>>
+[31mItem: Nightslayer Cover Entry: 16821 has no high level items HAS TO BE SCALED MANUALLY[0m
+ItemStat1: Type: 3 (AGILITY) Value: 441
+ItemStat2: Type: 7 (STAMINA) Value: 451
+ItemStat3: Type: 4 (STRENGTH) Value: 121
+ItemStat4: Type: 32 (CRIT_RATING) Value: 344
+ItemStat5: Type: 0 (MANA) Value: 0
+ItemStat6: Type: 0 (MANA) Value: 0
+ItemStat7: Type: 0 (MANA) Value: 0
+ItemStat8: Type: 0 (MANA) Value: 0
+Item: Gutgore Ripper Entry: 17071 lookup up Class: 2 Subclass: 15
+<<<< High Level Items that match class Type: Strength Melee 0 >>>>>
+[31mItem: Gutgore Ripper Entry: 17071 has no high level items HAS TO BE SCALED MANUALLY[0m
+ItemStat1: Type: 4 (STRENGTH) Value: -339
+ItemStat2: Type: 0 (MANA) Value: 0
+ItemStat3: Type: 0 (MANA) Value: 0
+ItemStat4: Type: 0 (MANA) Value: 0
+ItemStat5: Type: 0 (MANA) Value: 0
+ItemStat6: Type: 0 (MANA) Value: 0
+ItemStat7: Type: 0 (MANA) Value: 0
+ItemStat8: Type: 0 (MANA) Value: 0
+[35mStats Added: Gutgore Ripper now has 4 stats (minimum 4 enforced)[0m
+Item: Aurastone Hammer Entry: 17105 lookup up Class: 2 Subclass: 4
+<<<< High Level Items that match class Type: Healer 1 >>>>>
+New Item: Aurastone Hammer Entry: 17105 
+ItemStat1: Type: 45 (SPELL_POWER) Value: 402
+ItemStat2: Type: 5 (INTELLECT) Value: 202
+ItemStat3: Type: 7 (STAMINA) Value: 219
+ItemStat4: Type: 43 (MANA_REGENERATION) Value: 60
+ItemStat5: Type: 0 (MANA) Value: 0
+ItemStat6: Type: 0 (MANA) Value: 0
+ItemStat7: Type: 0 (MANA) Value: 0
+ItemStat8: Type: 0 (MANA) Value: 0
+Item: Talisman of Ephemeral Power Entry: 18820 lookup up Class: 4 Subclass: 0
+<<<< High Level Items that match class Type: Mage 7 >>>>>
+New Item: Talisman of Ephemeral Power Entry: 18820 
+ItemStat1: Type: 45 (SPELL_POWER) Value: 3003
+ItemStat2: Type: 0 (MANA) Value: 0
+ItemStat3: Type: 0 (MANA) Value: 0
+ItemStat4: Type: 0 (MANA) Value: 0
+ItemStat5: Type: 0 (MANA) Value: 0
+ItemStat6: Type: 0 (MANA) Value: 0
+ItemStat7: Type: 0 (MANA) Value: 0
+ItemStat8: Type: 0 (MANA) Value: 0
+Item: Quick Strike Ring Entry: 18821 lookup up Class: 4 Subclass: 0
+<<<< High Level Items that match class Type: Agility Melee 4 >>>>>
+New Item: Quick Strike Ring Entry: 18821 
+ItemStat1: Type: 7 (STAMINA) Value: 185
+ItemStat2: Type: 4 (STRENGTH) Value: 105
+ItemStat3: Type: 32 (CRIT_RATING) Value: 169
+ItemStat4: Type: 38 (ATTACK_POWER) Value: 504
+ItemStat5: Type: 0 (MANA) Value: 0
+ItemStat6: Type: 0 (MANA) Value: 0
+ItemStat7: Type: 0 (MANA) Value: 0
+ItemStat8: Type: 0 (MANA) Value: 0
+Item: Obsidian Edged Blade Entry: 18822 lookup up Class: 2 Subclass: 8
+<<<< High Level Items that match class Type: Strength Melee 1 >>>>>
+New Item: Obsidian Edged Blade Entry: 18822 
+ItemStat1: Type: 4 (STRENGTH) Value: 886
+ItemStat2: Type: 37 (EXPERTISE_RATING) Value: 162
+ItemStat3: Type: 0 (MANA) Value: 0
+ItemStat4: Type: 0 (MANA) Value: 0
+ItemStat5: Type: 0 (MANA) Value: 0
+ItemStat6: Type: 0 (MANA) Value: 0
+ItemStat7: Type: 0 (MANA) Value: 0
+ItemStat8: Type: 0 (MANA) Value: 0
+Item: Aged Core Leather Gloves Entry: 18823 lookup up Class: 4 Subclass: 2
+<<<< High Level Items that match class Type: Strength Melee 0 >>>>>
+[31mItem: Aged Core Leather Gloves Entry: 18823 has no high level items HAS TO BE SCALED MANUALLY[0m
+ItemStat1: Type: 37 (EXPERTISE_RATING) Value: 98
+ItemStat2: Type: 32 (CRIT_RATING) Value: 163
+ItemStat3: Type: 4 (STRENGTH) Value: 302
+ItemStat4: Type: 7 (STAMINA) Value: 328
+ItemStat5: Type: 0 (MANA) Value: 0
+ItemStat6: Type: 0 (MANA) Value: 0
+ItemStat7: Type: 0 (MANA) Value: 0
+ItemStat8: Type: 0 (MANA) Value: 0
+Item: Magma Tempered Boots Entry: 18824 lookup up Class: 4 Subclass: 4
+<<<< High Level Items that match class Type: Healer 7 >>>>>
+New Item: Magma Tempered Boots Entry: 18824 
+ItemStat1: Type: 6 (SPIRIT) Value: 235
+ItemStat2: Type: 45 (SPELL_POWER) Value: 142
+ItemStat3: Type: 7 (STAMINA) Value: 415
+ItemStat4: Type: 5 (INTELLECT) Value: 358
+ItemStat5: Type: 0 (MANA) Value: 0
+ItemStat6: Type: 0 (MANA) Value: 0
+ItemStat7: Type: 0 (MANA) Value: 0
+ItemStat8: Type: 0 (MANA) Value: 0
+Item: Deep Earth Spaulders Entry: 18829 lookup up Class: 4 Subclass: 3
+<<<< High Level Items that match class Type: Healer 7 >>>>>
+New Item: Deep Earth Spaulders Entry: 18829 
+ItemStat1: Type: 6 (SPIRIT) Value: 134
+ItemStat2: Type: 45 (SPELL_POWER) Value: 508
+ItemStat3: Type: 5 (INTELLECT) Value: 230
+ItemStat4: Type: 7 (STAMINA) Value: 236
+ItemStat5: Type: 0 (MANA) Value: 0
+ItemStat6: Type: 0 (MANA) Value: 0
+ItemStat7: Type: 0 (MANA) Value: 0
+ItemStat8: Type: 0 (MANA) Value: 0
+Item: Brutality Blade Entry: 18832 lookup up Class: 2 Subclass: 7
+<<<< High Level Items that match class Type: Strength Melee 0 >>>>>
+[31mItem: Brutality Blade Entry: 18832 has no high level items HAS TO BE SCALED MANUALLY[0m
+ItemStat1: Type: 4 (STRENGTH) Value: 173
+ItemStat2: Type: 3 (AGILITY) Value: 173
+ItemStat3: Type: 32 (CRIT_RATING) Value: 160
+ItemStat4: Type: 0 (MANA) Value: 0
+ItemStat5: Type: 0 (MANA) Value: 0
+ItemStat6: Type: 0 (MANA) Value: 0
+ItemStat7: Type: 0 (MANA) Value: 0
+ItemStat8: Type: 0 (MANA) Value: 0
+[35mStats Added: Brutality Blade now has 4 stats (minimum 4 enforced)[0m
+Item: Mana Igniting Cord Entry: 19136 lookup up Class: 4 Subclass: 1
+<<<< High Level Items that match class Type: Mage 1 >>>>>
+New Item: Mana Igniting Cord Entry: 19136 
+ItemStat1: Type: 5 (INTELLECT) Value: 315
+ItemStat2: Type: 7 (STAMINA) Value: 250
+ItemStat3: Type: 45 (SPELL_POWER) Value: 385
+ItemStat4: Type: 32 (CRIT_RATING) Value: 157
+ItemStat5: Type: 0 (MANA) Value: 0
+ItemStat6: Type: 0 (MANA) Value: 0
+ItemStat7: Type: 0 (MANA) Value: 0
+ItemStat8: Type: 0 (MANA) Value: 0
+[32mFire Resistance Applied: Mana Igniting Cord gets 15 fire resistance (modifier: 0.56)[0m
+Item: Fire Runed Grimoire Entry: 19142 lookup up Class: 4 Subclass: 0
+<<<< High Level Items that match class Type: Mage 7 >>>>>
+New Item: Fire Runed Grimoire Entry: 19142 
+ItemStat1: Type: 5 (INTELLECT) Value: 420
+ItemStat2: Type: 7 (STAMINA) Value: 255
+ItemStat3: Type: 45 (SPELL_POWER) Value: 173
+ItemStat4: Type: 0 (MANA) Value: 0
+ItemStat5: Type: 0 (MANA) Value: 0
+ItemStat6: Type: 0 (MANA) Value: 0
+ItemStat7: Type: 0 (MANA) Value: 0
+ItemStat8: Type: 0 (MANA) Value: 0
+[32mFire Resistance Applied: Fire Runed Grimoire gets 15 fire resistance (modifier: 0.56)[0m
+Item: Flameguard Gauntlets Entry: 19143 lookup up Class: 4 Subclass: 4
+<<<< High Level Items that match class Type: Unknown 0 >>>>>
+[31mItem: Flameguard Gauntlets Entry: 19143 has no high level items HAS TO BE SCALED MANUALLY[0m
+ItemStat1: Type: 7 (STAMINA) Value: 287
+ItemStat2: Type: 32 (CRIT_RATING) Value: 163
+ItemStat3: Type: 38 (ATTACK_POWER) Value: 867
+ItemStat4: Type: 0 (MANA) Value: 0
+ItemStat5: Type: 0 (MANA) Value: 0
+ItemStat6: Type: 0 (MANA) Value: 0
+ItemStat7: Type: 0 (MANA) Value: 0
+ItemStat8: Type: 0 (MANA) Value: 0
+[32mFire Resistance Applied: Flameguard Gauntlets gets 16 fire resistance (modifier: 0.62)[0m
+Item: Sabatons of the Flamewalker Entry: 19144 lookup up Class: 4 Subclass: 3
+<<<< High Level Items that match class Type: Mage 8 >>>>>
+New Item: Sabatons of the Flamewalker Entry: 19144 
+ItemStat1: Type: 7 (STAMINA) Value: 613
+ItemStat2: Type: 5 (INTELLECT) Value: 231
+ItemStat3: Type: 38 (ATTACK_POWER) Value: 493
+ItemStat4: Type: 0 (MANA) Value: 0
+ItemStat5: Type: 0 (MANA) Value: 0
+ItemStat6: Type: 0 (MANA) Value: 0
+ItemStat7: Type: 0 (MANA) Value: 0
+ItemStat8: Type: 0 (MANA) Value: 0
+[32mFire Resistance Applied: Sabatons of the Flamewalker gets 18 fire resistance (modifier: 0.69)[0m
+Item: Cenarion Spaulders Entry: 16836 lookup up Class: 4 Subclass: 2
+<<<< High Level Items that match class Type: Healer 8 >>>>>
+New Item: Cenarion Spaulders Entry: 16836 
+ItemStat1: Type: 45 (SPELL_POWER) Value: 155
+ItemStat2: Type: 5 (INTELLECT) Value: 441
+ItemStat3: Type: 6 (SPIRIT) Value: 214
+ItemStat4: Type: 7 (STAMINA) Value: 305
+ItemStat5: Type: 43 (MANA_REGENERATION) Value: 53
+ItemStat6: Type: 0 (MANA) Value: 0
+ItemStat7: Type: 0 (MANA) Value: 0
+ItemStat8: Type: 0 (MANA) Value: 0
+Item: Earthfury Epaulets Entry: 16844 lookup up Class: 4 Subclass: 3
+<<<< High Level Items that match class Type: Healer 7 >>>>>
+New Item: Earthfury Epaulets Entry: 16844 
+ItemStat1: Type: 5 (INTELLECT) Value: 388
+ItemStat2: Type: 6 (SPIRIT) Value: 214
+ItemStat3: Type: 7 (STAMINA) Value: 407
+ItemStat4: Type: 43 (MANA_REGENERATION) Value: 53
+ItemStat5: Type: 45 (SPELL_POWER) Value: 155
+ItemStat6: Type: 0 (MANA) Value: 0
+ItemStat7: Type: 0 (MANA) Value: 0
+ItemStat8: Type: 0 (MANA) Value: 0
+Item: Lawbringer Spaulders Entry: 16856 lookup up Class: 4 Subclass: 4
+<<<< High Level Items that match class Type: Healer 7 >>>>>
+New Item: Lawbringer Spaulders Entry: 16856 
+ItemStat1: Type: 5 (INTELLECT) Value: 321
+ItemStat2: Type: 6 (SPIRIT) Value: 174
+ItemStat3: Type: 7 (STAMINA) Value: 523
+ItemStat4: Type: 4 (STRENGTH) Value: 214
+ItemStat5: Type: 45 (SPELL_POWER) Value: 155
+ItemStat6: Type: 0 (MANA) Value: 0
+ItemStat7: Type: 0 (MANA) Value: 0
+ItemStat8: Type: 0 (MANA) Value: 0
+Item: Arcanist Mantle Entry: 16797 lookup up Class: 4 Subclass: 1
+<<<< High Level Items that match class Type: Healer 18 >>>>>
+New Item: Arcanist Mantle Entry: 16797 
+ItemStat1: Type: 6 (SPIRIT) Value: 107
+ItemStat2: Type: 7 (STAMINA) Value: 233
+ItemStat3: Type: 43 (MANA_REGENERATION) Value: 53
+ItemStat4: Type: 45 (SPELL_POWER) Value: 241
+ItemStat5: Type: 5 (INTELLECT) Value: 455
+ItemStat6: Type: 0 (MANA) Value: 0
+ItemStat7: Type: 0 (MANA) Value: 0
+ItemStat8: Type: 0 (MANA) Value: 0
+Item: Felheart Shoulder Pads Entry: 16807 lookup up Class: 4 Subclass: 1
+<<<< High Level Items that match class Type: Healer 18 >>>>>
+New Item: Felheart Shoulder Pads Entry: 16807 
+ItemStat1: Type: 5 (INTELLECT) Value: 374
+ItemStat2: Type: 6 (SPIRIT) Value: 147
+ItemStat3: Type: 7 (STAMINA) Value: 596
+ItemStat4: Type: 45 (SPELL_POWER) Value: 155
+ItemStat5: Type: 0 (MANA) Value: 0
+ItemStat6: Type: 0 (MANA) Value: 0
+ItemStat7: Type: 0 (MANA) Value: 0
+ItemStat8: Type: 0 (MANA) Value: 0
+Item: Seal of the Archmagus Entry: 17110 lookup up Class: 4 Subclass: 0
+<<<< High Level Items that match class Type: Healer 5 >>>>>
+New Item: Seal of the Archmagus Entry: 17110 
+ItemStat1: Type: 6 (SPIRIT) Value: 223
+ItemStat2: Type: 43 (MANA_REGENERATION) Value: 39
+ItemStat3: Type: 5 (INTELLECT) Value: 223
+ItemStat4: Type: 7 (STAMINA) Value: 241
+ItemStat5: Type: 0 (MANA) Value: 0
+ItemStat6: Type: 0 (MANA) Value: 0
+ItemStat7: Type: 0 (MANA) Value: 0
+ItemStat8: Type: 0 (MANA) Value: 0
+Item: Nightslayer Shoulder Pads Entry: 16823 lookup up Class: 4 Subclass: 2
+<<<< High Level Items that match class Type: Strength Melee 0 >>>>>
+[31mItem: Nightslayer Shoulder Pads Entry: 16823 has no high level items HAS TO BE SCALED MANUALLY[0m
+ItemStat1: Type: 3 (AGILITY) Value: 561
+ItemStat2: Type: 7 (STAMINA) Value: 276
+ItemStat3: Type: 4 (STRENGTH) Value: 54
+ItemStat4: Type: 31 (HIT_RATING) Value: 62
+ItemStat5: Type: 0 (MANA) Value: 0
+ItemStat6: Type: 0 (MANA) Value: 0
+ItemStat7: Type: 0 (MANA) Value: 0
+ItemStat8: Type: 0 (MANA) Value: 0
+Item: Pauldrons of Might Entry: 16868 lookup up Class: 4 Subclass: 4
+<<<< High Level Items that match class Type: Tank 5 >>>>>
+New Item: Pauldrons of Might Entry: 16868 
+ItemStat1: Type: 7 (STAMINA) Value: 523
+ItemStat2: Type: 4 (STRENGTH) Value: 321
+ItemStat3: Type: 15 (BLOCK_RATING) Value: 104
+ItemStat4: Type: 12 (DEFENSE_SKILL_RATING) Value: 63
+ItemStat5: Type: 0 (MANA) Value: 0
+ItemStat6: Type: 0 (MANA) Value: 0
+ItemStat7: Type: 0 (MANA) Value: 0
+ItemStat8: Type: 0 (MANA) Value: 0
+Item: Mantle of Prophecy Entry: 16816 lookup up Class: 4 Subclass: 1
+<<<< High Level Items that match class Type: Healer 18 >>>>>
+New Item: Mantle of Prophecy Entry: 16816 
+ItemStat1: Type: 5 (INTELLECT) Value: 495
+ItemStat2: Type: 6 (SPIRIT) Value: 214
+ItemStat3: Type: 7 (STAMINA) Value: 305
+ItemStat4: Type: 45 (SPELL_POWER) Value: 155
+ItemStat5: Type: 0 (MANA) Value: 0
+ItemStat6: Type: 0 (MANA) Value: 0
+ItemStat7: Type: 0 (MANA) Value: 0
+ItemStat8: Type: 0 (MANA) Value: 0
+Item: Giantstalker's Epaulets Entry: 16848 lookup up Class: 4 Subclass: 3
+<<<< High Level Items that match class Type: Healer 7 >>>>>
+New Item: Giantstalker's Epaulets Entry: 16848 
+ItemStat1: Type: 5 (INTELLECT) Value: 107
+ItemStat2: Type: 6 (SPIRIT) Value: 187
+ItemStat3: Type: 7 (STAMINA) Value: 334
+ItemStat4: Type: 31 (HIT_RATING) Value: 62
+ItemStat5: Type: 38 (ATTACK_POWER) Value: 550
+ItemStat6: Type: 3 (AGILITY) Value: 348
+ItemStat7: Type: 0 (MANA) Value: 0
+ItemStat8: Type: 0 (MANA) Value: 0
+Item: Shadowstrike Entry: 17074 lookup up Class: 2 Subclass: 6
+<<<< High Level Items that match class Type: Healer 0 >>>>>
+[31mItem: Shadowstrike Entry: 17074 has no high level items HAS TO BE SCALED MANUALLY[0m
+ItemStat1: Type: 0 (MANA) Value: 0
+ItemStat2: Type: 0 (MANA) Value: 0
+ItemStat3: Type: 0 (MANA) Value: 0
+ItemStat4: Type: 0 (MANA) Value: 0
+ItemStat5: Type: 0 (MANA) Value: 0
+ItemStat6: Type: 0 (MANA) Value: 0
+ItemStat7: Type: 0 (MANA) Value: 0
+ItemStat8: Type: 0 (MANA) Value: 0
+[35mStats Added: Shadowstrike now has 4 stats (minimum 4 enforced)[0m
+Item: Arcanist Leggings Entry: 16796 lookup up Class: 4 Subclass: 1
+<<<< High Level Items that match class Type: Healer 18 >>>>>
+New Item: Arcanist Leggings Entry: 16796 
+ItemStat1: Type: 5 (INTELLECT) Value: 495
+ItemStat2: Type: 6 (SPIRIT) Value: 214
+ItemStat3: Type: 7 (STAMINA) Value: 422
+ItemStat4: Type: 32 (CRIT_RATING) Value: 172
+ItemStat5: Type: 45 (SPELL_POWER) Value: 344
+ItemStat6: Type: 0 (MANA) Value: 0
+ItemStat7: Type: 0 (MANA) Value: 0
+ItemStat8: Type: 0 (MANA) Value: 0
+Item: Felheart Pants Entry: 16810 lookup up Class: 4 Subclass: 1
+<<<< High Level Items that match class Type: Healer 18 >>>>>
+New Item: Felheart Pants Entry: 16810 
+ItemStat1: Type: 5 (INTELLECT) Value: 414
+ItemStat2: Type: 6 (SPIRIT) Value: 214
+ItemStat3: Type: 7 (STAMINA) Value: 480
+ItemStat4: Type: 45 (SPELL_POWER) Value: 515
+ItemStat5: Type: 0 (MANA) Value: 0
+ItemStat6: Type: 0 (MANA) Value: 0
+ItemStat7: Type: 0 (MANA) Value: 0
+ItemStat8: Type: 0 (MANA) Value: 0
+Item: Pants of Prophecy Entry: 16814 lookup up Class: 4 Subclass: 1
+<<<< High Level Items that match class Type: Healer 18 >>>>>
+New Item: Pants of Prophecy Entry: 16814 
+ItemStat1: Type: 6 (SPIRIT) Value: 441
+ItemStat2: Type: 7 (STAMINA) Value: 422
+ItemStat3: Type: 43 (MANA_REGENERATION) Value: 84
+ItemStat4: Type: 45 (SPELL_POWER) Value: 206
+ItemStat5: Type: 5 (INTELLECT) Value: 521
+ItemStat6: Type: 0 (MANA) Value: 0
+ItemStat7: Type: 0 (MANA) Value: 0
+ItemStat8: Type: 0 (MANA) Value: 0
+Item: Nightslayer Pants Entry: 16822 lookup up Class: 4 Subclass: 2
+<<<< High Level Items that match class Type: Strength Melee 0 >>>>>
+[31mItem: Nightslayer Pants Entry: 16822 has no high level items HAS TO BE SCALED MANUALLY[0m
+ItemStat1: Type: 3 (AGILITY) Value: 722
+ItemStat2: Type: 7 (STAMINA) Value: 349
+ItemStat3: Type: 4 (STRENGTH) Value: 214
+ItemStat4: Type: 32 (CRIT_RATING) Value: 172
+ItemStat5: Type: 0 (MANA) Value: 0
+ItemStat6: Type: 0 (MANA) Value: 0
+ItemStat7: Type: 0 (MANA) Value: 0
+ItemStat8: Type: 0 (MANA) Value: 0
+Item: Striker's Mark Entry: 17069 lookup up Class: 2 Subclass: 2
+<<<< High Level Items that match class Type: Ranged 1 >>>>>
+New Item: Striker's Mark Entry: 17069 
+ItemStat1: Type: 38 (ATTACK_POWER) Value: 354
+ItemStat2: Type: 31 (HIT_RATING) Value: 59
+ItemStat3: Type: 0 (MANA) Value: 0
+ItemStat4: Type: 0 (MANA) Value: 0
+ItemStat5: Type: 0 (MANA) Value: 0
+ItemStat6: Type: 0 (MANA) Value: 0
+ItemStat7: Type: 0 (MANA) Value: 0
+ItemStat8: Type: 0 (MANA) Value: 0
+Item: Cenarion Leggings Entry: 16835 lookup up Class: 4 Subclass: 2
+<<<< High Level Items that match class Type: Healer 8 >>>>>
+New Item: Cenarion Leggings Entry: 16835 
+ItemStat1: Type: 5 (INTELLECT) Value: 414
+ItemStat2: Type: 6 (SPIRIT) Value: 441
+ItemStat3: Type: 7 (STAMINA) Value: 422
+ItemStat4: Type: 32 (CRIT_RATING) Value: 172
+ItemStat5: Type: 43 (MANA_REGENERATION) Value: 53
+ItemStat6: Type: 45 (SPELL_POWER) Value: 206
+ItemStat7: Type: 0 (MANA) Value: 0
+ItemStat8: Type: 0 (MANA) Value: 0
+Item: Earthfury Legguards Entry: 16843 lookup up Class: 4 Subclass: 3
+<<<< High Level Items that match class Type: Healer 7 >>>>>
+New Item: Earthfury Legguards Entry: 16843 
+ItemStat1: Type: 5 (INTELLECT) Value: 414
+ItemStat2: Type: 6 (SPIRIT) Value: 455
+ItemStat3: Type: 7 (STAMINA) Value: 422
+ItemStat4: Type: 43 (MANA_REGENERATION) Value: 84
+ItemStat5: Type: 45 (SPELL_POWER) Value: 206
+ItemStat6: Type: 0 (MANA) Value: 0
+ItemStat7: Type: 0 (MANA) Value: 0
+ItemStat8: Type: 0 (MANA) Value: 0
+Item: Giantstalker's Leggings Entry: 16847 lookup up Class: 4 Subclass: 3
+<<<< High Level Items that match class Type: Healer 7 >>>>>
+New Item: Giantstalker's Leggings Entry: 16847 
+ItemStat1: Type: 5 (INTELLECT) Value: 121
+ItemStat2: Type: 6 (SPIRIT) Value: 174
+ItemStat3: Type: 7 (STAMINA) Value: 349
+ItemStat4: Type: 32 (CRIT_RATING) Value: 172
+ItemStat5: Type: 38 (ATTACK_POWER) Value: 721
+ItemStat6: Type: 3 (AGILITY) Value: 481
+ItemStat7: Type: 0 (MANA) Value: 0
+ItemStat8: Type: 0 (MANA) Value: 0
+Item: Lawbringer Legplates Entry: 16855 lookup up Class: 4 Subclass: 4
+<<<< High Level Items that match class Type: Healer 7 >>>>>
+New Item: Lawbringer Legplates Entry: 16855 
+ItemStat1: Type: 4 (STRENGTH) Value: 147
+ItemStat2: Type: 43 (MANA_REGENERATION) Value: 43
+ItemStat3: Type: 45 (SPELL_POWER) Value: 206
+ItemStat4: Type: 5 (INTELLECT) Value: 388
+ItemStat5: Type: 6 (SPIRIT) Value: 388
+ItemStat6: Type: 7 (STAMINA) Value: 567
+ItemStat7: Type: 0 (MANA) Value: 0
+ItemStat8: Type: 0 (MANA) Value: 0
+Item: Legplates of Might Entry: 16867 lookup up Class: 4 Subclass: 4
+<<<< High Level Items that match class Type: Tank 5 >>>>>
+New Item: Legplates of Might Entry: 16867 
+ItemStat1: Type: 7 (STAMINA) Value: 538
+ItemStat2: Type: 4 (STRENGTH) Value: 521
+ItemStat3: Type: 14 (PARRY_RATING) Value: 192
+ItemStat4: Type: 12 (DEFENSE_SKILL_RATING) Value: 79
+ItemStat5: Type: 0 (MANA) Value: 0
+ItemStat6: Type: 0 (MANA) Value: 0
+ItemStat7: Type: 0 (MANA) Value: 0
+ItemStat8: Type: 0 (MANA) Value: 0
+Item: Medallion of Steadfast Might Entry: 17065 lookup up Class: 4 Subclass: 0
+<<<< High Level Items that match class Type: Tank 3 >>>>>
+New Item: Medallion of Steadfast Might Entry: 17065 
+ItemStat1: Type: 7 (STAMINA) Value: 293
+ItemStat2: Type: 4 (STRENGTH) Value: 180
+ItemStat3: Type: 13 (DODGE_RATING) Value: 83
+ItemStat4: Type: 12 (DEFENSE_SKILL_RATING) Value: 91
+ItemStat5: Type: 0 (MANA) Value: 0
+ItemStat6: Type: 0 (MANA) Value: 0
+ItemStat7: Type: 0 (MANA) Value: 0
+ItemStat8: Type: 0 (MANA) Value: 0
+Item: Earthshaker Entry: 17073 lookup up Class: 2 Subclass: 5
+<<<< High Level Items that match class Type: Unknown 0 >>>>>
+[31mItem: Earthshaker Entry: 17073 has no high level items HAS TO BE SCALED MANUALLY[0m
+ItemStat1: Type: 38 (ATTACK_POWER) Value: 378
+ItemStat2: Type: 0 (MANA) Value: 0
+ItemStat3: Type: 0 (MANA) Value: 0
+ItemStat4: Type: 0 (MANA) Value: 0
+ItemStat5: Type: 0 (MANA) Value: 0
+ItemStat6: Type: 0 (MANA) Value: 0
+ItemStat7: Type: 0 (MANA) Value: 0
+ItemStat8: Type: 0 (MANA) Value: 0
+[35mStats Added: Earthshaker now has 4 stats (minimum 4 enforced)[0m
+Item: Eskhandar's Right Claw Entry: 18203 lookup up Class: 2 Subclass: 13
+<<<< High Level Items that match class Type: Agility Melee 2 >>>>>
+New Item: Eskhandar's Right Claw Entry: 18203 
+ItemStat1: Type: 3 (AGILITY) Value: 81
+ItemStat2: Type: 36 (HASTE_RATING) Value: 3391
+ItemStat3: Type: 0 (MANA) Value: 0
+ItemStat4: Type: 0 (MANA) Value: 0
+ItemStat5: Type: 0 (MANA) Value: 0
+ItemStat6: Type: 0 (MANA) Value: 0
+ItemStat7: Type: 0 (MANA) Value: 0
+ItemStat8: Type: 0 (MANA) Value: 0
+Item: Arcanist Robes Entry: 16798 lookup up Class: 4 Subclass: 1
+<<<< High Level Items that match class Type: Healer 18 >>>>>
+New Item: Arcanist Robes Entry: 16798 
+ItemStat1: Type: 5 (INTELLECT) Value: 548
+ItemStat2: Type: 6 (SPIRIT) Value: 214
+ItemStat3: Type: 7 (STAMINA) Value: 451
+ItemStat4: Type: 45 (SPELL_POWER) Value: 395
+ItemStat5: Type: 0 (MANA) Value: 0
+ItemStat6: Type: 0 (MANA) Value: 0
+ItemStat7: Type: 0 (MANA) Value: 0
+ItemStat8: Type: 0 (MANA) Value: 0
+Item: Felheart Robes Entry: 16809 lookup up Class: 4 Subclass: 1
+<<<< High Level Items that match class Type: Mage 1 >>>>>
+New Item: Felheart Robes Entry: 16809 
+ItemStat1: Type: 5 (INTELLECT) Value: 441
+ItemStat2: Type: 7 (STAMINA) Value: 741
+ItemStat3: Type: 45 (SPELL_POWER) Value: 224
+ItemStat4: Type: 31 (HIT_RATING) Value: 50
+ItemStat5: Type: 0 (MANA) Value: 0
+ItemStat6: Type: 0 (MANA) Value: 0
+ItemStat7: Type: 0 (MANA) Value: 0
+ItemStat8: Type: 0 (MANA) Value: 0
+Item: Robes of Prophecy Entry: 16815 lookup up Class: 4 Subclass: 1
+<<<< High Level Items that match class Type: Healer 18 >>>>>
+New Item: Robes of Prophecy Entry: 16815 
+ItemStat1: Type: 5 (INTELLECT) Value: 588
+ItemStat2: Type: 6 (SPIRIT) Value: 374
+ItemStat3: Type: 7 (STAMINA) Value: 480
+ItemStat4: Type: 45 (SPELL_POWER) Value: 206
+ItemStat5: Type: 0 (MANA) Value: 0
+ItemStat6: Type: 0 (MANA) Value: 0
+ItemStat7: Type: 0 (MANA) Value: 0
+ItemStat8: Type: 0 (MANA) Value: 0
+Item: Nightslayer Chestpiece Entry: 16820 lookup up Class: 4 Subclass: 2
+<<<< High Level Items that match class Type: Strength Melee 0 >>>>>
+[31mItem: Nightslayer Chestpiece Entry: 16820 has no high level items HAS TO BE SCALED MANUALLY[0m
+ItemStat1: Type: 3 (AGILITY) Value: 628
+ItemStat2: Type: 7 (STAMINA) Value: 480
+ItemStat3: Type: 4 (STRENGTH) Value: 214
+ItemStat4: Type: 32 (CRIT_RATING) Value: 172
+ItemStat5: Type: 0 (MANA) Value: 0
+ItemStat6: Type: 0 (MANA) Value: 0
+ItemStat7: Type: 0 (MANA) Value: 0
+ItemStat8: Type: 0 (MANA) Value: 0
+Item: Cenarion Vestments Entry: 16833 lookup up Class: 4 Subclass: 2
+<<<< High Level Items that match class Type: Healer 8 >>>>>
+New Item: Cenarion Vestments Entry: 16833 
+ItemStat1: Type: 5 (INTELLECT) Value: 521
+ItemStat2: Type: 6 (SPIRIT) Value: 348
+ItemStat3: Type: 7 (STAMINA) Value: 538
+ItemStat4: Type: 43 (MANA_REGENERATION) Value: 43
+ItemStat5: Type: 45 (SPELL_POWER) Value: 206
+ItemStat6: Type: 0 (MANA) Value: 0
+ItemStat7: Type: 0 (MANA) Value: 0
+ItemStat8: Type: 0 (MANA) Value: 0
+Item: Earthfury Vestments Entry: 16841 lookup up Class: 4 Subclass: 3
+<<<< High Level Items that match class Type: Healer 7 >>>>>
+New Item: Earthfury Vestments Entry: 16841 
+ItemStat1: Type: 5 (INTELLECT) Value: 588
+ItemStat2: Type: 6 (SPIRIT) Value: 281
+ItemStat3: Type: 7 (STAMINA) Value: 407
+ItemStat4: Type: 32 (CRIT_RATING) Value: 172
+ItemStat5: Type: 45 (SPELL_POWER) Value: 206
+ItemStat6: Type: 0 (MANA) Value: 0
+ItemStat7: Type: 0 (MANA) Value: 0
+ItemStat8: Type: 0 (MANA) Value: 0
+Item: Giantstalker's Breastplate Entry: 16845 lookup up Class: 4 Subclass: 3
+<<<< High Level Items that match class Type: Mage 8 >>>>>
+New Item: Giantstalker's Breastplate Entry: 16845 
+ItemStat1: Type: 38 (ATTACK_POWER) Value: 584
+ItemStat2: Type: 3 (AGILITY) Value: 388
+ItemStat3: Type: 5 (INTELLECT) Value: 241
+ItemStat4: Type: 7 (STAMINA) Value: 538
+ItemStat5: Type: 32 (CRIT_RATING) Value: 172
+ItemStat6: Type: 0 (MANA) Value: 0
+ItemStat7: Type: 0 (MANA) Value: 0
+ItemStat8: Type: 0 (MANA) Value: 0
+Item: Lawbringer Chestguard Entry: 16853 lookup up Class: 4 Subclass: 4
+<<<< High Level Items that match class Type: Healer 7 >>>>>
+New Item: Lawbringer Chestguard Entry: 16853 
+ItemStat1: Type: 6 (SPIRIT) Value: 281
+ItemStat2: Type: 7 (STAMINA) Value: 610
+ItemStat3: Type: 4 (STRENGTH) Value: 174
+ItemStat4: Type: 45 (SPELL_POWER) Value: 206
+ItemStat5: Type: 5 (INTELLECT) Value: 455
+ItemStat6: Type: 0 (MANA) Value: 0
+ItemStat7: Type: 0 (MANA) Value: 0
+ItemStat8: Type: 0 (MANA) Value: 0
+Item: Breastplate of Might Entry: 16865 lookup up Class: 4 Subclass: 4
+<<<< High Level Items that match class Type: Tank 5 >>>>>
+New Item: Breastplate of Might Entry: 16865 
+ItemStat1: Type: 7 (STAMINA) Value: 668
+ItemStat2: Type: 4 (STRENGTH) Value: 441
+ItemStat3: Type: 15 (BLOCK_RATING) Value: 156
+ItemStat4: Type: 12 (DEFENSE_SKILL_RATING) Value: 79
+ItemStat5: Type: 0 (MANA) Value: 0
+ItemStat6: Type: 0 (MANA) Value: 0
+ItemStat7: Type: 0 (MANA) Value: 0
+ItemStat8: Type: 0 (MANA) Value: 0
+Item: Blastershot Launcher Entry: 17072 lookup up Class: 2 Subclass: 3
+<<<< High Level Items that match class Type: Ranged 1 >>>>>
+New Item: Blastershot Launcher Entry: 17072 
+ItemStat1: Type: 7 (STAMINA) Value: 121
+ItemStat2: Type: 32 (CRIT_RATING) Value: 160
+ItemStat3: Type: 0 (MANA) Value: 0
+ItemStat4: Type: 0 (MANA) Value: 0
+ItemStat5: Type: 0 (MANA) Value: 0
+ItemStat6: Type: 0 (MANA) Value: 0
+ItemStat7: Type: 0 (MANA) Value: 0
+ItemStat8: Type: 0 (MANA) Value: 0
+Item: Azuresong Mageblade Entry: 17103 lookup up Class: 2 Subclass: 7
+<<<< High Level Items that match class Type: Mage 1 >>>>>
+New Item: Azuresong Mageblade Entry: 17103 
+ItemStat1: Type: 5 (INTELLECT) Value: 230
+ItemStat2: Type: 7 (STAMINA) Value: 145
+ItemStat3: Type: 32 (CRIT_RATING) Value: 157
+ItemStat4: Type: 45 (SPELL_POWER) Value: 616
+ItemStat5: Type: 0 (MANA) Value: 0
+ItemStat6: Type: 0 (MANA) Value: 0
+ItemStat7: Type: 0 (MANA) Value: 0
+ItemStat8: Type: 0 (MANA) Value: 0
+Item: Staff of Dominance Entry: 18842 lookup up Class: 2 Subclass: 10
+<<<< High Level Items that match class Type: Healer 0 >>>>>
+[31mItem: Staff of Dominance Entry: 18842 has no high level items HAS TO BE SCALED MANUALLY[0m
+ItemStat1: Type: 5 (INTELLECT) Value: 753
+ItemStat2: Type: 7 (STAMINA) Value: 348
+ItemStat3: Type: 6 (SPIRIT) Value: 284
+ItemStat4: Type: 32 (CRIT_RATING) Value: 160
+ItemStat5: Type: 45 (SPELL_POWER) Value: 629
+ItemStat6: Type: 0 (MANA) Value: 0
+ItemStat7: Type: 0 (MANA) Value: 0
+ItemStat8: Type: 0 (MANA) Value: 0
+[36mSpell Power Boosted: Staff of Dominance spell power increased to 1179[0m
+Item: Giantstalker's Boots Entry: 16849 lookup up Class: 4 Subclass: 3
+<<<< High Level Items that match class Type: Healer 7 >>>>>
+New Item: Giantstalker's Boots Entry: 16849 
+ItemStat1: Type: 3 (AGILITY) Value: 414
+ItemStat2: Type: 6 (SPIRIT) Value: 121
+ItemStat3: Type: 7 (STAMINA) Value: 334
+ItemStat4: Type: 38 (ATTACK_POWER) Value: 618
+ItemStat5: Type: 0 (MANA) Value: 0
+ItemStat6: Type: 0 (MANA) Value: 0
+ItemStat7: Type: 0 (MANA) Value: 0
+ItemStat8: Type: 0 (MANA) Value: 0
+Item: Sabatons of Might Entry: 16862 lookup up Class: 4 Subclass: 4
+<<<< High Level Items that match class Type: Tank 5 >>>>>
+New Item: Sabatons of Might Entry: 16862 
+ItemStat1: Type: 7 (STAMINA) Value: 610
+ItemStat2: Type: 4 (STRENGTH) Value: 321
+ItemStat3: Type: 12 (DEFENSE_SKILL_RATING) Value: 63
+ItemStat4: Type: 0 (MANA) Value: 0
+ItemStat5: Type: 0 (MANA) Value: 0
+ItemStat6: Type: 0 (MANA) Value: 0
+ItemStat7: Type: 0 (MANA) Value: 0
+ItemStat8: Type: 0 (MANA) Value: 0
+Item: Gloves of Prophecy Entry: 16812 lookup up Class: 4 Subclass: 1
+<<<< High Level Items that match class Type: Healer 18 >>>>>
+New Item: Gloves of Prophecy Entry: 16812 
+ItemStat1: Type: 5 (INTELLECT) Value: 321
+ItemStat2: Type: 6 (SPIRIT) Value: 321
+ItemStat3: Type: 7 (STAMINA) Value: 233
+ItemStat4: Type: 43 (MANA_REGENERATION) Value: 84
+ItemStat5: Type: 45 (SPELL_POWER) Value: 155
+ItemStat6: Type: 0 (MANA) Value: 0
+ItemStat7: Type: 0 (MANA) Value: 0
+ItemStat8: Type: 0 (MANA) Value: 0
+Item: Nightslayer Gloves Entry: 16826 lookup up Class: 4 Subclass: 2
+<<<< High Level Items that match class Type: Strength Melee 0 >>>>>
+[31mItem: Nightslayer Gloves Entry: 16826 has no high level items HAS TO BE SCALED MANUALLY[0m
+ItemStat1: Type: 31 (HIT_RATING) Value: 62
+ItemStat2: Type: 3 (AGILITY) Value: 388
+ItemStat3: Type: 7 (STAMINA) Value: 407
+ItemStat4: Type: 4 (STRENGTH) Value: 254
+ItemStat5: Type: 0 (MANA) Value: 0
+ItemStat6: Type: 0 (MANA) Value: 0
+ItemStat7: Type: 0 (MANA) Value: 0
+ItemStat8: Type: 0 (MANA) Value: 0
+Item: Earthfury Gauntlets Entry: 16839 lookup up Class: 4 Subclass: 3
+<<<< High Level Items that match class Type: Healer 7 >>>>>
+New Item: Earthfury Gauntlets Entry: 16839 
+ItemStat1: Type: 6 (SPIRIT) Value: 321
+ItemStat2: Type: 7 (STAMINA) Value: 334
+ItemStat3: Type: 32 (CRIT_RATING) Value: 172
+ItemStat4: Type: 45 (SPELL_POWER) Value: 155
+ItemStat5: Type: 5 (INTELLECT) Value: 281
+ItemStat6: Type: 0 (MANA) Value: 0
+ItemStat7: Type: 0 (MANA) Value: 0
+ItemStat8: Type: 0 (MANA) Value: 0
+Item: Lawbringer Gauntlets Entry: 16860 lookup up Class: 4 Subclass: 4
+<<<< High Level Items that match class Type: Healer 7 >>>>>
+New Item: Lawbringer Gauntlets Entry: 16860 
+ItemStat1: Type: 4 (STRENGTH) Value: 214
+ItemStat2: Type: 45 (SPELL_POWER) Value: 155
+ItemStat3: Type: 5 (INTELLECT) Value: 321
+ItemStat4: Type: 6 (SPIRIT) Value: 308
+ItemStat5: Type: 7 (STAMINA) Value: 349
+ItemStat6: Type: 0 (MANA) Value: 0
+ItemStat7: Type: 0 (MANA) Value: 0
+ItemStat8: Type: 0 (MANA) Value: 0
