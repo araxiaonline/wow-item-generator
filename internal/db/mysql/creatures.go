@@ -74,6 +74,76 @@ var BossIDs = map[int]bool{
 	36502: true, // Devourer of Souls (Forge of Souls)
 	36658: true, // Scourgelord Tyrannus (Pit of Saron)
 	37226: true, // The Lich King (Halls of Reflection)
+
+	// Molten Core
+	12118: true, // Lucifron
+	11982: true, // Magmadar
+	12259: true, // Gehennas
+	12057: true, // Garr
+	12264: true, // Shazzrah
+	12056: true, // Baron Geddon
+	12098: true, // Sulfuron Harbinger
+	11988: true, // Golemagg the Incinerator
+	12018: true, // Majordomo Executus
+	11502: true, // Ragnaros
+
+	// Blackwing Lair
+	12435: true, // Razorgore the Untamed
+	13020: true, // Vaelastrasz the Corrupt
+	12017: true, // Broodlord Lashlayer
+	11983: true, // Firemaw
+	14601: true, // Ebonroc
+	11981: true, // Flamegor
+	14020: true, // Chromaggus
+	11583: true, // Nefarian
+
+	// Ruins of Ahn'Qiraj
+	15348: true, // Kurinnaxx
+	15341: true, // General Rajaxx
+	15340: true, // Moam
+	15370: true, // Buru the Gorger
+	15369: true, // Ayamiss the Hunter
+	15339: true, // Ossirian the Unscarred
+
+	// Temple of Ahn'Qiraj
+	15263: true, // The Prophet Skeram
+	15516: true, // Battleguard Sartura
+	15510: true, // Fankriss the Unyielding
+	15509: true, // Princess Huhuran
+	15275: true, // Emperor Vek'lor
+	15276: true, // Emperor Vek'nilash
+	15727: true, // C'Thun
+
+	// Zul'Gurub
+	14517: true, // High Priestess Jeklik
+	14507: true, // High Priest Venoxis
+	14510: true, // High Priestess Mar'li
+	14509: true, // High Priest Thekal
+	14515: true, // High Priestess Arlokk
+	14834: true, // Hakkar the Soulflayer
+	11382: true, // Bloodlord Mandokir
+	11380: true, // Jin'do the Hexxer
+	15114: true, // Gahz'ranka
+	15082: true, // Renataki
+	15083: true, // Grilek
+	15084: true, // Hazza'rah
+	15085: true, // Wushoolay
+
+	// Karazhan (Full Boss List)
+	16152: true, // Attumen the Huntsman (Karazhan)
+	15687: true, // Moroes (Karazhan)
+	16457: true, // Maiden of Virtue (Karazhan)
+	17521: true, // The Big Bad Wolf (Karazhan)
+	18168: true, // The Crone (Karazhan)
+	17533: true, // Romulo (Karazhan)
+	17534: true, // Julianne (Karazhan)
+	15691: true, // The Curator (Karazhan)
+	15688: true, // Terestian Illhoof (Karazhan)
+	16524: true, // Shade of Aran (Karazhan)
+	15689: true, // Netherspite (Karazhan)
+	16816: true, // Chess Event / Echo of Medivh (Karazhan)
+	15690: true, // Prince Malchezaar (Karazhan)
+	17225: true, // Nightbane (Karazhan)
 }
 
 func (db *MySqlDb) GetBosses(mapId int) ([]Boss, error) {

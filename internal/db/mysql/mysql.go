@@ -2,6 +2,7 @@ package mysql
 
 import (
 	"errors"
+	"fmt"
 	"os"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -35,7 +36,13 @@ func Connect(config *MySqlConfig) (*MySqlDb, error) {
 	connString := config.User + ":" + config.Password + "@tcp(" + config.Host + ")/" + config.Database
 	client, err := sqlx.Open("mysql", connString)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error opening database connection: %w", err)
+	}
+
+	// Verify the connection is actually working
+	err = client.Ping()
+	if err != nil {
+		return nil, fmt.Errorf("error connecting to database: %w", err)
 	}
 
 	MySql = &MySqlDb{client}

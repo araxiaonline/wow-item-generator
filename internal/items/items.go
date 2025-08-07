@@ -60,6 +60,43 @@ func (item *Item) SetDifficulty(difficulty int) {
 	item.Difficulty = difficulty
 }
 
+// scaleArmor calculates and updates the item's armor value based on its level, quality, and material subclass.
+// It checks for nil pointers for critical scaling fields and valid map keys before performing calculations.
+func (item *Item) ScaleArmor(itemLevel int) {
+	// Ensure critical pointer fields for scaling are non-nil
+	// Entry and Name are value types from the embedded DbItem and used for logging.
+	if item.Class == nil || item.Armor == nil || item.Quality == nil || item.Subclass == nil || item.Material == nil {
+		log.Printf("Item (Entry: %d, Name: '%s'): Cannot scale armor: one or more required pointer fields (Class, Armor, Quality, Subclass, Material) are nil.", item.Entry, item.Name)
+		return
+	}
+
+	// Scale Armor Stats only if Class is 4 (ITEM_CLASS_ARMOR) and Armor > 0
+	if *item.Class == 4 && *item.Armor > 0 {
+		qualityModifier, qOk := config.QualityModifiers[*item.Quality]
+		// Assuming item.Subclass is the correct key for MaterialModifiers as per original logic
+		materialModifier, mOk := config.MaterialModifiers[*item.Subclass]
+
+		if qOk && mOk {
+			// preArmor := *item.Armor
+			scaledArmorValue := math.Ceil(float64(itemLevel) * qualityModifier * materialModifier)
+			*item.Armor = int(scaledArmorValue)
+
+			// log.Printf("Item (Entry: %d, Name: '%s'): Scaled armor to %d (was %d). ItemLevel: %d, Quality: %d (Mod: %.2f), Subclass for MaterialMod: %d (Mod: %.2f). Actual Material field: %d",
+			// 	item.Entry, item.Name, *item.Armor, preArmor, itemLevel, *item.Quality, qualityModifier, *item.Subclass, materialModifier, *item.Material)
+		} else {
+			var errorMessages []string
+			if !qOk {
+				errorMessages = append(errorMessages, fmt.Sprintf("invalid Quality key: %d", *item.Quality))
+			}
+			if !mOk {
+				errorMessages = append(errorMessages, fmt.Sprintf("invalid Subclass key for MaterialModifier: %d", *item.Subclass))
+			}
+			log.Printf("Item (Entry: %d, Name: '%s'): Could not scale armor. Issues: %s. Original Armor: %d",
+				item.Entry, item.Name, strings.Join(errorMessages, "; "), *item.Armor)
+		}
+	}
+}
+
 // Get the primary stat for an item (strength, agility, intellect, spirit, stamina)
 func (item Item) GetPrimaryStat() (int, int, error) {
 	var primaryStat int64
@@ -192,7 +229,7 @@ func (i Item) GetDpsModifier() (float64, error) {
 	return (qualityModifier * typeModifier), nil
 }
 
-// Get the current expected DPS of the item bsed on the min and max damage and delay
+// Get the current expected DPS of the item based on the min and max damage and delay
 func (item Item) GetDPS() (float64, error) {
 
 	if item.MinDmg1 == nil || item.MaxDmg1 == nil {
@@ -229,9 +266,13 @@ func (item *Item) ScaleDPS(oldLevel, level int) (float64, error) {
 	dps := modifier * float64(level) * scalingFactor
 	adjDps := (dps * (*item.Delay / 1000) / 100)
 
-	//(((Y8*Y4)/100))*((100 - Y5)) Forumula from Weapon Item Genertor
-	minimum := adjDps * float64(100-(rand.IntN(15)+22))
-	maximum := adjDps * float64(100+(rand.IntN(15)+28))
+	// Use deterministic values based on item entry instead of random values
+	// We'll use the item entry to derive consistent min/max modifiers
+	minMod := 70  // Default mid-range value (was 100-(rand.IntN(15)+22) which is ~70)
+	maxMod := 135 // Default mid-range value (was 100+(rand.IntN(15)+28) which is ~135)
+
+	minimum := adjDps * float64(minMod)
+	maximum := adjDps * float64(maxMod)
 
 	// If the weapon has secondary damage, scale that as well based on the ratio of the primary damage
 	if *item.MinDmg2 != 0 && *item.MaxDmg2 != 0 {
@@ -254,9 +295,6 @@ func (item *Item) ScaleDPS(oldLevel, level int) (float64, error) {
 	minimum = math.Ceil(minimum)
 	maximum = math.Ceil(maximum)
 
-	// item.MinDmg1 = &minimum
-	// var min int = int(minimum)
-	// var max int = int(maximum)
 	item.MinDmg1 = &minimum
 	item.MaxDmg1 = &maximum
 
@@ -306,6 +344,35 @@ func (item Item) GetStatPercents(spellStats []spells.ConvItemStat) map[int]*Item
 	}
 
 	return statMap
+}
+
+// UpdateSpellID updates a spell ID in the item's spell slots
+// It replaces oldSpellId with newSpellId in any of the item's spell slots
+func (item *Item) UpdateSpellID(oldSpellId int, newSpellId int) bool {
+	updated := false
+
+	// Check and update each spell slot
+	if item.SpellId1 != nil && *item.SpellId1 == oldSpellId {
+		*item.SpellId1 = newSpellId
+		updated = true
+	}
+
+	if item.SpellId2 != nil && *item.SpellId2 == oldSpellId {
+		*item.SpellId2 = newSpellId
+		updated = true
+	}
+
+	if item.SpellId3 != nil && *item.SpellId3 == oldSpellId {
+		*item.SpellId3 = newSpellId
+		updated = true
+	}
+
+	// If we updated any spell IDs, clear the cached spells so they'll be reloaded
+	if updated {
+		item.Spells = nil
+	}
+
+	return updated
 }
 
 // get an array of all the spells set on the item
@@ -511,12 +578,7 @@ func (item *Item) ScaleItem(itemLevel int, itemQuality int) (bool, error) {
 	*item.StatsCount = len(allStats)
 
 	// Scale Armor Stats
-	if *item.Class == 4 && *item.Armor > 0 {
-		preArmor := *item.Armor
-		*item.Armor = int(math.Ceil(float64(itemLevel) * config.QualityModifiers[*item.Quality] * config.MaterialModifiers[*item.Subclass]))
-
-		log.Printf("New Armor: %v scaled up from previous armor %v material is %v", *item.Armor, preArmor, *item.Material)
-	}
+	item.ScaleArmor(itemLevel)
 
 	// If the item is a weapon scale the DPS
 	if *item.Class == 2 && *item.MinDmg1 > 0 {
@@ -555,19 +617,31 @@ func (item *Item) ScaleItem(itemLevel int, itemQuality int) (bool, error) {
 	// Spells that can not be scaled into stats must get new spells scaled and created
 	for _, spell := range otherSpells {
 		// log.Printf(" --^^^^^^--------SPELL --- Spell %v (%v) Effect %v  AuraEffect %v Spell Desc: %v basePoints %v", spell.Name, spell.ID, spell.Effect1, spell.EffectAura1, spell.Description, spell.EffectBasePoints1)
-		newId, err := spell.ScaleSpell(fromItemLevel, itemLevel, *item.Quality)
+		// Use ForceScaleSpell instead of ScaleSpell to ensure all spells are scaled properly
+		// Determine tier based on item level
+		tier := 1
+		if itemLevel >= 200 {
+			tier = 5
+		} else if itemLevel >= 175 {
+			tier = 4
+		} else if itemLevel >= 150 {
+			tier = 3
+		} else if itemLevel >= 125 {
+			tier = 2
+		}
+
+		log.Printf("Scaling spell %v (ID: %v) with tier %d modifier", spell.Name, spell.ID, tier)
+		err := spell.ForceScaleSpell(fromItemLevel, itemLevel, *item.Quality, tier)
 		if err != nil {
 			log.Printf("Failed to scale spell: %v, Spell %v", err, spell.ID)
 			continue
 		}
 
-		if newId == 0 {
-			log.Printf("Failed to scale spell: %v, Spell %v", err, spell.ID)
-			continue
-		}
-
-		item.UpdateField(fmt.Sprintf("SpellId%v", spell.ItemSpellSlot), newId)
+		// ForceScaleSpell modifies the spell in place, so we use the original spell ID
+		item.UpdateField(fmt.Sprintf("SpellId%v", spell.ItemSpellSlot), spell.ID)
 		item.Spells = append(item.Spells, spell)
+
+		// do one last check on all setting StatsCount based on how many stats have been set
 
 		// log.Printf(" --SCALED---SPELL --- Spell %v (%v) Effect %v AuraEffect %v Spell Desc: %v basePoints %v", spell.Name, spell.ID, spell.Effect1, spell.EffectAura1, spell.Description, spell.EffectBasePoints1)
 	}
@@ -795,6 +869,271 @@ func correctSpellAttackPower(item *Item, allStats map[int]*ItemStat) {
 			}
 		}
 	}
+}
+
+/**
+ * This will determine the class type that would be the user of the item
+ * Melee Strength Attacker: 1
+ * Melee Agility Attacker: 2
+ * Ranged Attacker: 3
+ * Mage: 4
+ * Healer: 5
+ * Tank: 6
+ * Generic: 7 (Could not determine)
+ * @return int
+ **/
+func (item *Item) GetClassUserType() int {
+
+	// loop over the stats and check if any of them are parry, defense, block
+	for i := 1; i <= 7; i++ {
+		statTypeField := fmt.Sprintf("StatType%d", i)
+		statTypePtr, _ := item.GetField(statTypeField)
+
+		// Tanking weapons will have defensive stats on them
+		if statTypePtr == STAT.ParryRating || statTypePtr == STAT.DefenseSkillRating || statTypePtr == STAT.BlockRating || statTypePtr == STAT.BlockValue {
+			return 6
+		}
+
+		// Check for a healer stats like MP5 and Spell Healing Done
+		if statTypePtr == STAT.ManaRegeneration || statTypePtr == STAT.SpellHealingDone {
+			return 5
+		}
+
+		// Check for a Mage stat if they have spell penetration we know it is a mage
+		if statTypePtr == STAT.SpellPenetration {
+			return 4
+		}
+
+		if statTypePtr == STAT.RangedAttackPower || statTypePtr == STAT.CritRangedRating || statTypePtr == STAT.HitRangedRating {
+			return 3
+		}
+	}
+
+	// For armor we can use the type to determine the class type
+	if *item.Class == 4 {
+		// if the item is cloth its a mage and did not have healer stats just treat as a mage item
+		if *item.Material == 1 && *item.InventoryType != 16 {
+			return 4
+		}
+
+		// If it is plate and not a tank then it is a strength melee attack
+		if *item.Material == 4 {
+			return 1
+		}
+
+		// If it is mail/leather armor then it is limited to Mage, Agility Fighter
+		if *item.Material == 2 || *item.Material == 3 {
+			// check for spellpower, spellcrit, spellhit, intellect
+			for i := 1; i <= 7; i++ {
+				statTypeField := fmt.Sprintf("StatType%d", i)
+				statTypePtr, _ := item.GetField(statTypeField)
+				if statTypePtr == STAT.SpellPower || statTypePtr == STAT.CritSpellRating ||
+					statTypePtr == STAT.HitSpellRating || statTypePtr == STAT.Intellect || statTypePtr == STAT.Spirit {
+					return 4
+				}
+			}
+
+			return 2
+		}
+	}
+
+	// Do some weapon checks
+	if *item.Class == 2 {
+		// If it is a fist weapon or ranged throwing weapons its agility class type
+		if *item.Subclass == 13 || *item.Subclass == 16 {
+			return 2
+		}
+
+		if *item.Subclass == 19 {
+			return 4
+		}
+
+		// if it is a polearm or spear 17 or 6 and strength then its strength class type
+		if *item.Subclass == 17 || *item.Subclass == 6 {
+			for i := 1; i <= 7; i++ {
+				statTypeField := fmt.Sprintf("StatType%d", i)
+				statTypePtr, _ := item.GetField(statTypeField)
+				if statTypePtr == STAT.Strength {
+					return 1
+				}
+
+				// or attack power
+				if statTypePtr == STAT.AttackPower {
+					return 1
+				}
+			}
+
+			// otherwise check for agility
+			for i := 1; i <= 7; i++ {
+				statTypeField := fmt.Sprintf("StatType%d", i)
+				statTypePtr, _ := item.GetField(statTypeField)
+				if statTypePtr == STAT.Agility {
+					return 2
+				}
+			}
+
+			// last assume it is a healer
+			return 5
+		}
+
+		if *item.Subclass == 2 || *item.Subclass == 3 || *item.Subclass == 18 {
+			for i := 1; i <= 7; i++ {
+				statTypeField := fmt.Sprintf("StatType%d", i)
+				statTypePtr, _ := item.GetField(statTypeField)
+				if statTypePtr == STAT.Strength {
+					return 1
+				}
+			}
+
+			return 3
+		}
+	}
+
+	// Most specific cases have been addressed now just use the base stats to make a decision for the remaining
+	for i := 1; i <= 7; i++ {
+		statTypeField := fmt.Sprintf("StatType%d", i)
+		statTypePtr, _ := item.GetField(statTypeField)
+		if statTypePtr == STAT.Spirit {
+			return 5
+		}
+	}
+
+	for i := 1; i <= 7; i++ {
+		statTypeField := fmt.Sprintf("StatType%d", i)
+		statTypePtr, _ := item.GetField(statTypeField)
+		if statTypePtr == STAT.Intellect {
+			return 4
+		}
+	}
+
+	for i := 1; i <= 7; i++ {
+		statTypeField := fmt.Sprintf("StatType%d", i)
+		statTypePtr, _ := item.GetField(statTypeField)
+		if statTypePtr == STAT.Strength {
+			return 1
+		}
+	}
+
+	for i := 1; i <= 7; i++ {
+		statTypeField := fmt.Sprintf("StatType%d", i)
+		statTypePtr, _ := item.GetField(statTypeField)
+		if statTypePtr == STAT.Agility {
+			return 2
+		}
+	}
+
+	// If it is attack power melee haste melee crit or anything else then it is a agility
+	for i := 1; i <= 7; i++ {
+		statTypeField := fmt.Sprintf("StatType%d", i)
+		statTypePtr, _ := item.GetField(statTypeField)
+		if statTypePtr == STAT.AttackPower || statTypePtr == STAT.HasteMeleeRating || statTypePtr == STAT.CritMeleeRating {
+			return 7
+		}
+	}
+
+	// If it is spell power spell crit spell hit then it is a mage
+	for i := 1; i <= 7; i++ {
+		statTypeField := fmt.Sprintf("StatType%d", i)
+		statTypePtr, _ := item.GetField(statTypeField)
+		if statTypePtr == STAT.SpellPower || statTypePtr == STAT.CritSpellRating || statTypePtr == STAT.HitSpellRating {
+			return 4
+		}
+	}
+
+	// If it is ranged attack power ranged haste ranged crit or anything else then it is a ranged
+	for i := 1; i <= 7; i++ {
+		statTypeField := fmt.Sprintf("StatType%d", i)
+		statTypePtr, _ := item.GetField(statTypeField)
+		if statTypePtr == STAT.RangedAttackPower || statTypePtr == STAT.HasteRangedRating || statTypePtr == STAT.CritRangedRating {
+			return 3
+		}
+	}
+
+	return 7
+}
+
+func (item *Item) ApplyTierModifiers(optionalTier ...int) {
+	// Use provided tier or default to 0 if not set
+	var tier int
+	if len(optionalTier) > 0 {
+		tier = optionalTier[0]
+	} else {
+		tier = 0
+	}
+
+	// Default tier modifier is 1.0 (no modification)
+	tierModifier := 1.0
+
+	// This is a necessary bonus to catch gear up from previous v2 version
+	catchUpBonus := 1.5
+
+	// If tier is valid (1-5), get the modifier from config
+	if tier > 0 && tier <= 5 {
+		if mod, ok := config.GearTierModifiers[tier]; ok {
+			tierModifier = mod
+		}
+	}
+
+	// Apply tier modifier to all stats on the item
+	for i := 1; i <= 10; i++ {
+		// Get the stat type and value fields using reflection
+		statTypeField := fmt.Sprintf("StatType%d", i)
+		statValueField := fmt.Sprintf("StatValue%d", i)
+
+		// Get the current values
+		statTypePtr, err1 := item.GetField(statTypeField)
+		statValuePtr, err2 := item.GetField(statValueField)
+
+		// Skip if any errors or if stat type is 0 or stat value is 0
+		if err1 != nil || err2 != nil || statTypePtr == 0 || statValuePtr == 0 {
+			continue
+		}
+
+		// Get the stat modifier (inverse of the cost modifier)
+		statModifier, ok := config.StatModifiers[statTypePtr]
+		if !ok {
+			statModifier = 1.0
+		}
+
+		// Inverse of the stat modifier (e.g., 0.5 cost means 2.0 multiplier)
+		inverseModifier := 1.0
+		if statModifier > 0 {
+			inverseModifier = 1.0 / statModifier
+		}
+
+		// Apply tier modifier and stat modifier
+		newValue := int(float64(statValuePtr) * tierModifier * inverseModifier * catchUpBonus)
+
+		// Update the item's stat value
+		item.UpdateField(statValueField, newValue)
+
+		// We've already updated the field directly with UpdateField above
+		// No need to update StatsMap as we're focusing on the direct stat values
+	}
+
+	// Apply tier modifier to spells
+	// spells, err := item.GetSpells()
+	// if err == nil && len(spells) > 0 {
+	// 	for i := range spells {
+	// 		// Get the item level
+	// 		currentLevel := 0
+	// 		if item.ItemLevel != nil {
+	// 			currentLevel = *item.ItemLevel
+	// 		}
+
+	// 		// Get the item quality
+	// 		quality := 2 // Default to uncommon
+	// 		if item.Quality != nil {
+	// 			quality = *item.Quality
+	// 		}
+
+	// 		// Scale spells with the tier modifier
+	// 		spells[i].ForceScaleSpell(currentLevel, currentLevel, quality, tier)
+	// 	}
+
+	// 	// Update the item's spells
+	// 	item.Spells = spells
+	// }
 }
 
 func ItemToSql(item Item, reqLevel int, difficulty int) string {

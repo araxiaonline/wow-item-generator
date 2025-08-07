@@ -72,6 +72,31 @@ var dungeonLevels = map[int]int{
 	668: 80, // Halls of Reflection
 }
 
+var raidLevels = map[int]int{
+	249: 60, // Onyxia's Lair
+	409: 60, // Molten Core
+	469: 60, // Blackwing Lair
+	309: 60, // Zul'Gurub
+	531: 60, // Ahn'Qiraj Temple
+	509: 60, // Ruins of Ahn'Qiraj
+	532: 70, // Karazhan
+	548: 70, // Serpentshrine Cavern
+	550: 70, // Tempest Keep
+	534: 70, // The Battle for Mount Hyjal
+	564: 70, // Black Temple
+	565: 70, // Gruul's Lair
+	568: 70, // Zul'Aman
+	580: 70, // Sunwell Plateau
+	533: 80, // Naxxramas
+	616: 80, // The Eye of Eternity
+	615: 80, // The Obsidian Sanctum
+	624: 80, // Vault of Archavon
+	603: 80, // Ulduar
+	649: 80, // Trial of the Crusader
+	631: 80, // Icecrown Citadel
+	724: 80, // The Ruby Sanctum
+}
+
 func (db *MySqlDb) GetDungeons(expansionId int) ([]Dungeon, error) {
 	dungeons := []Dungeon{}
 
