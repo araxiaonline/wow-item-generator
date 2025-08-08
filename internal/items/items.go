@@ -45,10 +45,167 @@ type StatScaleParams struct {
 	StatValue    int
 }
 
-// Create a new item from the database item
+// Create a new item from the database item with deep copy to prevent shared pointer issues
 func ItemFromDbItem(dbItem mysql.DbItem) Item {
+	// Create a deep copy to avoid shared pointer references
+	copy := dbItem
+
+	// Create new pointers for all StatType fields
+	if dbItem.StatType1 != nil {
+		val := *dbItem.StatType1
+		copy.StatType1 = &val
+	}
+	if dbItem.StatType2 != nil {
+		val := *dbItem.StatType2
+		copy.StatType2 = &val
+	}
+	if dbItem.StatType3 != nil {
+		val := *dbItem.StatType3
+		copy.StatType3 = &val
+	}
+	if dbItem.StatType4 != nil {
+		val := *dbItem.StatType4
+		copy.StatType4 = &val
+	}
+	if dbItem.StatType5 != nil {
+		val := *dbItem.StatType5
+		copy.StatType5 = &val
+	}
+	if dbItem.StatType6 != nil {
+		val := *dbItem.StatType6
+		copy.StatType6 = &val
+	}
+	if dbItem.StatType7 != nil {
+		val := *dbItem.StatType7
+		copy.StatType7 = &val
+	}
+	if dbItem.StatType8 != nil {
+		val := *dbItem.StatType8
+		copy.StatType8 = &val
+	}
+	if dbItem.StatType9 != nil {
+		val := *dbItem.StatType9
+		copy.StatType9 = &val
+	}
+	if dbItem.StatType10 != nil {
+		val := *dbItem.StatType10
+		copy.StatType10 = &val
+	}
+
+	// Create new pointers for all StatValue fields
+	if dbItem.StatValue1 != nil {
+		val := *dbItem.StatValue1
+		copy.StatValue1 = &val
+	}
+	if dbItem.StatValue2 != nil {
+		val := *dbItem.StatValue2
+		copy.StatValue2 = &val
+	}
+	if dbItem.StatValue3 != nil {
+		val := *dbItem.StatValue3
+		copy.StatValue3 = &val
+	}
+	if dbItem.StatValue4 != nil {
+		val := *dbItem.StatValue4
+		copy.StatValue4 = &val
+	}
+	if dbItem.StatValue5 != nil {
+		val := *dbItem.StatValue5
+		copy.StatValue5 = &val
+	}
+	if dbItem.StatValue6 != nil {
+		val := *dbItem.StatValue6
+		copy.StatValue6 = &val
+	}
+	if dbItem.StatValue7 != nil {
+		val := *dbItem.StatValue7
+		copy.StatValue7 = &val
+	}
+	if dbItem.StatValue8 != nil {
+		val := *dbItem.StatValue8
+		copy.StatValue8 = &val
+	}
+	if dbItem.StatValue9 != nil {
+		val := *dbItem.StatValue9
+		copy.StatValue9 = &val
+	}
+	if dbItem.StatValue10 != nil {
+		val := *dbItem.StatValue10
+		copy.StatValue10 = &val
+	}
+
+	// Create new pointers for other critical fields
+	if dbItem.Class != nil {
+		val := *dbItem.Class
+		copy.Class = &val
+	}
+	if dbItem.Subclass != nil {
+		val := *dbItem.Subclass
+		copy.Subclass = &val
+	}
+	if dbItem.Quality != nil {
+		val := *dbItem.Quality
+		copy.Quality = &val
+	}
+	if dbItem.ItemLevel != nil {
+		val := *dbItem.ItemLevel
+		copy.ItemLevel = &val
+	}
+	if dbItem.Armor != nil {
+		val := *dbItem.Armor
+		copy.Armor = &val
+	}
+	if dbItem.FireRes != nil {
+		val := *dbItem.FireRes
+		copy.FireRes = &val
+	}
+	if dbItem.Material != nil {
+		val := *dbItem.Material
+		copy.Material = &val
+	}
+	if dbItem.InventoryType != nil {
+		val := *dbItem.InventoryType
+		copy.InventoryType = &val
+	}
+	if dbItem.MinDmg1 != nil {
+		val := *dbItem.MinDmg1
+		copy.MinDmg1 = &val
+	}
+	if dbItem.MaxDmg1 != nil {
+		val := *dbItem.MaxDmg1
+		copy.MaxDmg1 = &val
+	}
+	if dbItem.Delay != nil {
+		val := *dbItem.Delay
+		copy.Delay = &val
+	}
+	if dbItem.SpellId1 != nil {
+		val := *dbItem.SpellId1
+		copy.SpellId1 = &val
+	}
+	if dbItem.SpellTrigger1 != nil {
+		val := *dbItem.SpellTrigger1
+		copy.SpellTrigger1 = &val
+	}
+	if dbItem.SpellId2 != nil {
+		val := *dbItem.SpellId2
+		copy.SpellId2 = &val
+	}
+	if dbItem.SpellTrigger2 != nil {
+		val := *dbItem.SpellTrigger2
+		copy.SpellTrigger2 = &val
+	}
+	if dbItem.SpellId3 != nil {
+		val := *dbItem.SpellId3
+		copy.SpellId3 = &val
+	}
+	if dbItem.SpellTrigger3 != nil {
+		val := *dbItem.SpellTrigger3
+		copy.SpellTrigger3 = &val
+	}
+
 	return Item{
-		DbItem: dbItem,
+		DbItem: copy,
 	}
 }
 
@@ -883,23 +1040,6 @@ func correctSpellAttackPower(item *Item, allStats map[int]*ItemStat) {
  * @return int
  **/
 func (item *Item) GetClassUserType() int {
-	// Debug: Print item details for troubleshooting
-	log.Printf("[DEBUG] GetClassUserType for %s (Entry: %d)", item.Name, item.Entry)
-	log.Printf("[DEBUG] Class: %v, Material: %v, InventoryType: %v, Subclass: %v",
-		item.Class, item.Material, item.InventoryType, item.Subclass)
-
-	// Debug: Print all stats on the item
-	log.Printf("[DEBUG] Item stats:")
-	for i := 1; i <= 7; i++ {
-		statTypeField := fmt.Sprintf("StatType%d", i)
-		statValueField := fmt.Sprintf("StatValue%d", i)
-		statType, _ := item.GetField(statTypeField)
-		statValue, _ := item.GetField(statValueField)
-		if statType > 0 {
-			log.Printf("[DEBUG]   Stat%d: Type=%d, Value=%d", i, statType, statValue)
-		}
-	}
-
 	// loop over the stats and check if any of them are parry, defense, block
 	for i := 1; i <= 7; i++ {
 		statTypeField := fmt.Sprintf("StatType%d", i)
@@ -928,17 +1068,17 @@ func (item *Item) GetClassUserType() int {
 	// For armor we can use the type to determine the class type
 	if *item.Class == 4 {
 		// if the item is cloth its a mage and did not have healer stats just treat as a mage item
-		if *item.Material == 1 && *item.InventoryType != 16 {
+		if *item.Subclass == 1 && *item.InventoryType != 16 {
 			return 4
 		}
 
 		// If it is plate and not a tank then it is a strength melee attack
-		if *item.Material == 4 {
+		if *item.Subclass == 4 {
 			return 1
 		}
 
 		// If it is mail/leather armor then it is limited to Mage, Agility Fighter
-		if *item.Material == 2 || *item.Material == 3 {
+		if *item.Subclass == 2 || *item.Subclass == 3 {
 			// check for spellpower, spellcrit, spellhit, intellect
 			for i := 1; i <= 7; i++ {
 				statTypeField := fmt.Sprintf("StatType%d", i)
@@ -1009,6 +1149,7 @@ func (item *Item) GetClassUserType() int {
 	for i := 1; i <= 7; i++ {
 		statTypeField := fmt.Sprintf("StatType%d", i)
 		statTypePtr, _ := item.GetField(statTypeField)
+		// fmt.Printf("itemName: %s StatType%d: %v \n", item.Name, i, statTypePtr)
 		if statTypePtr == STAT.Spirit {
 			return 5
 		}
@@ -1065,7 +1206,19 @@ func (item *Item) GetClassUserType() int {
 		}
 	}
 
-	log.Printf("[DEBUG] GetClassUserType for %s returning: 7 (Generic - Could not determine)", item.Name)
+	// if we have made it here then the only thing left to do is base it purely on armor material type
+	if *item.Class == 4 && *item.Subclass == 1 {
+		return 4
+	}
+
+	if *item.Class == 4 && *item.Subclass == 4 {
+		return 1
+	}
+
+	if *item.Class == 4 && (*item.Subclass == 2 || *item.Subclass == 3) {
+		return 2
+	}
+
 	return 7
 }
 

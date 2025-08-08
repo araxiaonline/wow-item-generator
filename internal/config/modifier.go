@@ -21,7 +21,7 @@ var InvTypeModifiers = map[int]float64{
 	19: 1.0,   // Tabard (assuming same as Chest for simplicity)
 	20: 1.0,   // Robe (see also Chest = 5)
 	21: 0.80,  // Main hand
-	22: 0.50,  // Off Hand weapons (see also One-Hand = 13)
+	22: 0.60,  // Off Hand weapons (see also One-Hand = 13)
 	23: 0.56,  // Held in Off-Hand (class = armor, not weapon even if in weapon slot)
 	24: 1.0,   // Ammo (assuming same as Chest for simplicity)
 	25: 0.38,  // Thrown
@@ -89,14 +89,14 @@ var StatModifiers = map[int]float64{
 	35: 1.0,  // ITEM_MOD_RESILIENCE_RATING
 	36: 1.0,  // ITEM_MOD_HASTE_RATING
 	37: 1.0,  // ITEM_MOD_EXPERTISE_RATING
-	38: 0.75, // ITEM_MOD_ATTACK_POWER
-	39: 0.75, // ITEM_MOD_RANGED_ATTACK_POWER
-	40: 0.75, // ITEM_MOD_FERAL_ATTACK_POWER (not used as of 3.3)
-	41: 0.75, // ITEM_MOD_SPELL_HEALING_DONE
-	42: 0.75, // ITEM_MOD_SPELL_DAMAGE_DONE
+	38: 0.65, // ITEM_MOD_ATTACK_POWER
+	39: 0.65, // ITEM_MOD_RANGED_ATTACK_POWER
+	40: 0.65, // ITEM_MOD_FERAL_ATTACK_POWER (not used as of 3.3)
+	41: 0.65, // ITEM_MOD_SPELL_HEALING_DONE
+	42: 0.65, // ITEM_MOD_SPELL_DAMAGE_DONE
 	43: 2.5,  // ITEM_MOD_MANA_REGENERATION
 	44: 1.0,  // ITEM_MOD_ARMOR_PENETRATION_RATING
-	45: 0.75, // ITEM_MOD_SPELL_POWER
+	45: 0.65, // ITEM_MOD_SPELL_POWER
 	46: 1.0,  // ITEM_MOD_HEALTH_REGEN
 	47: 1.8,  // ITEM_MOD_SPELL_PENETRATION
 	48: 1.5,  // ITEM_MOD_BLOCK_VALUE

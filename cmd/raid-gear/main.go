@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"math"
 	"math/rand"
 	"os"
 	"strings"
@@ -179,21 +178,21 @@ func getSimilarWeaponSubclasses(originalSubclass int) []int {
 	// Weapon subclass mappings for fallback searches
 	weaponGroups := map[int][]int{
 		// Two-handed weapons
-		1:  {1, 5, 8},   // 2H Axe -> 2H Axe, 2H Mace, 2H Sword
-		5:  {1, 5, 8},   // 2H Mace -> 2H Axe, 2H Mace, 2H Sword
-		8:  {1, 5, 8},   // 2H Sword -> 2H Axe, 2H Mace, 2H Sword
-		6:  {6, 17},     // Polearm -> Polearm, Spear
-		17: {6, 17},     // Spear -> Polearm, Spear
-		9:  {9, 10},     // Staff -> Staff, Stave
-		10: {9, 10},     // Stave -> Staff, Stave
-		
+		1:  {1, 5, 8}, // 2H Axe -> 2H Axe, 2H Mace, 2H Sword
+		5:  {1, 5, 8}, // 2H Mace -> 2H Axe, 2H Mace, 2H Sword
+		8:  {1, 5, 8}, // 2H Sword -> 2H Axe, 2H Mace, 2H Sword
+		6:  {6, 17},   // Polearm -> Polearm, Spear
+		17: {6, 17},   // Spear -> Polearm, Spear
+		9:  {9, 10},   // Staff -> Staff, Stave
+		10: {9, 10},   // Stave -> Staff, Stave
+
 		// One-handed weapons
 		0:  {0, 4, 7, 15}, // 1H Axe -> 1H Axe, 1H Mace, 1H Sword, Fist
 		4:  {0, 4, 7, 15}, // 1H Mace -> 1H Axe, 1H Mace, 1H Sword, Fist
 		7:  {0, 4, 7, 15}, // 1H Sword -> 1H Axe, 1H Mace, 1H Sword, Fist
 		15: {0, 4, 7, 15}, // Fist -> 1H Axe, 1H Mace, 1H Sword, Fist
 		13: {13},          // Dagger -> Dagger (unique)
-		
+
 		// Ranged weapons
 		2:  {2, 3, 18}, // Bow -> Bow, Gun, Crossbow
 		3:  {2, 3, 18}, // Gun -> Bow, Gun, Crossbow
@@ -202,7 +201,7 @@ func getSimilarWeaponSubclasses(originalSubclass int) []int {
 		19: {19},       // Wand -> Wand (unique)
 		20: {20},       // Fishing Pole -> Fishing Pole (unique)
 	}
-	
+
 	if alternatives, exists := weaponGroups[originalSubclass]; exists {
 		// Return alternatives excluding the original subclass
 		var result []int
@@ -213,18 +212,18 @@ func getSimilarWeaponSubclasses(originalSubclass int) []int {
 		}
 		return result
 	}
-	
+
 	return []int{} // No alternatives found
 }
 
 // addMissingKeyStats automatically adds missing key stats (SPELL_POWER/ATTACK_POWER) when validation fails
 func (g *MoltenCoreGenerator) addMissingKeyStats(item *items.Item, classType int) bool {
 	var addedStats []string
-	
+
 	// Determine what key stat should be added based on class type
 	var targetStatType int
 	var statName string
-	
+
 	switch classType {
 	case 4, 5: // Mage, Healer - need SPELL_POWER
 		targetStatType = 45 // SPELL_POWER
@@ -235,7 +234,7 @@ func (g *MoltenCoreGenerator) addMissingKeyStats(item *items.Item, classType int
 	default:
 		return false // Unknown class type, can't determine what stat to add
 	}
-	
+
 	// Check if the item already has this key stat
 	for i := 1; i <= 8; i++ {
 		statTypeField := fmt.Sprintf("StatType%d", i)
@@ -243,33 +242,33 @@ func (g *MoltenCoreGenerator) addMissingKeyStats(item *items.Item, classType int
 			return false // Already has the key stat
 		}
 	}
-	
+
 	// Find an empty stat slot to add the missing key stat
 	for i := 1; i <= 8; i++ {
 		statTypeField := fmt.Sprintf("StatType%d", i)
 		statValueField := fmt.Sprintf("StatValue%d", i)
-		
+
 		if statType, err := item.GetField(statTypeField); err == nil && statType == 0 {
-			// Found empty slot, calculate appropriate stat value
-			baseValue := rand.Intn(151) + 350 // Random between 350-500
-			
+			// Found empty slot, calculate appropriate stat value (reduced by 50% to prevent over-correction)
+			baseValue := rand.Intn(76) + 175 // Random between 175-250 (50% of original 350-500)
+
 			// Apply scaling based on item level and quality
 			scaledValue := g.calculateScaledStatValue(baseValue, targetStatType)
-			
+
 			// Set the stat
 			item.UpdateField(statTypeField, targetStatType)
 			item.UpdateField(statValueField, scaledValue)
-			
+
 			addedStats = append(addedStats, fmt.Sprintf("%s: %d", statName, scaledValue))
-			
+
 			if g.debug {
 				log.Printf("Auto-added missing key stat %s (%d) = %d to %s", statName, targetStatType, scaledValue, item.Name)
 			}
-			
+
 			return true
 		}
 	}
-	
+
 	return false // No empty slots available
 }
 
@@ -280,17 +279,17 @@ func (g *MoltenCoreGenerator) calculateScaledStatValue(baseValue, statType int) 
 	if factor, exists := config.ScalingFactor[statType]; exists {
 		scalingFactor = factor
 	}
-	
+
 	// Apply item level and quality scaling
 	itemLevelModifier := float64(g.itemLevel) / 100.0
 	qualityModifier := 1.0
 	if modifier, exists := config.QualityModifiers[g.quality]; exists {
 		qualityModifier = modifier
 	}
-	
+
 	// Calculate final value
 	finalValue := float64(baseValue) * scalingFactor * itemLevelModifier * qualityModifier
-	
+
 	return int(finalValue)
 }
 
@@ -305,7 +304,7 @@ func getSimilarArmorSubclasses(originalSubclass int) []int {
 		6: {6},    // Shield -> Shield only
 		0: {0},    // Miscellaneous -> Miscellaneous only
 	}
-	
+
 	if alternatives, exists := armorGroups[originalSubclass]; exists {
 		// Return alternatives excluding the original subclass
 		var result []int
@@ -316,7 +315,7 @@ func getSimilarArmorSubclasses(originalSubclass int) []int {
 		}
 		return result
 	}
-	
+
 	return []int{} // No alternatives found
 }
 
@@ -348,6 +347,74 @@ func NewMoltenCoreGenerator(db *mysql.MySqlDb, debug bool) *MoltenCoreGenerator 
 	}
 }
 
+// getInventoryTypeString returns a human-readable string for inventory type
+func getInventoryTypeString(inventoryType *int) string {
+	if inventoryType == nil {
+		return "nil"
+	}
+	
+	switch *inventoryType {
+	case 0:
+		return "Non-equippable"
+	case 1:
+		return "Head"
+	case 2:
+		return "Neck"
+	case 3:
+		return "Shoulder"
+	case 4:
+		return "Shirt"
+	case 5:
+		return "Chest"
+	case 6:
+		return "Waist"
+	case 7:
+		return "Legs"
+	case 8:
+		return "Feet"
+	case 9:
+		return "Wrists"
+	case 10:
+		return "Hands"
+	case 11:
+		return "Finger"
+	case 12:
+		return "Trinket"
+	case 13:
+		return "One-Hand"
+	case 14:
+		return "Shield"
+	case 15:
+		return "Ranged"
+	case 16:
+		return "Back"
+	case 17:
+		return "Two-Hand"
+	case 18:
+		return "Bag"
+	case 19:
+		return "Tabard"
+	case 20:
+		return "Robe"
+	case 21:
+		return "Main-Hand"
+	case 22:
+		return "Off-Hand"
+	case 23:
+		return "Held-In-Off-Hand"
+	case 24:
+		return "Ammo"
+	case 25:
+		return "Thrown"
+	case 26:
+		return "Ranged-Right"
+	case 28:
+		return "Relic"
+	default:
+		return fmt.Sprintf("Unknown(%d)", *inventoryType)
+	}
+}
+
 func getClassString(class int) string {
 	switch class {
 	case 1:
@@ -365,6 +432,256 @@ func getClassString(class int) string {
 	default:
 		return "Unknown"
 	}
+}
+
+// generateClassAppropriateStats generates appropriate stats for an item based on class type
+func (g *MoltenCoreGenerator) generateClassAppropriateStats(item *items.Item, classType int) {
+	// Clear existing stats first
+	g.clearItemStats(item)
+	
+	// Determine appropriate stats based on class type and item type
+	isWeapon := item.Class != nil && *item.Class == 2
+	isTrinket := item.InventoryType != nil && *item.InventoryType == 0
+	isRing := item.InventoryType != nil && *item.InventoryType == 11
+	
+	// Base stat values scaled for item level
+	baseStatValue := g.calculateBaseStatValue()
+	highStatValue := int(float64(baseStatValue) * 1.5) // Primary stats get higher values
+	
+	statSlot := 1
+	
+	switch classType {
+	case 1: // Strength Melee
+		// Primary stats: Strength, Stamina
+		statSlot = g.setItemStat(item, statSlot, 4, highStatValue)   // Strength
+		statSlot = g.setItemStat(item, statSlot, 7, baseStatValue)   // Stamina
+		
+		if isWeapon {
+			// Weapons: Attack Power + 2 secondary stats
+			statSlot = g.setItemStat(item, statSlot, 38, highStatValue*2) // Attack Power (higher value)
+			// Add 2 random secondary stats
+			secondaryStats := []int{18, 27, 15} // Crit Rating, Haste Rating, Hit Rating
+			for i := 0; i < 2 && statSlot <= 7; i++ {
+				statType := secondaryStats[rand.Intn(len(secondaryStats))]
+				statSlot = g.setItemStat(item, statSlot, statType, baseStatValue)
+			}
+		} else {
+			// Armor: Add more secondary stats
+			secondaryStats := []int{18, 27, 15, 43} // Crit, Haste, Hit, Armor Pen
+			for i := 0; i < 3 && statSlot <= 7; i++ {
+				statType := secondaryStats[rand.Intn(len(secondaryStats))]
+				statSlot = g.setItemStat(item, statSlot, statType, baseStatValue)
+			}
+		}
+		
+	case 2: // Agility Melee
+		// Primary stats: Agility, Stamina
+		statSlot = g.setItemStat(item, statSlot, 3, highStatValue)   // Agility
+		statSlot = g.setItemStat(item, statSlot, 7, baseStatValue)   // Stamina
+		
+		if isWeapon {
+			// Weapons: Attack Power + 2 secondary stats
+			statSlot = g.setItemStat(item, statSlot, 38, highStatValue*2) // Attack Power
+			secondaryStats := []int{19, 28, 16} // Crit Ranged, Haste Ranged, Hit Ranged
+			for i := 0; i < 2 && statSlot <= 7; i++ {
+				statType := secondaryStats[rand.Intn(len(secondaryStats))]
+				statSlot = g.setItemStat(item, statSlot, statType, baseStatValue)
+			}
+		} else {
+			// Armor: Add more secondary stats
+			secondaryStats := []int{19, 28, 16, 43} // Crit Ranged, Haste Ranged, Hit Ranged, Armor Pen
+			for i := 0; i < 3 && statSlot <= 7; i++ {
+				statType := secondaryStats[rand.Intn(len(secondaryStats))]
+				statSlot = g.setItemStat(item, statSlot, statType, baseStatValue)
+			}
+		}
+		
+	case 3: // Ranged Attacker
+		// Primary stats: Agility, Stamina
+		statSlot = g.setItemStat(item, statSlot, 3, highStatValue)   // Agility
+		statSlot = g.setItemStat(item, statSlot, 7, baseStatValue)   // Stamina
+		
+		if isWeapon {
+			// Weapons: Ranged Attack Power + 2 secondary stats
+			statSlot = g.setItemStat(item, statSlot, 39, highStatValue*2) // Ranged Attack Power
+			secondaryStats := []int{19, 28, 16} // Crit Ranged, Haste Ranged, Hit Ranged
+			for i := 0; i < 2 && statSlot <= 7; i++ {
+				statType := secondaryStats[rand.Intn(len(secondaryStats))]
+				statSlot = g.setItemStat(item, statSlot, statType, baseStatValue)
+			}
+		} else {
+			// Armor: Add more secondary stats
+			secondaryStats := []int{19, 28, 16, 43} // Crit Ranged, Haste Ranged, Hit Ranged, Armor Pen
+			for i := 0; i < 3 && statSlot <= 7; i++ {
+				statType := secondaryStats[rand.Intn(len(secondaryStats))]
+				statSlot = g.setItemStat(item, statSlot, statType, baseStatValue)
+			}
+		}
+		
+	case 4: // Mage
+		// Primary stats: Intellect, Stamina
+		statSlot = g.setItemStat(item, statSlot, 5, highStatValue)   // Intellect
+		statSlot = g.setItemStat(item, statSlot, 7, baseStatValue)   // Stamina
+		
+		if isWeapon {
+			// Weapons: Spell Power + 2 secondary stats
+			statSlot = g.setItemStat(item, statSlot, 45, highStatValue*2) // Spell Power
+			secondaryStats := []int{20, 29, 17} // Crit Spell, Haste Spell, Hit Spell
+			for i := 0; i < 2 && statSlot <= 7; i++ {
+				statType := secondaryStats[rand.Intn(len(secondaryStats))]
+				statSlot = g.setItemStat(item, statSlot, statType, baseStatValue)
+			}
+		} else {
+			// Armor: Add more secondary stats
+			secondaryStats := []int{20, 29, 17, 46} // Crit Spell, Haste Spell, Hit Spell, Spell Penetration
+			for i := 0; i < 3 && statSlot <= 7; i++ {
+				statType := secondaryStats[rand.Intn(len(secondaryStats))]
+				statSlot = g.setItemStat(item, statSlot, statType, baseStatValue)
+			}
+		}
+		
+	case 5: // Healer
+		// Primary stats: Intellect, Spirit, Stamina
+		statSlot = g.setItemStat(item, statSlot, 5, highStatValue)   // Intellect
+		statSlot = g.setItemStat(item, statSlot, 6, highStatValue)   // Spirit
+		statSlot = g.setItemStat(item, statSlot, 7, baseStatValue)   // Stamina
+		
+		if isWeapon {
+			// Weapons: Spell Power + 1 secondary stat
+			statSlot = g.setItemStat(item, statSlot, 45, highStatValue*2) // Spell Power
+			secondaryStats := []int{42, 29} // Mana Regen, Haste Spell
+			if statSlot <= 7 {
+				statType := secondaryStats[rand.Intn(len(secondaryStats))]
+				statSlot = g.setItemStat(item, statSlot, statType, baseStatValue)
+			}
+		} else {
+			// Armor: Add more secondary stats
+			secondaryStats := []int{42, 29, 40} // Mana Regen, Haste Spell, Spell Healing
+			for i := 0; i < 2 && statSlot <= 7; i++ {
+				statType := secondaryStats[rand.Intn(len(secondaryStats))]
+				statSlot = g.setItemStat(item, statSlot, statType, baseStatValue)
+			}
+		}
+		
+	case 6: // Tank
+		// Primary stats: Strength, Stamina
+		statSlot = g.setItemStat(item, statSlot, 4, highStatValue)   // Strength
+		statSlot = g.setItemStat(item, statSlot, 7, highStatValue*2) // Stamina (higher for tanks)
+		
+		if isWeapon {
+			// Weapons: Defense + 2 secondary stats
+			statSlot = g.setItemStat(item, statSlot, 12, baseStatValue)  // Defense Rating
+			secondaryStats := []int{14, 13, 47} // Parry, Dodge, Block Value
+			for i := 0; i < 2 && statSlot <= 7; i++ {
+				statType := secondaryStats[rand.Intn(len(secondaryStats))]
+				statSlot = g.setItemStat(item, statSlot, statType, baseStatValue)
+			}
+		} else {
+			// Armor: Add more defensive stats
+			secondaryStats := []int{12, 14, 13, 47} // Defense, Parry, Dodge, Block Value
+			for i := 0; i < 3 && statSlot <= 7; i++ {
+				statType := secondaryStats[rand.Intn(len(secondaryStats))]
+				statSlot = g.setItemStat(item, statSlot, statType, baseStatValue)
+			}
+		}
+		
+	default: // Generic - use basic stats
+		statSlot = g.setItemStat(item, statSlot, 7, baseStatValue)   // Stamina
+		statSlot = g.setItemStat(item, statSlot, 4, baseStatValue)   // Strength
+		statSlot = g.setItemStat(item, statSlot, 3, baseStatValue)   // Agility
+	}
+	
+	// Handle special item types
+	if isTrinket {
+		// Trinkets should have exactly 2 stats
+		g.clearItemStats(item)
+		statSlot = 1
+		switch classType {
+		case 1, 2, 3: // Physical DPS
+			statSlot = g.setItemStat(item, statSlot, 38, highStatValue*2) // Attack Power
+			statSlot = g.setItemStat(item, statSlot, 18, baseStatValue)   // Crit Rating
+		case 4, 5: // Casters
+			statSlot = g.setItemStat(item, statSlot, 45, highStatValue*2) // Spell Power
+			statSlot = g.setItemStat(item, statSlot, 20, baseStatValue)   // Crit Spell Rating
+		case 6: // Tank
+			statSlot = g.setItemStat(item, statSlot, 7, highStatValue*2)  // Stamina
+			statSlot = g.setItemStat(item, statSlot, 12, baseStatValue)   // Defense Rating
+		}
+	} else if isRing {
+		// Rings should have 3-4 stats, clear and rebuild
+		g.clearItemStats(item)
+		statSlot = 1
+		switch classType {
+		case 1: // Strength Melee
+			statSlot = g.setItemStat(item, statSlot, 4, baseStatValue)    // Strength
+			statSlot = g.setItemStat(item, statSlot, 38, highStatValue)   // Attack Power
+			statSlot = g.setItemStat(item, statSlot, 18, baseStatValue)   // Crit Rating
+			statSlot = g.setItemStat(item, statSlot, 27, baseStatValue)   // Haste Rating
+		case 2, 3: // Agility/Ranged
+			statSlot = g.setItemStat(item, statSlot, 3, baseStatValue)    // Agility
+			statSlot = g.setItemStat(item, statSlot, 38, highStatValue)   // Attack Power
+			statSlot = g.setItemStat(item, statSlot, 19, baseStatValue)   // Crit Ranged Rating
+		case 4, 5: // Casters
+			statSlot = g.setItemStat(item, statSlot, 5, baseStatValue)    // Intellect
+			statSlot = g.setItemStat(item, statSlot, 45, highStatValue)   // Spell Power
+			statSlot = g.setItemStat(item, statSlot, 20, baseStatValue)   // Crit Spell Rating
+		case 6: // Tank
+			statSlot = g.setItemStat(item, statSlot, 7, highStatValue)    // Stamina
+			statSlot = g.setItemStat(item, statSlot, 12, baseStatValue)   // Defense Rating
+			statSlot = g.setItemStat(item, statSlot, 14, baseStatValue)   // Parry Rating
+		}
+	}
+	
+	// Scale the item to the target level and quality
+	item.ScaleItem(g.itemLevel, g.quality)
+}
+
+// clearItemStats clears all stats from an item
+func (g *MoltenCoreGenerator) clearItemStats(item *items.Item) {
+	zero := 0
+	for i := 1; i <= 10; i++ {
+		statTypeField := fmt.Sprintf("StatType%d", i)
+		statValueField := fmt.Sprintf("StatValue%d", i)
+		item.UpdateField(statTypeField, zero)
+		item.UpdateField(statValueField, zero)
+	}
+}
+
+// setItemStat sets a stat on an item and returns the next available slot
+func (g *MoltenCoreGenerator) setItemStat(item *items.Item, slot int, statType int, statValue int) int {
+	if slot > 10 {
+		return slot // No more slots available
+	}
+	
+	statTypeField := fmt.Sprintf("StatType%d", slot)
+	statValueField := fmt.Sprintf("StatValue%d", slot)
+	
+	item.UpdateField(statTypeField, statType)
+	item.UpdateField(statValueField, statValue)
+	
+	return slot + 1
+}
+
+// calculateBaseStatValue calculates appropriate base stat values for the item level
+func (g *MoltenCoreGenerator) calculateBaseStatValue() int {
+	// Base calculation similar to what reference items would have
+	baseValue := int(float64(g.itemLevel) * 2.5) // Rough scaling factor
+	
+	// Apply quality modifier
+	if qualityMod, exists := config.QualityModifiers[g.quality]; exists {
+		baseValue = int(float64(baseValue) * qualityMod)
+	}
+	
+	// Add some randomness (±10%)
+	variation := int(float64(baseValue) * 0.1)
+	baseValue += rand.Intn(variation*2) - variation
+	
+	// Ensure minimum value
+	if baseValue < 10 {
+		baseValue = 10
+	}
+	
+	return baseValue
 }
 
 func main() {
@@ -420,8 +737,9 @@ func main() {
 		fmt.Printf("[%d/%d] Processing: %s (Entry: %d)\n", i+1, len(rareItems), dbItem.Name, dbItem.Entry)
 
 		// Store original item for comparison (before any modifications)
-		// Create a deep copy to preserve original values
+		// ItemFromDbItem now creates a deep copy to preserve original values
 		originalItem := items.ItemFromDbItem(dbItem)
+
 		// Scale original item to show actual baseline stats at original item level
 		if originalItem.ItemLevel != nil && *originalItem.ItemLevel > 0 {
 			originalItem.ScaleItem(*originalItem.ItemLevel, *originalItem.Quality)
@@ -750,14 +1068,20 @@ func (g *MoltenCoreGenerator) GenerateItem(dbItem mysql.DbItem, validateOnly boo
 		return result
 	}
 
-	// Filter items by class type compatibility
+	// Filter items by class type AND inventory type compatibility
 	var compatibleChoices []items.Item
 	for _, highLevelItem := range highLevelItems {
 		highLevelItem := items.ItemFromDbItem(highLevelItem)
 		highLevelItem.ScaleItem(*highLevelItem.ItemLevel, *item.Quality)
 		highClassType := highLevelItem.GetClassUserType()
 
-		if highClassType == classType {
+		// Check both class type and inventory type compatibility
+		classTypeMatches := highClassType == classType
+		inventoryTypeMatches := (item.InventoryType != nil && highLevelItem.InventoryType != nil && 
+			*item.InventoryType == *highLevelItem.InventoryType)
+
+		// Use reference item only if both class type and inventory type match
+		if classTypeMatches && inventoryTypeMatches {
 			compatibleChoices = append(compatibleChoices, highLevelItem)
 		}
 	}
@@ -765,48 +1089,141 @@ func (g *MoltenCoreGenerator) GenerateItem(dbItem mysql.DbItem, validateOnly boo
 	if g.debug {
 		log.Printf("Found %d compatible reference items for class type %s",
 			len(compatibleChoices), getClassString(classType))
+		
+		// If no compatible items found, show diagnostic info
+		if len(compatibleChoices) == 0 {
+			log.Printf("[DIAGNOSTIC] Total items returned from DB: %d", len(highLevelItems))
+			log.Printf("[DIAGNOSTIC] Target item: %s - Class: %d, Subclass: %d, InventoryType: %v, ClassType: %s", 
+				item.Name, *item.Class, *item.Subclass, getInventoryTypeString(item.InventoryType), getClassString(classType))
+			
+			// Show details of items that were considered but rejected
+			for i, highLevelItem := range highLevelItems {
+				if i >= 5 { // Limit to first 5 items to avoid spam
+					log.Printf("[DIAGNOSTIC] ... and %d more items", len(highLevelItems)-5)
+					break
+				}
+				highLevelItem := items.ItemFromDbItem(highLevelItem)
+				highLevelItem.ScaleItem(*highLevelItem.ItemLevel, *item.Quality)
+				highClassType := highLevelItem.GetClassUserType()
+				
+				log.Printf("[DIAGNOSTIC] Rejected: %s - Class: %d, Subclass: %d, InventoryType: %v, ClassType: %s (ClassMatch: %v, InvTypeMatch: %v)",
+					highLevelItem.Name, *highLevelItem.Class, *highLevelItem.Subclass, 
+					getInventoryTypeString(highLevelItem.InventoryType), getClassString(highClassType),
+					highClassType == classType,
+					(item.InventoryType != nil && highLevelItem.InventoryType != nil && *item.InventoryType == *highLevelItem.InventoryType))
+			}
+		}
 	}
-	
-	// If no compatible items found, try similar subclasses as fallback
+
+	// If no compatible items found, try similar subclasses and inventory types as fallback
 	if len(compatibleChoices) == 0 {
+		// First try similar subclasses with same inventory type
 		var similarSubclasses []int
 		if *item.Class == 2 { // Weapons
 			similarSubclasses = getSimilarWeaponSubclasses(subclassToUse)
 		} else if *item.Class == 4 { // Armor
 			similarSubclasses = getSimilarArmorSubclasses(subclassToUse)
 		}
-		
+
 		if g.debug && len(similarSubclasses) > 0 {
 			log.Printf("No compatible items found for subclass %d, trying similar subclasses: %v", subclassToUse, similarSubclasses)
 		}
-		
-		// Try each similar subclass until we find compatible items
+
+		// Try each similar subclass with same inventory type
 		for _, altSubclass := range similarSubclasses {
 			altHighLevelItems, err := g.db.GetRaidPhase1Items(*item.Class, altSubclass, 0, 0)
 			if err != nil {
 				if g.debug {
-					log.Printf("Failed to get reference items for subclass %d: %v", altSubclass, err)
+					log.Printf("Error getting items for similar subclass %d: %v", altSubclass, err)
 				}
 				continue
 			}
-			
-			// Filter these alternative items by class type compatibility
-			for _, highLevelItem := range altHighLevelItems {
-				highLevelItem := items.ItemFromDbItem(highLevelItem)
-				highLevelItem.ScaleItem(*highLevelItem.ItemLevel, *item.Quality)
-				highClassType := highLevelItem.GetClassUserType()
 
-				if highClassType == classType {
-					compatibleChoices = append(compatibleChoices, highLevelItem)
+			// Check these items for compatibility (class type AND inventory type)
+			for _, altHighLevelItem := range altHighLevelItems {
+				altHighLevelItem := items.ItemFromDbItem(altHighLevelItem)
+				altHighLevelItem.ScaleItem(*altHighLevelItem.ItemLevel, *item.Quality)
+				altHighClassType := altHighLevelItem.GetClassUserType()
+
+				// Check both class type and inventory type compatibility
+				classTypeMatches := altHighClassType == classType
+				inventoryTypeMatches := (item.InventoryType != nil && altHighLevelItem.InventoryType != nil && 
+					*item.InventoryType == *altHighLevelItem.InventoryType)
+
+				if classTypeMatches && inventoryTypeMatches {
+					compatibleChoices = append(compatibleChoices, altHighLevelItem)
 				}
 			}
-			
+
 			if len(compatibleChoices) > 0 {
 				if g.debug {
-					log.Printf("Found %d compatible fallback reference items using subclass %d for class type %s",
-						len(compatibleChoices), altSubclass, getClassString(classType))
+					log.Printf("Found %d compatible items using similar subclass %d with same inventory type", len(compatibleChoices), altSubclass)
 				}
-				break // Found compatible items, stop searching
+				break // Found some, no need to try more subclasses
+			}
+		}
+
+		// If still no matches, try equivalent inventory type groups
+		if len(compatibleChoices) == 0 {
+			equivalentInventoryTypes := getEquivalentInventoryTypes(item.InventoryType)
+			if g.debug && len(equivalentInventoryTypes) > 0 {
+				log.Printf("No compatible items found with same inventory type, trying equivalent inventory types: %v", equivalentInventoryTypes)
+			}
+
+			// Try original subclass with equivalent inventory types
+			for _, equivInvType := range equivalentInventoryTypes {
+				for _, highLevelItem := range highLevelItems {
+					highLevelItem := items.ItemFromDbItem(highLevelItem)
+					highLevelItem.ScaleItem(*highLevelItem.ItemLevel, *item.Quality)
+					highClassType := highLevelItem.GetClassUserType()
+
+					// Check class type and equivalent inventory type compatibility
+					classTypeMatches := highClassType == classType
+					inventoryTypeMatches := (highLevelItem.InventoryType != nil && 
+						*highLevelItem.InventoryType == equivInvType)
+
+					if classTypeMatches && inventoryTypeMatches {
+						compatibleChoices = append(compatibleChoices, highLevelItem)
+					}
+				}
+			}
+
+			if len(compatibleChoices) > 0 {
+				if g.debug {
+					log.Printf("Found %d compatible items using equivalent inventory types", len(compatibleChoices))
+				}
+			} else {
+				// Try similar subclasses with equivalent inventory types
+				for _, altSubclass := range similarSubclasses {
+					altHighLevelItems, err := g.db.GetRaidPhase1Items(*item.Class, altSubclass, 0, 0)
+					if err != nil {
+						continue
+					}
+
+					for _, equivInvType := range equivalentInventoryTypes {
+						for _, altHighLevelItem := range altHighLevelItems {
+							altHighLevelItem := items.ItemFromDbItem(altHighLevelItem)
+							altHighLevelItem.ScaleItem(*altHighLevelItem.ItemLevel, *item.Quality)
+							altHighClassType := altHighLevelItem.GetClassUserType()
+
+							// Check class type and equivalent inventory type compatibility
+							classTypeMatches := altHighClassType == classType
+							inventoryTypeMatches := (altHighLevelItem.InventoryType != nil && 
+								*altHighLevelItem.InventoryType == equivInvType)
+
+							if classTypeMatches && inventoryTypeMatches {
+								compatibleChoices = append(compatibleChoices, altHighLevelItem)
+							}
+						}
+					}
+
+					if len(compatibleChoices) > 0 {
+						if g.debug {
+							log.Printf("Found %d compatible items using similar subclass %d with equivalent inventory types", len(compatibleChoices), altSubclass)
+						}
+						break // Found some, no need to try more subclasses
+					}
+				}
 			}
 		}
 	}
@@ -818,6 +1235,7 @@ func (g *MoltenCoreGenerator) GenerateItem(dbItem mysql.DbItem, validateOnly boo
 		randHighLevelItem := compatibleChoices[rand.Intn(len(compatibleChoices))]
 		// Store reference item for comparison
 		selectedReferenceItem = &randHighLevelItem
+		// Apply stats from reference item (accept the scaling)
 		item.ApplyStats(randHighLevelItem)
 
 		// Handle spell assignment: clear original spells and use reference item spells (except for trinkets)
@@ -849,8 +1267,10 @@ func (g *MoltenCoreGenerator) GenerateItem(dbItem mysql.DbItem, validateOnly boo
 				log.Printf("Cleared original spells from trinket %s (manual scaling)", item.Name)
 			}
 		}
-		result.Warnings = append(result.Warnings, "No compatible reference items found, using manual scaling")
-		item.ScaleItem(g.itemLevel, g.quality)
+		result.Warnings = append(result.Warnings, "No compatible reference items found - FLAGGED FOR MANUAL REVIEW")
+		result.Errors = append(result.Errors, "MANUAL REVIEW REQUIRED: No reference items available for stat scaling")
+		// Don't auto-generate stats - flag for manual review instead
+		return result
 	}
 
 	// Store reference item in result
@@ -885,7 +1305,7 @@ func (g *MoltenCoreGenerator) GenerateItem(dbItem mysql.DbItem, validateOnly boo
 		if !validateOnly {
 			// Try to fix validation errors
 			g.fixValidationErrors(&item, classType, validationErrors)
-			
+
 			// If still failing validation, try adding missing key stats
 			fixedErrors, fixedWarnings, newScore := g.validateItemAdvanced(&item, classType)
 			if len(fixedErrors) > 0 && classType != 7 { // Don't try to fix Generic class type
@@ -1820,16 +2240,13 @@ func calculateDPS(item *items.Item) float64 {
 		return 0.0
 	}
 
-	minDmg := getDamageMin(item)
-	maxDmg := getDamageMax(item)
-	delay := getWeaponDelay(item)
-
-	if delay == 0 {
+	// Use the existing GetDPS method from the items module
+	dps, err := item.GetDPS()
+	if err != nil {
 		return 0.0
 	}
 
-	avgDamage := float64(minDmg+maxDmg) / 2.0
-	return (avgDamage * 1000.0) / float64(delay) // Convert delay from ms to seconds
+	return dps
 }
 
 // getDamageMin gets minimum damage from item
@@ -1970,27 +2387,33 @@ func getWeaponSubclassName(item *items.Item) string {
 }
 
 // calculateOriginalArmor calculates what the armor value would be at the original item level
-// using the same formula as ScaleArmor but with the original item level
+// using the existing ScaleArmor method from the items module
 func calculateOriginalArmor(item *items.Item, originalItemLevel int) int {
 	// Only calculate for armor items
 	if item.Class == nil || *item.Class != 4 {
 		return 0
 	}
 
-	// Need quality and subclass for the calculation
-	if item.Quality == nil || item.Subclass == nil {
+	// Create a temporary copy of the item to avoid modifying the original
+	tempItem := *item
+	if tempItem.Armor == nil {
 		return 0
 	}
 
-	// Use the same modifiers as ScaleArmor
-	qualityModifier, qOk := config.QualityModifiers[*item.Quality]
-	materialModifier, mOk := config.MaterialModifiers[*item.Subclass]
+	// Store the current armor value
+	currentArmor := *tempItem.Armor
 
-	if !qOk || !mOk {
-		return 0
+	// Use the existing ScaleArmor method to calculate armor at original item level
+	tempItem.ScaleArmor(originalItemLevel)
+
+	// Get the calculated original armor value
+	originalArmorValue := 0
+	if tempItem.Armor != nil {
+		originalArmorValue = *tempItem.Armor
 	}
 
-	// Calculate armor at original item level using the same formula
-	originalArmorValue := math.Ceil(float64(originalItemLevel) * qualityModifier * materialModifier)
-	return int(originalArmorValue)
+	// Restore the original armor value to avoid side effects
+	*item.Armor = currentArmor
+
+	return originalArmorValue
 }
