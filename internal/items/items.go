@@ -883,6 +883,22 @@ func correctSpellAttackPower(item *Item, allStats map[int]*ItemStat) {
  * @return int
  **/
 func (item *Item) GetClassUserType() int {
+	// Debug: Print item details for troubleshooting
+	log.Printf("[DEBUG] GetClassUserType for %s (Entry: %d)", item.Name, item.Entry)
+	log.Printf("[DEBUG] Class: %v, Material: %v, InventoryType: %v, Subclass: %v",
+		item.Class, item.Material, item.InventoryType, item.Subclass)
+
+	// Debug: Print all stats on the item
+	log.Printf("[DEBUG] Item stats:")
+	for i := 1; i <= 7; i++ {
+		statTypeField := fmt.Sprintf("StatType%d", i)
+		statValueField := fmt.Sprintf("StatValue%d", i)
+		statType, _ := item.GetField(statTypeField)
+		statValue, _ := item.GetField(statValueField)
+		if statType > 0 {
+			log.Printf("[DEBUG]   Stat%d: Type=%d, Value=%d", i, statType, statValue)
+		}
+	}
 
 	// loop over the stats and check if any of them are parry, defense, block
 	for i := 1; i <= 7; i++ {
@@ -1027,7 +1043,7 @@ func (item *Item) GetClassUserType() int {
 		statTypeField := fmt.Sprintf("StatType%d", i)
 		statTypePtr, _ := item.GetField(statTypeField)
 		if statTypePtr == STAT.AttackPower || statTypePtr == STAT.HasteMeleeRating || statTypePtr == STAT.CritMeleeRating {
-			return 7
+			return 2
 		}
 	}
 
@@ -1049,6 +1065,7 @@ func (item *Item) GetClassUserType() int {
 		}
 	}
 
+	log.Printf("[DEBUG] GetClassUserType for %s returning: 7 (Generic - Could not determine)", item.Name)
 	return 7
 }
 

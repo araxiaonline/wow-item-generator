@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/araxiaonline/endgame-item-generator/internal/config"
@@ -177,31 +178,77 @@ func (db *MySqlDb) GetRarePlusItems(limit, offset int) ([]DbItem, error) {
 	return items, nil
 }
 
-func (db *MySqlDb) GetBossMapItems(mapId, limit, offset int) ([]DbItem, error) {
+func (db *MySqlDb) GetBossMapItems(mapId int, bossEntries []int, gameObjectEntries []int, limit, offset int) ([]DbItem, error) {
 	items := []DbItem{}
 
-	sql := `SELECT DISTINCT ` + GetItemFields("it") + ` 
-	FROM acore_world.creature c
-	JOIN acore_world.creature_template ct ON c.id1 = ct.entry
-	JOIN acore_world.map_dbc m ON c.map = m.ID
-	LEFT JOIN acore_world.creature_loot_template clt ON ct.lootid = clt.Entry
-	LEFT JOIN acore_world.reference_loot_template rlt ON clt.Reference = rlt.Entry
-	LEFT JOIN acore_world.item_template it ON rlt.Item = it.entry
-
-WHERE
-    m.ID = ?
-    AND ct.rank = 3
-    -- AND it.StatsCount = 0
-    AND it.class IN (2, 4)              -- Weapons and armor
-    AND it.bonding IN (1, 2)            -- Binds when picked up/equipped
-    AND it.Quality >= 3              -- Epic and above
-`
-
-	if limit != 0 && offset != 0 {
-		sql += fmt.Sprintf("LIMIT %v OFFSET %v", limit, offset)
+	// Build the boss entries condition
+	bossEntriesCondition := ""
+	if len(bossEntries) > 0 {
+		bossEntriesStr := make([]string, len(bossEntries))
+		for i, entry := range bossEntries {
+			bossEntriesStr[i] = fmt.Sprintf("%d", entry)
+		}
+		bossEntriesCondition = fmt.Sprintf("OR ct.entry IN (%s)", strings.Join(bossEntriesStr, ","))
 	}
 
-	err := db.Select(&items, sql, mapId)
+	// Build the GameObject entries condition
+	gameObjectEntriesCondition := ""
+	if len(gameObjectEntries) > 0 {
+		gameObjectEntriesStr := make([]string, len(gameObjectEntries))
+		for i, entry := range gameObjectEntries {
+			gameObjectEntriesStr[i] = fmt.Sprintf("%d", entry)
+		}
+		gameObjectEntriesCondition = fmt.Sprintf("AND got.entry IN (%s)", strings.Join(gameObjectEntriesStr, ","))
+	}
+
+	sql := `SELECT DISTINCT ` + GetItemFields("it") + ` 
+FROM acore_world.creature_template ct
+LEFT JOIN acore_world.creature c ON c.id1 = ct.entry
+LEFT JOIN acore_world.map_dbc m ON c.map = m.ID
+LEFT JOIN acore_world.creature_loot_template clt ON ct.lootid = clt.Entry
+LEFT JOIN acore_world.reference_loot_template rlt ON clt.Reference = rlt.Entry
+LEFT JOIN acore_world.item_template it ON rlt.Item = it.entry
+
+WHERE
+    ( m.ID = ? ` + bossEntriesCondition + ` )
+    AND ct.rank IN (3)
+    AND it.class IN (2, 4)              -- Weapons and armor
+    AND it.bonding IN (1, 2)            -- Binds when picked up/equipped
+    AND it.Quality >= 4             -- Epic and above`
+
+	// Only add the UNION clause if we have GameObject entries
+	if len(gameObjectEntries) > 0 {
+		sql += `
+
+UNION
+
+SELECT DISTINCT ` + GetItemFields("it") + ` 
+
+FROM acore_world.gameobject go
+JOIN acore_world.gameobject_template got ON go.id = got.entry
+LEFT JOIN acore_world.gameobject_loot_template glt ON got.Data1 = glt.Entry
+LEFT JOIN acore_world.reference_loot_template rlt ON glt.Reference = rlt.Entry
+LEFT JOIN acore_world.item_template it ON rlt.Item = it.entry
+
+WHERE go.map = ? 
+    ` + gameObjectEntriesCondition + `
+    AND it.class IN (2, 4)              -- Weapons and armor
+    AND it.bonding IN (1, 2)            -- Binds when picked up/equipped
+    AND it.Quality >= 4`
+	}
+
+	if limit != 0 && offset != 0 {
+		sql += fmt.Sprintf(" LIMIT %v OFFSET %v", limit, offset)
+	}
+
+	// Prepare query parameters
+	var args []interface{}
+	args = append(args, mapId)
+	if len(gameObjectEntries) > 0 {
+		args = append(args, mapId) // Second mapId for the UNION query
+	}
+
+	err := db.Select(&items, sql, args...)
 	if err != nil {
 		return []DbItem{}, err
 	}
