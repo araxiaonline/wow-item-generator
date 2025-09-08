@@ -1,28 +1,29 @@
 package config
 
+// modifiers to stats based on inventory type
 var InvTypeModifiers = map[int]float64{
 	0:  0.6,   // Trinket
 	1:  0.813, // Head
 	2:  1.0,   // Neck
 	3:  0.75,  // Shoulder
-	5:  1.0,   // Chest
+	5:  0.95,  // Chest
 	6:  0.562, // Waist
 	7:  0.875, // Legs
 	8:  0.688, // Feet
 	9:  0.437, // Wrists
 	10: 0.625, // Hands
 	11: 1.0,   // Finger
-	13: 0.62,  // One-Hand (not to confuse with Off-Hand = 22)
+	13: 0.70,  // One-Hand (not to confuse with Off-Hand = 22)
 	14: 0.66,  // Shield (class = armor, not weapon even if in weapon slot)
 	15: 0.32,  // Ranged (Bows) (see also Ranged right = 26)
-	16: 0.66,  // Back
-	17: 1.0,   // Two-Hand
+	16: 0.70,  // Back
+	17: 1.3,   // Two-Hand
 	18: 1.0,   // Bag (assuming same as Chest for simplicity)
 	19: 1.0,   // Tabard (assuming same as Chest for simplicity)
 	20: 1.0,   // Robe (see also Chest = 5)
-	21: 0.80,  // Main hand
-	22: 0.60,  // Off Hand weapons (see also One-Hand = 13)
-	23: 0.56,  // Held in Off-Hand (class = armor, not weapon even if in weapon slot)
+	21: 0.85,  // Main hand
+	22: 0.65,  // Off Hand weapons (see also One-Hand = 13)
+	23: 0.60,  // Held in Off-Hand (class = armor, not weapon even if in weapon slot)
 	24: 1.0,   // Ammo (assuming same as Chest for simplicity)
 	25: 0.38,  // Thrown
 	26: 0.38,  // Ranged right (Wands, Guns) (see also Ranged = 15)
@@ -48,13 +49,14 @@ var MaterialModifiers = map[int]float64{
 
 // Modifies stats flat for difficulty of dungeon / raid itself.
 var GearTierModifiers = map[int]float64{
-	1: 1.05,
-	2: 1.10,
-	3: 1.15,
-	4: 1.20,
-	5: 1.25,
+	1: 1.25,
+	2: 1.50,
+	3: 1.75,
+	4: 2.00,
+	5: 2.25,
 }
 
+// how much a stat weighs against the stat point pool based on iLevel
 var StatModifiers = map[int]float64{
 	0:  1.0,  // ITEM_MOD_MANA
 	1:  1.0,  // ITEM_MOD_HEALTH
@@ -82,23 +84,23 @@ var StatModifiers = map[int]float64{
 	28: 1.0,  // ITEM_MOD_HASTE_MELEE_RATING
 	29: 1.0,  // ITEM_MOD_HASTE_RANGED_RATING
 	30: 1.0,  // ITEM_MOD_HASTE_SPELL_RATING
-	31: 2.5,  // ITEM_MOD_HIT_RATING
+	31: 1.3,  // ITEM_MOD_HIT_RATING
 	32: 1.0,  // ITEM_MOD_CRIT_RATING
 	33: 1.0,  // ITEM_MOD_HIT_TAKEN_RATING
 	34: 1.0,  // ITEM_MOD_CRIT_TAKEN_RATING
 	35: 1.0,  // ITEM_MOD_RESILIENCE_RATING
 	36: 1.0,  // ITEM_MOD_HASTE_RATING
-	37: 1.0,  // ITEM_MOD_EXPERTISE_RATING
+	37: 1.5,  // ITEM_MOD_EXPERTISE_RATING
 	38: 0.65, // ITEM_MOD_ATTACK_POWER
-	39: 0.65, // ITEM_MOD_RANGED_ATTACK_POWER
-	40: 0.65, // ITEM_MOD_FERAL_ATTACK_POWER (not used as of 3.3)
-	41: 0.65, // ITEM_MOD_SPELL_HEALING_DONE
-	42: 0.65, // ITEM_MOD_SPELL_DAMAGE_DONE
-	43: 2.5,  // ITEM_MOD_MANA_REGENERATION
-	44: 1.0,  // ITEM_MOD_ARMOR_PENETRATION_RATING
-	45: 0.65, // ITEM_MOD_SPELL_POWER
+	39: 0.70, // ITEM_MOD_RANGED_ATTACK_POWER
+	40: 0.95, // ITEM_MOD_FERAL_ATTACK_POWER (not used as of 3.3)
+	41: 0.95, // ITEM_MOD_SPELL_HEALING_DONE
+	42: 0.95, // ITEM_MOD_SPELL_DAMAGE_DONE
+	43: 2.0,  // ITEM_MOD_MANA_REGENERATION
+	44: 1.3,  // ITEM_MOD_ARMOR_PENETRATION_RATING
+	45: 0.95, // ITEM_MOD_SPELL_POWER
 	46: 1.0,  // ITEM_MOD_HEALTH_REGEN
-	47: 1.8,  // ITEM_MOD_SPELL_PENETRATION
+	47: 1.2,  // ITEM_MOD_SPELL_PENETRATION
 	48: 1.5,  // ITEM_MOD_BLOCK_VALUE
 }
 
@@ -149,6 +151,7 @@ var StatModifierNames = map[int]string{
 	48: "BLOCK_VALUE",
 }
 
+// how much a bonus to apply
 var ScalingFactor = map[int]float64{
 	0:  1.1,  // ITEM_MOD_MANA
 	1:  1.2,  // ITEM_MOD_HEALTH
@@ -157,7 +160,7 @@ var ScalingFactor = map[int]float64{
 	5:  1.35, // ITEM_MOD_INTELLECT
 	6:  1.35, // ITEM_MOD_SPIRIT
 	7:  1.40, // ITEM_MOD_STAMINA
-	12: 1.1,  // ITEM_MOD_DEFENSE_SKILL_RATING
+	12: 1.25, // ITEM_MOD_DEFENSE_SKILL_RATING
 	13: 1.0,  // ITEM_MOD_DODGE_RATING
 	14: 0.85, // ITEM_MOD_PARRY_RATING
 	15: 1.15, // ITEM_MOD_BLOCK_RATING
@@ -191,7 +194,7 @@ var ScalingFactor = map[int]float64{
 	43: 1.0,  // ITEM_MOD_MANA_REGENERATION
 	44: 1.1,  // ITEM_MOD_ARMOR_PENETRATION_RATING
 	45: 1.0,  // ITEM_MOD_SPELL_POWER
-	46: 1.3,  // ITEM_MOD_HEALTH_REGEN
+	46: 1.0,  // ITEM_MOD_HEALTH_REGEN
 	47: 1.0,  // ITEM_MOD_SPELL_PENETRATION
 	48: 1.2,  // ITEM_MOD_BLOCK_VALUE
 }

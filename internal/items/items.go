@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 	"math"
-	"math/rand/v2"
+	"math/rand"
 	"reflect"
 	"slices"
 	"strings"
@@ -14,6 +14,17 @@ import (
 	"github.com/araxiaonline/endgame-item-generator/internal/config"
 	"github.com/araxiaonline/endgame-item-generator/internal/db/mysql"
 	"github.com/araxiaonline/endgame-item-generator/internal/spells"
+)
+
+// Class User Type constants for GetClassUserType()
+const (
+	CLASS_USER_TYPE_MELEE_STRENGTH_ATTACKER = 1 // Melee Strength Attacker
+	CLASS_USER_TYPE_MELEE_AGILITY_ATTACKER  = 2 // Melee Agility Attacker
+	CLASS_USER_TYPE_RANGED_ATTACKER         = 3 // Ranged Attacker
+	CLASS_USER_TYPE_MAGE                    = 4 // Mage
+	CLASS_USER_TYPE_HEALER                  = 5 // Healer
+	CLASS_USER_TYPE_TANK                    = 6 // Tank
+	CLASS_USER_TYPE_GENERIC                 = 7 // Generic (Could not determine)
 )
 
 /**
@@ -770,6 +781,15 @@ func (item *Item) ScaleItem(itemLevel int, itemQuality int) (bool, error) {
 
 	log.Printf("\n\n\n -------------------- COUNT OF other spells %v \n\n", len(otherSpells))
 
+	// Define spellBump based on item quality for spell ID generation
+	spellBump := 30000000
+	if *item.Quality == 4 {
+		spellBump = 31000000
+	}
+	if *item.Quality == 5 {
+		spellBump = 32000000
+	}
+
 	item.Spells = []spells.Spell{}
 	// Spells that can not be scaled into stats must get new spells scaled and created
 	for _, spell := range otherSpells {
@@ -795,7 +815,7 @@ func (item *Item) ScaleItem(itemLevel int, itemQuality int) (bool, error) {
 		}
 
 		// ForceScaleSpell modifies the spell in place, so we use the original spell ID
-		item.UpdateField(fmt.Sprintf("SpellId%v", spell.ItemSpellSlot), spell.ID)
+		item.UpdateField(fmt.Sprintf("SpellId%v", spell.ItemSpellSlot), spellBump+spell.ID)
 		item.Spells = append(item.Spells, spell)
 
 		// do one last check on all setting StatsCount based on how many stats have been set
@@ -1047,21 +1067,21 @@ func (item *Item) GetClassUserType() int {
 
 		// Tanking weapons will have defensive stats on them
 		if statTypePtr == STAT.ParryRating || statTypePtr == STAT.DefenseSkillRating || statTypePtr == STAT.BlockRating || statTypePtr == STAT.BlockValue {
-			return 6
+			return CLASS_USER_TYPE_TANK
 		}
 
 		// Check for a healer stats like MP5 and Spell Healing Done
 		if statTypePtr == STAT.ManaRegeneration || statTypePtr == STAT.SpellHealingDone {
-			return 5
+			return CLASS_USER_TYPE_HEALER
 		}
 
 		// Check for a Mage stat if they have spell penetration we know it is a mage
 		if statTypePtr == STAT.SpellPenetration {
-			return 4
+			return CLASS_USER_TYPE_MAGE
 		}
 
 		if statTypePtr == STAT.RangedAttackPower || statTypePtr == STAT.CritRangedRating || statTypePtr == STAT.HitRangedRating {
-			return 3
+			return CLASS_USER_TYPE_RANGED_ATTACKER
 		}
 	}
 
@@ -1069,12 +1089,19 @@ func (item *Item) GetClassUserType() int {
 	if *item.Class == 4 {
 		// if the item is cloth its a mage and did not have healer stats just treat as a mage item
 		if *item.Subclass == 1 && *item.InventoryType != 16 {
-			return 4
+			return CLASS_USER_TYPE_MAGE
 		}
 
 		// If it is plate and not a tank then it is a strength melee attack
 		if *item.Subclass == 4 {
-			return 1
+			for i := 1; i <= 7; i++ {
+				statTypeField := fmt.Sprintf("StatType%d", i)
+				statTypePtr, _ := item.GetField(statTypeField)
+				if statTypePtr == STAT.SpellPower || statTypePtr == STAT.CritSpellRating ||
+					statTypePtr == STAT.HitSpellRating || (statTypePtr == STAT.Intellect && statTypePtr == STAT.Spirit) {
+					return CLASS_USER_TYPE_MAGE
+				}
+			}
 		}
 
 		// If it is mail/leather armor then it is limited to Mage, Agility Fighter
@@ -1084,12 +1111,12 @@ func (item *Item) GetClassUserType() int {
 				statTypeField := fmt.Sprintf("StatType%d", i)
 				statTypePtr, _ := item.GetField(statTypeField)
 				if statTypePtr == STAT.SpellPower || statTypePtr == STAT.CritSpellRating ||
-					statTypePtr == STAT.HitSpellRating || statTypePtr == STAT.Intellect || statTypePtr == STAT.Spirit {
-					return 4
+					statTypePtr == STAT.HitSpellRating {
+					return CLASS_USER_TYPE_MAGE
 				}
 			}
 
-			return 2
+			return CLASS_USER_TYPE_MELEE_AGILITY_ATTACKER
 		}
 	}
 
@@ -1097,11 +1124,11 @@ func (item *Item) GetClassUserType() int {
 	if *item.Class == 2 {
 		// If it is a fist weapon or ranged throwing weapons its agility class type
 		if *item.Subclass == 13 || *item.Subclass == 16 {
-			return 2
+			return CLASS_USER_TYPE_MELEE_AGILITY_ATTACKER
 		}
 
 		if *item.Subclass == 19 {
-			return 4
+			return CLASS_USER_TYPE_MAGE
 		}
 
 		// if it is a polearm or spear 17 or 6 and strength then its strength class type
@@ -1110,12 +1137,12 @@ func (item *Item) GetClassUserType() int {
 				statTypeField := fmt.Sprintf("StatType%d", i)
 				statTypePtr, _ := item.GetField(statTypeField)
 				if statTypePtr == STAT.Strength {
-					return 1
+					return CLASS_USER_TYPE_MELEE_STRENGTH_ATTACKER
 				}
 
 				// or attack power
 				if statTypePtr == STAT.AttackPower {
-					return 1
+					return CLASS_USER_TYPE_MELEE_STRENGTH_ATTACKER
 				}
 			}
 
@@ -1124,12 +1151,12 @@ func (item *Item) GetClassUserType() int {
 				statTypeField := fmt.Sprintf("StatType%d", i)
 				statTypePtr, _ := item.GetField(statTypeField)
 				if statTypePtr == STAT.Agility {
-					return 2
+					return CLASS_USER_TYPE_MELEE_AGILITY_ATTACKER
 				}
 			}
 
 			// last assume it is a healer
-			return 5
+			return CLASS_USER_TYPE_HEALER
 		}
 
 		if *item.Subclass == 2 || *item.Subclass == 3 || *item.Subclass == 18 {
@@ -1137,11 +1164,11 @@ func (item *Item) GetClassUserType() int {
 				statTypeField := fmt.Sprintf("StatType%d", i)
 				statTypePtr, _ := item.GetField(statTypeField)
 				if statTypePtr == STAT.Strength {
-					return 1
+					return CLASS_USER_TYPE_MELEE_STRENGTH_ATTACKER
 				}
 			}
 
-			return 3
+			return CLASS_USER_TYPE_RANGED_ATTACKER
 		}
 	}
 
@@ -1151,7 +1178,7 @@ func (item *Item) GetClassUserType() int {
 		statTypePtr, _ := item.GetField(statTypeField)
 		// fmt.Printf("itemName: %s StatType%d: %v \n", item.Name, i, statTypePtr)
 		if statTypePtr == STAT.Spirit {
-			return 5
+			return CLASS_USER_TYPE_HEALER
 		}
 	}
 
@@ -1159,7 +1186,7 @@ func (item *Item) GetClassUserType() int {
 		statTypeField := fmt.Sprintf("StatType%d", i)
 		statTypePtr, _ := item.GetField(statTypeField)
 		if statTypePtr == STAT.Intellect {
-			return 4
+			return CLASS_USER_TYPE_MAGE
 		}
 	}
 
@@ -1167,7 +1194,7 @@ func (item *Item) GetClassUserType() int {
 		statTypeField := fmt.Sprintf("StatType%d", i)
 		statTypePtr, _ := item.GetField(statTypeField)
 		if statTypePtr == STAT.Strength {
-			return 1
+			return CLASS_USER_TYPE_MELEE_STRENGTH_ATTACKER
 		}
 	}
 
@@ -1175,7 +1202,7 @@ func (item *Item) GetClassUserType() int {
 		statTypeField := fmt.Sprintf("StatType%d", i)
 		statTypePtr, _ := item.GetField(statTypeField)
 		if statTypePtr == STAT.Agility {
-			return 2
+			return CLASS_USER_TYPE_MELEE_AGILITY_ATTACKER
 		}
 	}
 
@@ -1184,7 +1211,7 @@ func (item *Item) GetClassUserType() int {
 		statTypeField := fmt.Sprintf("StatType%d", i)
 		statTypePtr, _ := item.GetField(statTypeField)
 		if statTypePtr == STAT.AttackPower || statTypePtr == STAT.HasteMeleeRating || statTypePtr == STAT.CritMeleeRating {
-			return 2
+			return CLASS_USER_TYPE_MELEE_AGILITY_ATTACKER
 		}
 	}
 
@@ -1193,7 +1220,7 @@ func (item *Item) GetClassUserType() int {
 		statTypeField := fmt.Sprintf("StatType%d", i)
 		statTypePtr, _ := item.GetField(statTypeField)
 		if statTypePtr == STAT.SpellPower || statTypePtr == STAT.CritSpellRating || statTypePtr == STAT.HitSpellRating {
-			return 4
+			return CLASS_USER_TYPE_MAGE
 		}
 	}
 
@@ -1202,24 +1229,90 @@ func (item *Item) GetClassUserType() int {
 		statTypeField := fmt.Sprintf("StatType%d", i)
 		statTypePtr, _ := item.GetField(statTypeField)
 		if statTypePtr == STAT.RangedAttackPower || statTypePtr == STAT.HasteRangedRating || statTypePtr == STAT.CritRangedRating {
-			return 3
+			return CLASS_USER_TYPE_RANGED_ATTACKER
 		}
 	}
 
 	// if we have made it here then the only thing left to do is base it purely on armor material type
 	if *item.Class == 4 && *item.Subclass == 1 {
-		return 4
+		return CLASS_USER_TYPE_MAGE
 	}
 
 	if *item.Class == 4 && *item.Subclass == 4 {
-		return 1
+		return CLASS_USER_TYPE_MELEE_STRENGTH_ATTACKER
 	}
 
 	if *item.Class == 4 && (*item.Subclass == 2 || *item.Subclass == 3) {
-		return 2
+		return CLASS_USER_TYPE_MELEE_AGILITY_ATTACKER
 	}
 
-	return 7
+	return CLASS_USER_TYPE_GENERIC
+}
+
+// AddElementalDamage adds elemental damage to weapons based on weapon type and scales it to item level
+// damageType: 1=Holy, 2=Fire, 3=Nature, 4=Frost, 5=Shadow, 6=Arcane
+func (item *Item) AddElementalDamage(damageType int) {
+	// Only apply to weapons (class 2)
+	if item.Class == nil || *item.Class != 2 {
+		return
+	}
+
+	// Initialize elemental damage fields if they don't exist
+	if item.MinDmg2 == nil {
+		minDmg := 0.0
+		maxDmg := 0.0
+		item.MinDmg2 = &minDmg
+		item.MaxDmg2 = &maxDmg
+		item.DmgType2 = &damageType
+	}
+
+	// Get base damage values based on weapon type
+	var baseMinDamage, baseMaxDamage float64
+	if item.InventoryType != nil && (*item.InventoryType == 13 || *item.InventoryType == 21 || *item.InventoryType == 22) {
+		// One-handed weapons (main hand, off hand, one-hand)
+		baseMinDamage = float64(10 + rand.Intn(11)) // 10-20 base
+		baseMaxDamage = float64(20 + rand.Intn(11)) // 20-30 base
+	} else {
+		// Two-handed weapons
+		baseMinDamage = float64(25 + rand.Intn(16)) // 25-40 base
+		baseMaxDamage = float64(40 + rand.Intn(21)) // 40-60 base
+	}
+
+	// Scale damage based on item level and quality
+	itemLevel := float64(60) // Default base level
+	if item.ItemLevel != nil {
+		itemLevel = float64(*item.ItemLevel)
+	}
+
+	quality := 2 // Default uncommon
+	if item.Quality != nil {
+		quality = *item.Quality
+	}
+
+	// Scale factor based on item level (scales from level 60 baseline)
+	levelScale := itemLevel / 60.0
+	if levelScale < 1.0 {
+		levelScale = 1.0 // Don't scale down below base
+	}
+
+	// Quality multiplier
+	qualityMultiplier := 1.0
+	switch quality {
+	case 3: // Rare
+		qualityMultiplier = 1.3
+	case 4: // Epic
+		qualityMultiplier = 1.6
+	case 5: // Legendary
+		qualityMultiplier = 2.0
+	}
+
+	// Apply scaling
+	scaledMinDamage := baseMinDamage * levelScale * qualityMultiplier
+	scaledMaxDamage := baseMaxDamage * levelScale * qualityMultiplier
+
+	item.MinDmg2 = &scaledMinDamage
+	item.MaxDmg2 = &scaledMaxDamage
+	item.DmgType2 = &damageType
 }
 
 func (item *Item) ApplyTierModifiers(optionalTier ...int) {
@@ -1241,6 +1334,7 @@ func (item *Item) ApplyTierModifiers(optionalTier ...int) {
 	if tier > 0 && tier <= 5 {
 		if mod, ok := config.GearTierModifiers[tier]; ok {
 			tierModifier = mod
+			fmt.Printf("DEBUG: Applying tier %d modifier %.2f to item %s\n", tier, tierModifier, item.Name)
 		}
 	}
 
@@ -1259,6 +1353,8 @@ func (item *Item) ApplyTierModifiers(optionalTier ...int) {
 			continue
 		}
 
+		fmt.Printf("DEBUG: Processing stat %d: type=%d, value=%d\n", i, statTypePtr, statValuePtr)
+
 		// Get the stat modifier (inverse of the cost modifier)
 		statModifier, ok := config.StatModifiers[statTypePtr]
 		if !ok {
@@ -1273,6 +1369,9 @@ func (item *Item) ApplyTierModifiers(optionalTier ...int) {
 
 		// Apply tier modifier and stat modifier
 		newValue := int(float64(statValuePtr) * tierModifier * inverseModifier * catchUpBonus)
+
+		fmt.Printf("DEBUG: Stat %d changed from %d to %d (tier=%.2f, inverse=%.2f, catchup=%.2f)\n", 
+			i, statValuePtr, newValue, tierModifier, inverseModifier, catchUpBonus)
 
 		// Update the item's stat value
 		item.UpdateField(statValueField, newValue)
@@ -1306,7 +1405,7 @@ func (item *Item) ApplyTierModifiers(optionalTier ...int) {
 	// }
 }
 
-func ItemToSql(item Item, reqLevel int, difficulty int) string {
+func ItemToSql(item Item, reqLevel int, difficulty int, skipSpellGen bool) string {
 
 	fmt.Printf("-- Required level: %v\n", reqLevel)
 
@@ -1332,7 +1431,7 @@ func ItemToSql(item Item, reqLevel int, difficulty int) string {
 	name = getRandomWord(difficulty) + " " + name
 
 	spellList := ""
-	if len(item.Spells) > 0 {
+	if len(item.Spells) > 0 && !skipSpellGen {
 		for i, spell := range item.Spells {
 
 			spellList += spells.SpellToSql(spell, *item.Quality)
@@ -1401,6 +1500,7 @@ func ItemToSql(item Item, reqLevel int, difficulty int) string {
 	  dmg_max1 = %v,
 	  dmg_min2 = %v,
 	  dmg_max2 = %v,
+	  dmg_type2 = %v,
 	  StatsCount = %v,
 	  stat_type1 = %v,
 	  stat_value1 = %v,
@@ -1441,7 +1541,7 @@ func ItemToSql(item Item, reqLevel int, difficulty int) string {
 	  SellPrice = FLOOR(100000 + (RAND() * 400001)),
 	  Armor = %v
 	WHERE entry = %v;
-	`, *item.Quality, strings.ReplaceAll(name, "'", "''"), *item.ItemLevel, reqLevel, *item.MinDmg1, *item.MaxDmg1, *item.MinDmg2, *item.MaxDmg2, *item.StatsCount,
+	`, *item.Quality, strings.ReplaceAll(name, "'", "''"), *item.ItemLevel, reqLevel, *item.MinDmg1, *item.MaxDmg1, *item.MinDmg2, *item.MaxDmg2, *item.DmgType2, *item.StatsCount,
 		*item.StatType1, *item.StatValue1, *item.StatType2, *item.StatValue2, *item.StatType3, *item.StatValue3, *item.StatType4, *item.StatValue4,
 		*item.StatType5, *item.StatValue5, *item.StatType6, *item.StatValue6, *item.StatType7, *item.StatValue7, *item.StatType8, *item.StatValue8,
 		*item.StatType9, *item.StatValue9, *item.StatType10, *item.StatValue10, *item.SpellId1, *item.SpellId2, *item.SpellId3, *item.SpellTrigger1, *item.SpellTrigger2,
@@ -1457,17 +1557,17 @@ func getRandomWord(difficulty int) string {
 	legendary := []string{"Legendary", "Fabled", "Exalted", "Magnificent", "Pristine", "Supreme", "Glorious"}
 	ascendant := []string{"Ascendant", "Godlike", "Celestial", "Transcendant", "Divine", "Omnipotent", "Demonforged", "Immortal", "Omniscient", "Ethereal"}
 
-	r := rand.New(rand.NewPCG(uint64(time.Now().UnixNano()), 2))
+	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 
 	switch difficulty {
 	case 3: // Mythic
-		randomIndex := r.IntN(len(mythic))
+		randomIndex := r.Intn(len(mythic))
 		return mythic[randomIndex]
 	case 4: // Legendary
-		randomIndex := r.IntN(len(legendary))
+		randomIndex := r.Intn(len(legendary))
 		return legendary[randomIndex]
 	case 5: // Ascendant
-		randomIndex := r.IntN(len(ascendant))
+		randomIndex := r.Intn(len(ascendant))
 		return ascendant[randomIndex]
 	default:
 		return ""

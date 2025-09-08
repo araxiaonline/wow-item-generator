@@ -151,7 +151,7 @@ func main() {
 		// if the item is not from a dungeon and we made it here, then just scale to mythic which can be used for weekly loot chests or new recipes.
 		if lookupItem.Entry == 0 {
 			Scale(highLevelItem, &item, *itemLevel, *item.Quality)
-			fmt.Print(items.ItemToSql(item, *baselevel, *difficulty))
+			fmt.Print(items.ItemToSql(item, *baselevel, *difficulty, false))
 			continue
 		}
 
@@ -160,32 +160,32 @@ func main() {
 
 			if lookupItem.DungeonLevel < 60 && lookupItem.Expansion == 0 {
 				Scale(highLevelItem, &item, *itemLevel+5, *item.Quality)
-				fmt.Print(items.ItemToSql(item, *baselevel, *difficulty))
+				fmt.Print(items.ItemToSql(item, *baselevel, *difficulty, false))
 			}
 
 			if lookupItem.DungeonLevel == 60 && lookupItem.Expansion == 0 {
 				Scale(highLevelItem, &item, *itemLevel+10, *item.Quality)
-				fmt.Print(items.ItemToSql(item, *baselevel, *difficulty))
+				fmt.Print(items.ItemToSql(item, *baselevel, *difficulty, false))
 			}
 
 			if lookupItem.DungeonLevel < 70 && lookupItem.Expansion == 1 {
 				Scale(highLevelItem, &item, *itemLevel+7, *item.Quality)
-				fmt.Print(items.ItemToSql(item, *baselevel, *difficulty))
+				fmt.Print(items.ItemToSql(item, *baselevel, *difficulty, false))
 			}
 
 			if lookupItem.DungeonLevel == 70 && lookupItem.Expansion == 1 {
 				Scale(highLevelItem, &item, *itemLevel+10, *item.Quality)
-				fmt.Print(items.ItemToSql(item, *baselevel, *difficulty))
+				fmt.Print(items.ItemToSql(item, *baselevel, *difficulty, false))
 			}
 
 			if lookupItem.DungeonLevel < 80 && lookupItem.Expansion == 2 {
 				Scale(highLevelItem, &item, *itemLevel+7, *item.Quality)
-				fmt.Print(items.ItemToSql(item, *baselevel, *difficulty))
+				fmt.Print(items.ItemToSql(item, *baselevel, *difficulty, false))
 			}
 
 			if lookupItem.DungeonLevel == 80 && lookupItem.Expansion == 2 {
 				Scale(highLevelItem, &item, *itemLevel+10, *item.Quality)
-				fmt.Print(items.ItemToSql(item, *baselevel+2, *difficulty))
+				fmt.Print(items.ItemToSql(item, *baselevel+2, *difficulty, false))
 			}
 		} else {
 
@@ -212,32 +212,32 @@ func main() {
 			// if the item is from a boss fight
 			if lookupItem.DungeonLevel < 60 && lookupItem.Expansion == 0 {
 				Scale(highLevelItem, &item, *itemLevel+9+finalBonus, quality)
-				fmt.Print(items.ItemToSql(item, reqLevel-1, *difficulty))
+				fmt.Print(items.ItemToSql(item, reqLevel-1, *difficulty, false))
 			}
 
 			if lookupItem.DungeonLevel == 60 && lookupItem.Expansion == 0 {
 				Scale(highLevelItem, &item, *itemLevel+23+finalBonus, quality)
-				fmt.Print(items.ItemToSql(item, reqLevel, *difficulty))
+				fmt.Print(items.ItemToSql(item, reqLevel, *difficulty, false))
 			}
 
 			if lookupItem.DungeonLevel < 70 && lookupItem.Expansion == 1 {
 				Scale(highLevelItem, &item, *itemLevel+10+finalBonus, quality)
-				fmt.Print(items.ItemToSql(item, reqLevel-1, *difficulty))
+				fmt.Print(items.ItemToSql(item, reqLevel-1, *difficulty, false))
 			}
 
 			if lookupItem.DungeonLevel == 70 && lookupItem.Expansion == 1 {
 				Scale(highLevelItem, &item, *itemLevel+23+finalBonus, quality)
-				fmt.Print(items.ItemToSql(item, reqLevel, *difficulty))
+				fmt.Print(items.ItemToSql(item, reqLevel, *difficulty, false))
 			}
 
 			if lookupItem.DungeonLevel < 80 && lookupItem.Expansion == 2 {
 				Scale(highLevelItem, &item, *itemLevel+12+finalBonus, quality)
-				fmt.Print(items.ItemToSql(item, reqLevel-1, *difficulty))
+				fmt.Print(items.ItemToSql(item, reqLevel-1, *difficulty, false))
 			}
 
 			if lookupItem.DungeonLevel == 80 && lookupItem.Expansion == 2 {
 				Scale(highLevelItem, &item, *itemLevel+25+finalBonus, quality)
-				fmt.Print(items.ItemToSql(item, reqLevel, *difficulty))
+				fmt.Print(items.ItemToSql(item, reqLevel, *difficulty, false))
 			}
 		}
 

@@ -260,27 +260,44 @@ func (db *MySqlDb) GetRaidPhase1Items(class, subclass, limit, offset int) ([]DbI
 	items := []DbItem{}
 
 	sql := `SELECT DISTINCT ` + GetItemFields("it") + ` 
-	FROM acore_world.creature c
-	JOIN acore_world.creature_template ct ON c.id1 = ct.entry
-	JOIN acore_world.map_dbc m ON c.map = m.ID
-	LEFT JOIN acore_world.creature_loot_template clt ON ct.lootid = clt.Entry
-	LEFT JOIN acore_world.reference_loot_template rlt ON clt.Reference = rlt.Entry
-	LEFT JOIN acore_world.item_template it ON rlt.Item = it.entry
-
+FROM acore_world.creature c
+JOIN acore_world.creature_template ct ON c.id1 = ct.entry
+JOIN acore_world.map_dbc m ON c.map = m.ID
+JOIN acore_world.creature_loot_template clt ON ct.lootid = clt.Entry
+JOIN acore_world.item_template it ON clt.Item = it.entry
 WHERE
     m.ID IN (533,615,616)
     AND ct.rank = 3
-    AND it.class = ?              -- Weapons and armor
+    AND it.class = ?
 	AND it.subclass = ?
-    AND it.bonding IN (1, 2)            -- Binds when picked up/equipped
-    AND it.Quality >= 3              -- Epic and above
+    AND it.bonding IN (1, 2)        -- Binds when picked up/equipped
+    AND it.Quality >= 4             -- Epic and above
+
+UNION ALL
+
+-- Get loot from reference_loot_template (reference items)
+SELECT DISTINCT ` + GetItemFields("it") + ` 
+FROM acore_world.creature c
+JOIN acore_world.creature_template ct ON c.id1 = ct.entry
+JOIN acore_world.map_dbc m ON c.map = m.ID
+JOIN acore_world.creature_loot_template clt ON ct.lootid = clt.Entry
+JOIN acore_world.reference_loot_template rlt ON clt.Reference = rlt.Entry
+JOIN acore_world.item_template it ON rlt.Item = it.entry
+WHERE
+    m.ID IN (533,615,616)
+    AND ct.rank = 3
+    AND it.class = ?
+	AND it.subclass = ?
+    AND it.bonding IN (1, 2)        -- Binds when picked up/equipped
+    AND it.Quality >= 4             -- Epic and above
+
 `
 
 	if limit != 0 && offset != 0 {
 		sql += fmt.Sprintf("LIMIT %v OFFSET %v", limit, offset)
 	}
 
-	err := db.Select(&items, sql, class, subclass)
+	err := db.Select(&items, sql, class, subclass, class, subclass)
 	if err != nil {
 		return []DbItem{}, err
 	}
