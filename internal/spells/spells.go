@@ -483,80 +483,95 @@ func (s *Spell) ForceScaleSpell(fromItemLevel int, toItemLevel int, itemQuality 
 
 	// Scale Effect1
 	if s.EffectBasePoints1 != 0 {
-		effectMultiplier := 1.0
+		// Skip scaling for percentage-based effects (buffs/debuffs)
+		// Look for percentage indicators in spell description
+		skipScaling := strings.Contains(s.Description, "$s1%") || 
+					  strings.Contains(s.Description, "$s1\\%") ||
+					  strings.Contains(s.Description, "by $s1%") ||
+					  // Common percentage-based aura effects that should not scale
+					  (s.EffectAura1 != 0 && (
+						  s.EffectAura1 == 33 || // Modify Movement Speed
+						  s.EffectAura1 == 31 || // Modify Stat (percentage)
+						  s.EffectAura1 == 52 || // Modify Damage Done (percentage)
+						  s.EffectAura1 == 79 || // Modify Resistance (percentage)
+						  s.EffectAura1 == 137)) // Modify Total Stat Percentage
 
-		// Check for attack power and spell power in the description regardless of effect type
-		if strings.Contains(s.Description, "attack power") ||
-			strings.Contains(s.Description, "Attack Power") ||
-			strings.Contains(s.Description, "spell power") ||
-			strings.Contains(s.Description, "Spell Power") ||
-			strings.Contains(s.Description, "healing") ||
-			strings.Contains(s.Description, "Healing") {
-			effectMultiplier = 2.0 // Higher multiplier for attack/spell power
-		}
+		if !skipScaling {
+			effectMultiplier := 1.0
 
-		// Determine effect category and apply appropriate multiplier
-		if s.Effect1 != 0 {
-			// Direct damage effects scale more aggressively at higher item levels
-			if funk.Contains(directDamageEffects, s.Effect1) {
-				effectMultiplier = 2.5 + (float64(toItemLevel) * 0.1 * 0.005) // +0.5% per every 10 item levels
+			// Check for attack power and spell power in the description regardless of effect type
+			if strings.Contains(s.Description, "attack power") ||
+				strings.Contains(s.Description, "Attack Power") ||
+				strings.Contains(s.Description, "spell power") ||
+				strings.Contains(s.Description, "Spell Power") ||
+				strings.Contains(s.Description, "healing") ||
+				strings.Contains(s.Description, "Healing") {
+				effectMultiplier = 2.0 // Higher multiplier for attack/spell power
 			}
 
-			// Flat Base Stat modifier for all other stats.
-			if funk.Contains(statBuffEffects, s.Effect1) && effectMultiplier < 1.5 {
-				effectMultiplier = 1.45
-			}
-		}
+			// Determine effect category and apply appropriate multiplier
+			if s.Effect1 != 0 {
+				// Direct damage effects scale more aggressively at higher item levels
+				if funk.Contains(directDamageEffects, s.Effect1) {
+					effectMultiplier = 2.5 + (float64(toItemLevel) * 0.1 * 0.005) // +0.5% per every 10 item levels
+				}
 
-		// Special handling for aura effects
-		if s.EffectAura1 != 0 {
-			// DOT effects (Aura 3: Periodic Damage)
-			if s.EffectAura1 == 3 && funk.Contains(periodEffects, s.Effect1) {
-				effectMultiplier = 2.5 + (float64(toItemLevel) * 0.1 * 0.005)
-
-				// Scale DOTs more with higher quality items
-				if itemQuality >= 5 { // Legendary or higher
-					effectMultiplier += 0.5
+				// Flat Base Stat modifier for all other stats.
+				if funk.Contains(statBuffEffects, s.Effect1) && effectMultiplier < 1.5 {
+					effectMultiplier = 1.45
 				}
 			}
 
-			// HOT effects (Aura 8: Periodic Heal)
-			if s.EffectAura1 == 8 && funk.Contains(periodEffects, s.Effect1) {
-				effectMultiplier = 2.5 + (float64(toItemLevel) * 0.1 * 0.005)
-				// Healing scales slightly higher than damage
-			}
+			// Special handling for aura effects
+			if s.EffectAura1 != 0 {
+				// DOT effects (Aura 3: Periodic Damage)
+				if s.EffectAura1 == 3 && funk.Contains(periodEffects, s.Effect1) {
+					effectMultiplier = 2.5 + (float64(toItemLevel) * 0.1 * 0.005)
 
-			// Damage Shield effects (Aura 15)
-			if s.EffectAura1 == 15 && funk.Contains(periodEffects, s.Effect1) {
-				// Damage shields scale with item level difference
-				effectMultiplier = 1.5 + (float64(toItemLevel) * 0.1 * 0.005)
-				if effectMultiplier > 2.5 {
-					effectMultiplier = 2.5 // Cap at 2.5x
+					// Scale DOTs more with higher quality items
+					if itemQuality >= 5 { // Legendary or higher
+						effectMultiplier += 0.5
+					}
+				}
+
+				// HOT effects (Aura 8: Periodic Heal)
+				if s.EffectAura1 == 8 && funk.Contains(periodEffects, s.Effect1) {
+					effectMultiplier = 2.5 + (float64(toItemLevel) * 0.1 * 0.005)
+					// Healing scales slightly higher than damage
+				}
+
+				// Damage Shield effects (Aura 15)
+				if s.EffectAura1 == 15 && funk.Contains(periodEffects, s.Effect1) {
+					// Damage shields scale with item level difference
+					effectMultiplier = 1.5 + (float64(toItemLevel) * 0.1 * 0.005)
+					if effectMultiplier > 2.5 {
+						effectMultiplier = 2.5 // Cap at 2.5x
+					}
+				}
+
+				// Proc chance effects (various auras)
+				if s.ProcChance > 0 && s.ProcChance < 100 {
+					// For proc effects, we might want to scale the effect more aggressively
+					// since they don't happen all the time
+					procFactor := 100.0 / float64(s.ProcChance) // Inverse of proc chance
+					// Limit the proc factor to avoid excessive scaling
+					if procFactor > 2.0 {
+						procFactor = 2.0
+					}
+					effectMultiplier += math.Sqrt(procFactor) // Scale by square root of proc factor
 				}
 			}
 
-			// Proc chance effects (various auras)
-			if s.ProcChance > 0 && s.ProcChance < 100 {
-				// For proc effects, we might want to scale the effect more aggressively
-				// since they don't happen all the time
-				procFactor := 100.0 / float64(s.ProcChance) // Inverse of proc chance
-				// Limit the proc factor to avoid excessive scaling
-				if procFactor > 2.0 {
-					procFactor = 2.0
+			// Special handling for mana restoration
+			if s.Effect1 == 30 {
+				if strings.Contains(s.Description, "Mana") || strings.Contains(s.Description, "mana") {
+					// Mana effects scale with level but with diminishing returns
+					effectMultiplier = 1.0 + (math.Log10(float64(ilevelDiff+1)) * 0.3)
 				}
-				effectMultiplier += math.Sqrt(procFactor) // Scale by square root of proc factor
 			}
+			// Apply the scaling with the appropriate multiplier
+			s.EffectBasePoints1 = int(float64(s.EffectBasePoints1) * levelRatio * qualModifier * effectMultiplier)
 		}
-
-		// Special handling for mana restoration
-		if s.Effect1 == 30 {
-			if strings.Contains(s.Description, "Mana") || strings.Contains(s.Description, "mana") {
-				// Mana effects scale with level but with diminishing returns
-				effectMultiplier = 1.0 + (math.Log10(float64(ilevelDiff+1)) * 0.3)
-			}
-		}
-		// Apply the scaling with the appropriate multiplier
-		s.EffectBasePoints1 = int(float64(s.EffectBasePoints1) * levelRatio * qualModifier * effectMultiplier)
 	}
 
 	// Scale Effect2 with similar logic
@@ -851,43 +866,7 @@ func SpellToSql(spell Spell, quality int) string {
 	EffectChainAmplitude_1, EffectChainAmplitude_2, EffectChainAmplitude_3, MinFactionID, MinReputation, RequiredAuraVision, RequiredTotemCategoryID_1,
 	RequiredTotemCategoryID_2, RequiredAreasID, SchoolMask, RuneCostID, SpellMissileID, PowerDisplayID, EffectBonusMultiplier_1, EffectBonusMultiplier_2,
 	EffectBonusMultiplier_3, SpellDescriptionVariableID, SpellDifficultyID
-	) SELECT 
-	ID + %v, Category, DispelType, Mechanic, Attributes, AttributesEx, AttributesEx2, AttributesEx3, AttributesEx4,
-	AttributesEx5, AttributesEx6, AttributesEx7, ShapeshiftMask, unk_320_2, ShapeshiftExclude, unk_320_3, Targets,
-	TargetCreatureType, RequiresSpellFocus, FacingCasterFlags, CasterAuraState, TargetAuraState, ExcludeCasterAuraState,
-	ExcludeTargetAuraState, CasterAuraSpell, TargetAuraSpell, ExcludeCasterAuraSpell, ExcludeTargetAuraSpell, CastingTimeIndex,
-	RecoveryTime, CategoryRecoveryTime, InterruptFlags, AuraInterruptFlags, ChannelInterruptFlags, ProcTypeMask, ProcChance,
-	ProcCharges, MaxLevel, BaseLevel, SpellLevel, DurationIndex, PowerType, ManaCost, ManaCostPerLevel, ManaPerSecond,
-	ManaPerSecondPerLevel, RangeIndex, Speed, ModalNextSpell, CumulativeAura, Totem_1, Totem_2, Reagent_1, Reagent_2, Reagent_3,
-	Reagent_4, Reagent_5, Reagent_6, Reagent_7, Reagent_8, ReagentCount_1, ReagentCount_2, ReagentCount_3, ReagentCount_4,
-	ReagentCount_5, ReagentCount_6, ReagentCount_7, ReagentCount_8, EquippedItemClass, EquippedItemSubclass, EquippedItemInvTypes,
-	Effect_1, Effect_2, Effect_3, EffectDieSides_1, EffectDieSides_2, EffectDieSides_3, EffectRealPointsPerLevel_1,
-	EffectRealPointsPerLevel_2, EffectRealPointsPerLevel_3, EffectBasePoints_1, EffectBasePoints_2, EffectBasePoints_3,
-	EffectMechanic_1, EffectMechanic_2, EffectMechanic_3, ImplicitTargetA_1, ImplicitTargetA_2, ImplicitTargetA_3, ImplicitTargetB_1,
-	ImplicitTargetB_2, ImplicitTargetB_3, EffectRadiusIndex_1, EffectRadiusIndex_2, EffectRadiusIndex_3, EffectAura_1,
-	EffectAura_2, EffectAura_3, EffectAuraPeriod_1, EffectAuraPeriod_2, EffectAuraPeriod_3, EffectMultipleValue_1, EffectMultipleValue_2,
-	EffectMultipleValue_3, EffectChainTargets_1, EffectChainTargets_2, EffectChainTargets_3, EffectItemType_1, EffectItemType_2,
-	EffectItemType_3, EffectMiscValue_1, EffectMiscValue_2, EffectMiscValue_3, EffectMiscValueB_1, EffectMiscValueB_2, EffectMiscValueB_3,
-	EffectTriggerSpell_1, EffectTriggerSpell_2, EffectTriggerSpell_3, EffectPointsPerCombo_1, EffectPointsPerCombo_2, EffectPointsPerCombo_3,
-	EffectSpellClassMaskA_1, EffectSpellClassMaskA_2, EffectSpellClassMaskA_3, EffectSpellClassMaskB_1, EffectSpellClassMaskB_2,
-	EffectSpellClassMaskB_3, EffectSpellClassMaskC_1, EffectSpellClassMaskC_2, EffectSpellClassMaskC_3, SpellVisualID_1, SpellVisualID_2,
-	SpellIconID, ActiveIconID, SpellPriority, Name_Lang_enUS, Name_Lang_enGB, Name_Lang_koKR, Name_Lang_frFR, Name_Lang_deDE,
-	Name_Lang_enCN, Name_Lang_zhCN, Name_Lang_enTW, Name_Lang_zhTW, Name_Lang_esES, Name_Lang_esMX, Name_Lang_ruRU, Name_Lang_ptPT,
-	Name_Lang_ptBR, Name_Lang_itIT, Name_Lang_Unk, Name_Lang_Mask, NameSubtext_Lang_enUS, NameSubtext_Lang_enGB, NameSubtext_Lang_koKR,
-	NameSubtext_Lang_frFR, NameSubtext_Lang_deDE, NameSubtext_Lang_enCN, NameSubtext_Lang_zhCN, NameSubtext_Lang_enTW, NameSubtext_Lang_zhTW,
-	NameSubtext_Lang_esES, NameSubtext_Lang_esMX, NameSubtext_Lang_ruRU, NameSubtext_Lang_ptPT, NameSubtext_Lang_ptBR, NameSubtext_Lang_itIT,
-	NameSubtext_Lang_Unk, NameSubtext_Lang_Mask, Description_Lang_enUS, Description_Lang_enGB, Description_Lang_koKR, Description_Lang_frFR,
-	Description_Lang_deDE, Description_Lang_enCN, Description_Lang_zhCN, Description_Lang_enTW, Description_Lang_zhTW, Description_Lang_esES,
-	Description_Lang_esMX, Description_Lang_ruRU, Description_Lang_ptPT, Description_Lang_ptBR, Description_Lang_itIT, Description_Lang_Unk,
-	Description_Lang_Mask, AuraDescription_Lang_enUS, AuraDescription_Lang_enGB, AuraDescription_Lang_koKR, AuraDescription_Lang_frFR,
-	AuraDescription_Lang_deDE, AuraDescription_Lang_enCN, AuraDescription_Lang_zhCN, AuraDescription_Lang_enTW, AuraDescription_Lang_zhTW,
-	AuraDescription_Lang_esES, AuraDescription_Lang_esMX, AuraDescription_Lang_ruRU, AuraDescription_Lang_ptPT, AuraDescription_Lang_ptBR,
-	AuraDescription_Lang_itIT, AuraDescription_Lang_Unk, AuraDescription_Lang_Mask, ManaCostPct, StartRecoveryCategory, StartRecoveryTime,
-	MaxTargetLevel, SpellClassSet, SpellClassMask_1, SpellClassMask_2, SpellClassMask_3, MaxTargets, DefenseType, PreventionType, StanceBarOrder,
-	EffectChainAmplitude_1, EffectChainAmplitude_2, EffectChainAmplitude_3, MinFactionID, MinReputation, RequiredAuraVision, RequiredTotemCategoryID_1,
-	RequiredTotemCategoryID_2, RequiredAreasID, SchoolMask, RuneCostID, SpellMissileID, PowerDisplayID, EffectBonusMultiplier_1, EffectBonusMultiplier_2,
-	EffectBonusMultiplier_3, SpellDescriptionVariableID, SpellDifficultyID from acore_world.spell_dbc as src
-	WHERE src.ID = %v ON DUPLICATE KEY UPDATE ID = src.ID + %v;`, entryBump, spell.ID, entryBump)
+	from spell_dbc as src WHERE src.ID = %v;`, entryBump, spell.ID)
 
 	update := fmt.Sprintf(`
 	UPDATE acore_world.spell_dbc

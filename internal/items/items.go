@@ -415,6 +415,11 @@ func (item Item) GetDPS() (float64, error) {
 
 // Scales and items dps damage numbers based on a desired item level.
 func (item *Item) ScaleDPS(oldLevel, level int) (float64, error) {
+	return item.ScaleDPSWithPhase(oldLevel, level, 0)
+}
+
+// ScaleDPSWithPhase scales DPS with phase-based modifiers
+func (item *Item) ScaleDPSWithPhase(oldLevel, level, phase int) (float64, error) {
 	if item.ItemLevel == nil {
 		return 0, fmt.Errorf("ItemLevel is not set")
 	}
@@ -432,7 +437,23 @@ func (item *Item) ScaleDPS(oldLevel, level int) (float64, error) {
 	scalingFactor := math.Pow(float64(level)/float64(oldLevel), 1.012)
 
 	dps := modifier * float64(level) * scalingFactor
-	adjDps := (dps * (*item.Delay / 1000) / 100)
+
+	// Remove variance for weapons to let phase scaling work properly
+	varianceMultiplier := 1.0
+
+	// Add phase-based DPS modifier (higher phases = higher DPS)
+	// Phase 0: base DPS, Phase 1: -15%, Phase 2: -10%, Phase 3: -5%, Phase 4: base, Phase 5: +5%
+	phaseMultiplier := 1.0
+	if phase > 0 {
+		// Start from -20% at phase 1 and increase by +5% per phase
+		phaseBonus := -0.20 + (float64(phase) * 0.05)
+		phaseMultiplier = 1.0 + phaseBonus
+	}
+
+	adjDps := (dps * (*item.Delay / 1000) / 100) * varianceMultiplier * phaseMultiplier
+	
+	log.Printf("DPS DEBUG: phase=%d, phaseMultiplier=%.3f, baseDPS=%.3f, adjDps=%.3f", 
+		phase, phaseMultiplier, (dps * (*item.Delay / 1000) / 100), adjDps)
 
 	// Use deterministic values based on item entry instead of random values
 	// We'll use the item entry to derive consistent min/max modifiers
@@ -672,6 +693,10 @@ func (item *Item) ApplyStats(otherItem Item) (success bool, err error) {
 // Ceiling of ((ItemLevel * QualityModifier * ItemTypeModifier)^1.7095 * %ofStats) ^ (1/1.7095)) / StatModifier
 // i.e)   Green Strength Helmet  (((100 * 1.1 * 1.0)^1.705) * 1)^(1/1.7095) / 1.0 = 110 Strength on item
 func (item *Item) ScaleItem(itemLevel int, itemQuality int) (bool, error) {
+	return item.ScaleItemWithPhase(itemLevel, itemQuality, 0)
+}
+
+func (item *Item) ScaleItemWithPhase(itemLevel int, itemQuality int, phase int) (bool, error) {
 	var allSpellStats []spells.ConvItemStat
 	if item.ItemLevel == nil {
 		return false, errors.New("field itemLevel is not set")
@@ -755,7 +780,7 @@ func (item *Item) ScaleItem(itemLevel int, itemQuality int) (bool, error) {
 			log.Printf("Failed to get DPS: %v", err)
 		}
 
-		dps, err := item.ScaleDPS(fromItemLevel, itemLevel)
+		dps, err := item.ScaleDPSWithPhase(fromItemLevel, itemLevel, phase)
 		if err != nil {
 			log.Printf("Failed to scale DPS: %v", err)
 			return false, err
@@ -1324,11 +1349,15 @@ func (item *Item) ApplyTierModifiers(optionalTier ...int) {
 		tier = 0
 	}
 
-	// Default tier modifier is 1.0 (no modification)
-	tierModifier := 1.0
-
 	// This is a necessary bonus to catch gear up from previous v2 version
 	catchUpBonus := 1.5
+
+	item.ApplyTierModifiersWithCatchup(tier, catchUpBonus)
+}
+
+func (item *Item) ApplyTierModifiersWithCatchup(tier int, catchUpBonus float64) {
+	// Default tier modifier is 1.0 (no modification)
+	tierModifier := 1.0
 
 	// If tier is valid (1-5), get the modifier from config
 	if tier > 0 && tier <= 5 {
@@ -1370,7 +1399,7 @@ func (item *Item) ApplyTierModifiers(optionalTier ...int) {
 		// Apply tier modifier and stat modifier
 		newValue := int(float64(statValuePtr) * tierModifier * inverseModifier * catchUpBonus)
 
-		fmt.Printf("DEBUG: Stat %d changed from %d to %d (tier=%.2f, inverse=%.2f, catchup=%.2f)\n", 
+		fmt.Printf("DEBUG: Stat %d changed from %d to %d (tier=%.2f, inverse=%.2f, catchup=%.2f)\n",
 			i, statValuePtr, newValue, tierModifier, inverseModifier, catchUpBonus)
 
 		// Update the item's stat value
