@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WoW Item Scaler</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://wow.zamimg.com/widgets/power.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Uncial+Antiqua&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/wow-theme.css">
+</head>
+<body class="min-h-screen wow-bg">
+    <!-- Header -->
+    <header class="wow-header border-b-4 shadow-2xl" style="border-color: #4fc3f7;">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex items-center justify-center">
+                <div class="wow-logo-container">
+                    <div class="flex items-center justify-center mb-2">
+                        <img src="https://araxiaonline.github.io/docs/_media/logo.png" alt="Araxia Online" class="araxia-logo" onerror="this.style.display='none'">
+                    </div>
+                    <h1 class="wow-title text-4xl font-bold">Item Scaler</h1>
+                    <p class="wow-subtitle text-lg">Wrath of the Lich King</p>
+                    <p class="wow-server-name">Araxia Online</p>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-6 py-8">
+        <!-- Scaling Parameters Panel -->
+        <div class="wow-panel mb-8">
+            <div class="wow-panel-header">
+                <h2 class="wow-section-title text-2xl font-semibold">Scaling Parameters</h2>
+            </div>
+            <div class="wow-panel-content">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <div class="wow-input-group">
+                        <label for="itemLevel" class="wow-label">Item Level</label>
+                        <input type="number" id="itemLevel" class="wow-input" value="325" min="1" max="500">
+                    </div>
+                    <div class="wow-input-group">
+                        <label for="phase" class="wow-label">Phase</label>
+                        <select id="phase" class="wow-select">
+                            <option value="0">No Tier Bonus</option>
+                            <option value="1">Phase 1</option>
+                            <option value="2">Phase 2</option>
+                            <option value="3">Phase 3</option>
+                            <option value="4">Phase 4</option>
+                            <option value="5">Phase 5</option>
+                        </select>
+                    </div>
+                    <div class="wow-input-group">
+                        <label for="quality" class="wow-label">Quality</label>
+                        <select id="quality" class="wow-select">
+                            <option value="4" class="text-purple-400">Epic</option>
+                            <option value="5" class="text-orange-400">Legendary</option>
+                        </select>
+                    </div>
+                    <div class="wow-input-group">
+                        <label for="catchup" class="wow-label">Catchup Bonus</label>
+                        <input type="number" id="catchup" class="wow-input" value="1.0" min="0.1" max="3.0" step="0.1">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Item Input Panel -->
+        <div class="wow-panel mb-8">
+            <div class="wow-panel-header">
+                <h2 class="wow-section-title text-2xl font-semibold">Item Selection</h2>
+            </div>
+            <div class="wow-panel-content">
+                <div class="space-y-6">
+                    <!-- Tab Navigation -->
+                    <div class="wow-tab-container">
+                        <button id="tabEntries" class="wow-tab wow-tab-active">Entry IDs</button>
+                        <button id="tabSearch" class="wow-tab">Search by Name</button>
+                    </div>
+
+                    <!-- Entry IDs Input -->
+                    <div id="entriesPanel" class="wow-tab-panel">
+                        <div class="wow-input-group">
+                            <label for="entryIds" class="wow-label">Entry IDs (comma-separated)</label>
+                            <input type="text" id="entryIds" class="wow-input" placeholder="19019, 19103, 17076">
+                            <p class="wow-help-text">Enter item entry IDs separated by commas</p>
+                        </div>
+                    </div>
+
+                    <!-- Search Input -->
+                    <div id="searchPanel" class="wow-tab-panel hidden">
+                        <div class="wow-input-group">
+                            <label for="itemSearch" class="wow-label">Item Name</label>
+                            <input type="text" id="itemSearch" class="wow-input" placeholder="Thunderfury">
+                            <div id="searchResults" class="wow-search-results hidden"></div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="flex gap-4">
+                        <button id="scaleButton" class="wow-button wow-button-primary">
+                            <span class="wow-button-text">Scale Items</span>
+                        </button>
+                        <button id="clearButton" class="wow-button wow-button-secondary">
+                            <span class="wow-button-text">Clear Results</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading Spinner -->
+        <div id="loadingSpinner" class="wow-loading hidden">
+            <div class="wow-spinner"></div>
+            <p class="wow-loading-text">Forging your items...</p>
+        </div>
+
+        <!-- Results Panel -->
+        <div id="resultsPanel" class="wow-panel hidden">
+            <div class="wow-panel-header">
+                <h2 class="wow-section-title text-2xl font-semibold">Scaled Items</h2>
+                <div class="flex gap-2">
+                    <button id="exportSqlButton" class="wow-button-small wow-button-secondary">Export SQL</button>
+                    <button id="copyResultsButton" class="wow-button-small wow-button-secondary">Copy Results</button>
+                </div>
+            </div>
+            <div id="resultsContainer" class="wow-panel-content">
+                <!-- Results will be populated here -->
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="wow-footer mt-12">
+        <div class="container mx-auto px-6 py-4 text-center">
+            <p class="wow-footer-text">Araxia Online - Wrath of the Lich King Item Scaler</p>
+            <p class="text-xs mt-2" style="color: #7986cb;">Forge your destiny in the frozen wastes of Northrend</p>
+        </div>
+    </footer>
+
+    <script src="js/wow-theme.js"></script>
+    <script src="js/item-scaler.js"></script>
+</body>
+</html>
